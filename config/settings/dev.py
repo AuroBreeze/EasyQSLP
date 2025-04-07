@@ -18,6 +18,6 @@ CSRF_COOKIE_SECURE = False  # 允许HTTP传输CSRF Token
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']  # 开发环境允许的域名
 
 # 生成随机密钥（运行后复制到配置中）
-from django.core.management.utils import get_random_secret_key
-print(f"SECRET_KEY = '{get_random_secret_key()}'")  # 运行后替换下面的值
-SECRET_KEY = '你的新密钥'  # 替换为打印出来的随机值
+# from django.core.management.utils import get_random_secret_key
+# print(f"SECRET_KEY = '{get_random_secret_key()}'")  # 运行后替换下面的值
+# SECRET_KEY = '你的新密钥'  # 替换为打印出来的随机值
