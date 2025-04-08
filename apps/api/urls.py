@@ -6,5 +6,4 @@ app_name='api'
 
 
 urlpatterns=[
-    path('user_login',views.user_login,name='user_login')
 ]
