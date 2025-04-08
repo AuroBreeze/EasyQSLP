@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<!-- 声明文档使用 HTML5 标准 -->
+<html lang="zh-CN">
+<!-- 设置文档语言为中文 -->
+
+<head>
+    <!-- 文档头部，包含元数据和外部资源引用 -->
+    <meta charset="UTF-8">
+    <!-- 设置字符编码为 UTF-8 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 设置视口，使页面在不同设备上自适应 -->
+    <!-- 引入 CSS 文件 -->
+    <link rel="stylesheet" href="注册.css">
+    <!-- 引入外部 CSS 文件，用于设置页面样式 -->
+    <title>登录注册界面</title>
+    <!-- 设置页面标题 -->
+</head>
+
+<body>
+    <!-- 文档主体，包含页面可见内容 -->
+    <h2>欢迎来到EasyQFLP</h2>
+    <!-- 显示欢迎标题 -->
+    <div class="container" id="container">
+        <!-- 容器，包含注册和登录表单及切换面板 -->
+        <div class="form-container sign-up-container">
+            <!-- 注册表单容器 -->
+            <form action="#">
+                <!-- 注册表单 -->
+                <h1>创建账户😀</h1>
+                <!-- 注册表单标题 -->
+                <!-- 删除社交登录按钮部分 -->
+                <span>使用邮箱注册</span>
+                <!-- 提示用户使用邮箱注册 -->
+                <input type="text" placeholder="姓名" />
+                <!-- 输入姓名的文本框 -->
+                <div style="display: flex; align-items: center;">
+                    <!-- 包含邮箱输入框和获取验证码按钮的容器 -->
+                    <input type="email" placeholder="邮箱" id="signupEmail" />
+                    <!-- 输入邮箱的文本框 -->
+                    <button type="button" id="signupGetCode">获取验证码</button>
+                    <!-- 获取验证码的按钮 -->
+                </div>
+                <input type="text" placeholder="验证码" id="signupCode" />
+                <!-- 输入验证码的文本框 -->
+                <input type="password" placeholder="密码" />
+                <!-- 输入密码的文本框 -->
+                <button>注册</button>
+                <!-- 提交注册表单的按钮 -->
+            </form>
+        </div>
+        <div class="form-container sign-in-container">
+            <!-- 登录表单容器 -->
+            <form action="#">
+                <!-- 登录表单 -->
+                <h1>登录😃</h1>
+                <!-- 登录表单标题 -->
+                <!-- 删除社交登录按钮部分 -->
+                <span>账户密码登录</span>
+                <!-- 提示用户使用账户密码登录 -->
+                <input type="email" placeholder="邮箱" id="signinEmail" />
+                <!-- 输入邮箱的文本框 -->
+                <input type="password" placeholder="密码" />
+                <!-- 输入密码的文本框 -->
+                <a href="#">忘记密码?</a>
+                <!-- 忘记密码的链接 -->
+                <button>登录</button>
+                <!-- 提交登录表单的按钮 -->
+            </form>
+        </div>
+        <div class="overlay-container">
+            <!-- 覆盖层容器，用于切换注册和登录界面 -->
+            <div class="overlay">
+                <!-- 覆盖层 -->
+                <div class="overlay-panel overlay-left">
+                    <!-- 左侧覆盖层面板 -->
+                    <h1>欢迎回来！😊</h1>
+                    <!-- 左侧覆盖层面板标题 -->
+                    <p>请使用您的个人信息登录以保持与我们的联系</p>
+                    <!-- 左侧覆盖层面板提示信息 -->
+                    <button class="ghost" id="signIn">登录</button>
+                    <!-- 切换到登录界面的按钮 -->
+                </div>
+                <div class="overlay-panel overlay-right">
+                    <!-- 右侧覆盖层面板 -->
+                    <h1>欢迎🎉</h1>
+                    <!-- 右侧覆盖层面板标题 -->
+                    <p>注册账户，并加入我们的大家庭</p>
+                    <!-- 右侧覆盖层面板提示信息 -->
+                    <button class="ghost" id="signUp">注册</button>
+                    <!-- 切换到注册界面的按钮 -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 引入 JavaScript 文件 -->
+    <script src="注册.js"></script>
+    <!-- 引入外部 JavaScript 文件，用于实现交互功能 -->
+</body>
+
+</html>
