@@ -2,7 +2,7 @@ from django.urls import path
 from .views import *
 
 #指定应用名称(命名空间)
-app_name='api'
+app_name='user'
 
 
 urlpatterns=[
