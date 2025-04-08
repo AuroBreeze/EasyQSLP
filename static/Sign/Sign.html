@@ -23,8 +23,8 @@
     <!-- 显示欢迎标题 -->
     <div class="container" id="container">
         <!-- 容器，包含注册和登录表单及切换面板 -->
+        <!-- 注册表单部分 -->
         <div class="form-container sign-up-container">
-            <!-- 注册表单容器 -->
             <form action="#">
                 <!-- 注册表单 -->
                 <h1>创建账户😀</h1>
@@ -32,25 +32,39 @@
                 <!-- 删除社交登录按钮部分 -->
                 <span>使用邮箱注册</span>
                 <!-- 提示用户使用邮箱注册 -->
-                <input type="text" placeholder="姓名" />
-                <!-- 输入姓名的文本框 -->
-                <div style="display: flex; align-items: center;">
-                    <!-- 包含邮箱输入框和获取验证码按钮的容器 -->
-                    <input type="email" placeholder="邮箱" id="signupEmail" />
-                    <!-- 输入邮箱的文本框 -->
-                    <button type="button" id="signupGetCode">获取验证码</button>
-                    <!-- 获取验证码的按钮 -->
+                <!-- 原有输入框保持不变，在其外层添加容器和标签 -->
+                <!-- 姓名输入框 -->
+                <div class="input-group">
+                    <input type="text" placeholder="姓名" id="nameInput" />
+                    <label for="nameInput">姓名</label>
                 </div>
-                <input type="text" placeholder="验证码" id="signupCode" />
-                <!-- 输入验证码的文本框 -->
-                <input type="password" placeholder="密码" />
-                <!-- 输入密码的文本框 -->
+                
+                <!-- 邮箱输入框 -->
+                <div style="display: flex; align-items: center;">
+                    <div class="input-group" style="flex-grow: 1;">
+                        <input type="email" placeholder="邮箱" id="signupEmail" />
+                        <label for="signupEmail">邮箱</label>
+                    </div>
+                    <button type="button" id="signupGetCode">获取验证码</button>
+                </div>
+                
+                <!-- 验证码输入框 -->
+                <div class="input-group">
+                    <input type="text" placeholder="验证码" id="signupCode" />
+                    <label for="signupCode">验证码</label>
+                </div>
+                
+                <!-- 密码输入框 -->
+                <div class="input-group">
+                    <input type="password" placeholder="密码" id="signupPassword" />
+                    <label for="signupPassword">密码</label>
+                </div>
                 <button>注册</button>
                 <!-- 提交注册表单的按钮 -->
             </form>
         </div>
+        <!-- 登录表单部分 -->
         <div class="form-container sign-in-container">
-            <!-- 登录表单容器 -->
             <form action="#">
                 <!-- 登录表单 -->
                 <h1>登录😃</h1>
@@ -58,10 +72,17 @@
                 <!-- 删除社交登录按钮部分 -->
                 <span>账户密码登录</span>
                 <!-- 提示用户使用账户密码登录 -->
-                <input type="email" placeholder="邮箱" id="signinEmail" />
-                <!-- 输入邮箱的文本框 -->
-                <input type="password" placeholder="密码" />
-                <!-- 输入密码的文本框 -->
+                <!-- 邮箱输入框 -->
+                <div class="input-group">
+                    <input type="email" placeholder="邮箱" id="signinEmail" />
+                    <label for="signinEmail">邮箱</label>
+                </div>
+                
+                <!-- 密码输入框 -->
+                <div class="input-group">
+                    <input type="password" placeholder="密码" id="signinPassword" />
+                    <label for="signinPassword">密码</label>
+                </div>
                 <a href="#">忘记密码?</a>
                 <!-- 忘记密码的链接 -->
                 <button>登录</button>

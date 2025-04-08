@@ -439,3 +439,41 @@ footer a {
     /* 去除下划线 */
     text-decoration: none;
 }
+
+/* 输入框组样式 */
+.input-group {
+    position: relative;
+    width: 100%;
+    margin: 8px 0;
+}
+
+/* 标签样式 */
+.input-group label {
+    position: absolute;
+    left: 15px;
+    top: 12px;
+    color: #999;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    font-size: 12px;
+    background-color: #eee;
+    padding: 0 5px;
+}
+
+/* 输入框聚焦/有内容时的标签效果 */
+.input-group input:focus + label,
+.input-group input:not(:placeholder-shown) + label {
+    transform: translateY(-20px) scale(0.8);
+    color: #FF4B2B;
+    background-color: white;
+    z-index: 1;
+}
+
+/* 保持原有输入框样式 */
+input {
+    background-color: #eee;
+    border: none;
+    padding: 12px 15px;
+    margin: 0;
+    width: 100%;
+}
