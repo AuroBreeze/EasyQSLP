@@ -6,5 +6,6 @@ app_name='user'
 
 
 urlpatterns=[
-    path("login/",LoginAPI.as_view(),name="login")
+    path("login/",LoginAPI.as_view(),name="login"),
+    path("register/",RegisterAPI.as_view(),name="register")
 ]
