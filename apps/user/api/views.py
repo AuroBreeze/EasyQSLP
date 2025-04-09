@@ -19,6 +19,19 @@ class LoginAPI(APIView):
         user = User_Login.objects.get(username="123456")
         return Response({"message": f"User {user.username} logged in successfully!"})
 
+class DeletAPI(APIView):
+    def post(self, request):
+        user = User_Login.objects.get(username="123456")
+        user.delete()
+        return Response({"message": "User deleted successfully!"})
+class ChangeAPI(APIView):
+    def post(self, request):
+        user = User_Login.objects.get(username="123456")
+        user.password = "9876543210"
+        user.save()
+        return Response({"message": "User password changed successfully!"})
+
+
 class Querr(APIView):
     def post(self, request):
         users = User_Login.objects.all()
