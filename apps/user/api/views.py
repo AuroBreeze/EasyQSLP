@@ -40,8 +40,10 @@ class Querr(APIView):
 
 class ArticleAPI(APIView):
     def post(self, request):
-        user = User_Login(username="fhajsdhflk", password="1234567890")
-        user.save()
-        article = Article(title="Article1", content="This is the content of the article", author=user)
-        article.save()
-        return Response({"message": "Article created successfully!"})
+        # user = User_Login(username="fhajsdhflk", password="1234567890",email="123@123.com")
+        # user.save()
+        # article = Article(title="Article1", content="This is the content of the article", author=user)
+        # article.save()
+        article = Article.objects.first()
+        print(article)
+        return Response({"message": f"Article {article.author.username} created successfully!"})
