@@ -2,10 +2,20 @@ from .base import *
 
 DEBUG = True
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR.parent / 'db.sqlite3',  # 确保路径正确
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'test',  # 确保路径正确
+        'USER': 'postgres',
+        'PASSWORD': 'AuroBreeze',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 MEDIA_ROOT = BASE_DIR.parent / 'media'  # 媒体文件存储路径
