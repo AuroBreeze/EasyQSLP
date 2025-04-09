@@ -23,5 +23,4 @@ class Querr(APIView):
     def post(self, request):
         users = User_Login.objects.all()
         users = [user.username for user in users]
-        #print(users)
         return Response({"message": f"Users:{users}"})
