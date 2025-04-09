@@ -8,4 +8,7 @@ class User_Login(models.Model):
     password = models.CharField(max_length=25)
     join_date = models.DateTimeField(auto_now_add=True)
     email = models.EmailField(max_length=50,unique=True,default='')
+
+class User_Profile(models.Model):
+    profile_text = models.TextField(max_length=500,default='')
     
