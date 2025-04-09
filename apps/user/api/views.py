@@ -16,8 +16,8 @@ class RegisterAPI(APIView):
 
 class LoginAPI(APIView):
     def post(self, request):
-        
-        return Response({"message": "User logged in successfully!"})
+        user = User_Login.objects.get(username="123456")
+        return Response({"message": f"User {user.username} logged in successfully!"})
 
 class Querr(APIView):
     def post(self, request):
