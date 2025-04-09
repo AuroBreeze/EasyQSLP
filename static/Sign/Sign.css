@@ -469,6 +469,18 @@ footer a {
     z-index: 1;
 }
 
+/* 输入框placeholder样式 */
+.input-group input::placeholder {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+/* 输入框聚焦/有内容时的placeholder效果 */
+.input-group input:focus::placeholder,
+.input-group input:not(:placeholder-shown)::placeholder {
+    opacity: 0;
+}
+
 /* 保持原有输入框样式 */
 input {
     background-color: #eee;
