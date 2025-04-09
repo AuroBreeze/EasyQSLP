@@ -37,3 +37,11 @@ class Querr(APIView):
         users = User_Login.objects.all()
         users = [user.username for user in users]
         return Response({"message": f"Users:{users}"})
+
+class ArticleAPI(APIView):
+    def post(self, request):
+        user = User_Login(username="fhajsdhflk", password="1234567890")
+        user.save()
+        article = Article(title="Article1", content="This is the content of the article", author=user)
+        article.save()
+        return Response({"message": "Article created successfully!"})
