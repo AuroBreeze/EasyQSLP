@@ -48,6 +48,15 @@ class Querr(APIView):
         
         # users = User_Login.objects.filter(articles__title__icontains="Article") #使用根据关联表进行查询，获取作者名包含'Article'的文章
         users = [user.username for user in users]
+        
+        # F表达式
+        # 查找用户名和密码都相同的用户
+        # from django.db.models import F
+        # users = User_Login.objects.filter(username=F('password')).all()
+        
+        # Q表达式
+        # 查找用户加入时间在2021年1月1日到2021年12月31日之间的用户
+        # from django.db.models import Q
         return Response({"message": f"Users:{users}"})
 
 class ArticleAPI(APIView):
