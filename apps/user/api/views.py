@@ -55,8 +55,9 @@ class Querr(APIView):
         # users = User_Login.objects.filter(username=F('password')).all()
         
         # Q表达式
-        # 查找用户加入时间在2021年1月1日到2021年12月31日之间的用户
+        # 查找用户加入时间大于2021年1月1日的用户
         # from django.db.models import Q
+        # users = User_Login.objects.filter(Q(join_date__gte="2021") |  Q(join_date__lte="2022")).all()
         return Response({"message": f"Users:{users}"})
 
 class ArticleAPI(APIView):
