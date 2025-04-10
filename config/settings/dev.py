@@ -18,6 +18,12 @@ DATABASES = {
         'PORT': '5432',
     }
 }
+INSTALLED_APPS_DEV = [
+    'apps.user'
+]
+
+INSTALLED_APPS = INSTALLED_APPS_DEV + INSTALLED_APPS
+
 MEDIA_ROOT = BASE_DIR.parent / 'media'  # 媒体文件存储路径
 
 # 禁用安全警告（仅开发环境！）
