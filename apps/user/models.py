@@ -1,4 +1,13 @@
 from django.db import models
+
+#验证器
+# MinLengthValidator(5) 表示最小长度为5
+# MaxLengthValidator(25) 表示最大长度为25
+# EmailValidator() 表示验证是否为邮箱格式
+# MinValueValidator(18) 表示最小值为18
+# MaxValueValidator(100) 表示最大值为100
+# URLValidator() 表示验证是否为网址格式
+# RegexValidator(r'^[a-zA-Z0-9_-]{5,20}$') 表示验证是否为字母、数字、下划线、减号组成的字符串，长度为5到20
 from django.core.validators import MinLengthValidator
 
 # Create your models here.
