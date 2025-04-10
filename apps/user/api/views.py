@@ -47,3 +47,13 @@ class ArticleAPI(APIView):
         article = Article.objects.first()
         print(article)
         return Response({"message": f"Article {article.author.username} created successfully!"})
+
+class ArticleListAPI(APIView):
+    def post(self, request):
+        user = User_Login.objects.first()
+        articles = user.articles.all() 
+        #正常应该是user.article_set.all() 'article'是模型的名字(小写)，加上'_set'固定写法
+        #因为Article模型使用了related_name='articles'，所以可以这样写
+        #这是两种写法
+        articles = [article.title for article in articles]
+        return Response({"message": f"Articles:{articles}"})
