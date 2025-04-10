@@ -19,7 +19,7 @@ class User_Profile(models.Model):
     
     #user = models.ForeignKey('User_Login',on_delete=models.CASCADE) #外键关联到User_Login表
 
-class Article(models.Model):
+class Article(models.Model): #一对多关系
     title = models.CharField(max_length=100)
     content = models.TextField(max_length=1000)
     
@@ -30,6 +30,19 @@ class Article(models.Model):
     
     # related_name='articles' 表示在User_Login表中的articles字段表示关联到Article表的数据
     author = models.ForeignKey('User_Login',on_delete=models.CASCADE,related_name='articles') #外键关联到User_Login表
+    
+class UserExtension(models.Model):
+    birthday = models.DateField(null=True)
+    school = models.CharField(max_length=50,null=True)
+    
+    # 一对一关系
+    user = models.OneToOneField('User_Login',on_delete=models.CASCADE,related_name='extension')
+
+class ArticleTag(models.Model):
+    name = models.CharField(max_length=20)
+    
+    # 多对多关系
+    articles = models.ManyToManyField('Article',related_name='tags')
 
 class Comment(models.Model):
     content = models.TextField(max_length=500)
