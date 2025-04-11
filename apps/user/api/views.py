@@ -1,8 +1,10 @@
 from django.shortcuts import render,HttpResponse
+from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.db import connection
 from ..models import *
+from .serializers import UserLoginSerializer,UserRegisterSerializer
 # Create your views here.
 
 def user_login(request):
@@ -10,14 +12,26 @@ def user_login(request):
 
 class RegisterAPI(APIView):
     def post(self, request):
-        user = User_Login(username="123456", password="1234567890")
-        user.save()
-        return Response({"message": "User registered successfully!"})
+        # user = User_Login(username="AuroBreeze", password="123123123",email="123@qq.com")
+        # user.save()
+        serialize = UserRegisterSerializer(data=request.data)
+        print(request.data)
+        if serialize.is_valid():
+            serialize.save()
+            return Response({"message": "User registered successfully!"})
+        else:
+            return Response(serialize.errors, status=status.HTTP_400_BAD_REQUEST)
+        #return Response({"message": "User registered successfully!"})
 
 class LoginAPI(APIView):
     def post(self, request):
-        user = User_Login.objects.get(username="123456")
-        return Response({"message": f"User {user.username} logged in successfully!"})
+        serializer = UserLoginSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.validated_data['user']
+            # 这里可以添加生成 token 或 session 的逻辑
+            return Response({"message": "Login successful", "user_id": user.id}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class DeletAPI(APIView):
     def post(self, request):
