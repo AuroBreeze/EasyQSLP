@@ -11,5 +11,10 @@ login_data = {
     "email": "123@qq.com",
     "password": "123123123"
 }
+register_data = {
+    "email": "123@qq.com",
+    "password": "123123123",
+    "username": "AuroBreeze"
+}
 res = requests.post(url_login, json=login_data).json()
 print(res)
