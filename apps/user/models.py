@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.contrib.auth.models import AbstractBaseUser,BaseUserManager
 #验证器
 # MinLengthValidator(5) 表示最小长度为5
 # MaxLengthValidator(25) 表示最大长度为25
@@ -12,11 +12,16 @@ from django.core.validators import MinLengthValidator
 
 # Create your models here.
 
-class User_Login(models.Model): #正常django会生成一个 app名_类名 的表名
+class User_Login(AbstractBaseUser): #正常django会生成一个 app名_类名 的表名
     username = models.CharField(max_length=20,validators=[MinLengthValidator(5)],unique=True)
-    password = models.CharField(max_length=25)
+    password = models.CharField(max_length=255)#最大长度要保证哈希后的长度能够放进数据库
     join_date = models.DateTimeField(auto_now_add=True)
-    email = models.EmailField(max_length=50,unique=True,default='')
+    email = models.EmailField(max_length=50,unique=True)
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username']
+
+    objects = BaseUserManager()  # 使用默认管理器或自定义管理器
     class Meta: #指定元数据，固定写法
         db_table = 'user_login' #指定表名
         
