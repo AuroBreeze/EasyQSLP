@@ -19,7 +19,7 @@ DATABASES = {
     }
 }
 INSTALLED_APPS_DEV = [
-    'apps.user'
+    'apps.user.apps.UserConfig'
 ]
 
 INSTALLED_APPS = INSTALLED_APPS_DEV + INSTALLED_APPS
@@ -37,3 +37,9 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1']  # 开发环境允许的域名
 # from django.core.management.utils import get_random_secret_key
 # print(f"SECRET_KEY = '{get_random_secret_key()}'")  # 运行后替换下面的值
 # SECRET_KEY = '你的新密钥'  # 替换为打印出来的随机值
+
+
+AUTH_USER_MODEL = 'user.User_Login'  # 替换 your_app 为实际应用名
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',  # 默认后端（支持 USERNAME_FIELD）
+]
