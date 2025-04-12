@@ -15,7 +15,7 @@ class RegisterAPI(APIView):
         # user = User_Login(username="AuroBreeze", password="123123123",email="123@qq.com")
         # user.save()
         serialize = UserRegisterSerializer(data=request.data)
-        print(request.data)
+        #print(request.data)
         if serialize.is_valid():
             serialize.save()
             return Response({"message": "User registered successfully!"})
@@ -26,12 +26,23 @@ class RegisterAPI(APIView):
 class LoginAPI(APIView):
     def post(self, request):
         serializer = UserLoginSerializer(data=request.data)
+
         if serializer.is_valid():
             user = serializer.validated_data['user']
             # 这里可以添加生成 token 或 session 的逻辑
-            return Response({"message": "Login successful", "user_id": user.id}, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+            return Response({"success": True,"message": "Login successful", "user_id": user.id}, status=status.HTTP_200_OK)
+        else:
+            errors = serializer.errors
+            error_dict = {}
+            # 提取错误信息并转换为字符串
+            for field, error_list in errors.items():
+                if error_list:
+                    error_dict[field] = error_list[0]  # 取第一个错误
+            return Response({
+                "success": False,
+                "message": "Invalid credentials",
+                "errors": error_dict  # 仅包含有错误的字段
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 class DeletAPI(APIView):
     def post(self, request):
