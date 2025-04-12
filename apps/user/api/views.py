@@ -5,12 +5,11 @@ from rest_framework.response import Response
 from django.db import connection
 from ..models import *
 from .serializers import UserLoginSerializer,UserRegisterSerializer
+from django_ratelimit.decorators import ratelimit
 # Create your views here.
 
-def user_login(request):
-    return HttpResponse("user_login")
-
 class RegisterAPI(APIView):
+    @ratelimit(key='ip', rate='3/hour')  # 同一 IP 每小时最多注册5次
     def post(self, request):
         # user = User_Login(username="AuroBreeze", password="123123123",email="123@qq.com")
         # user.save()

@@ -25,9 +25,6 @@ SECRET_KEY = 'django-insecure-o0o#*xt1u3-ph^=*p&of^c_43pajyc@f5(j4q5qlm=mgvmfz#&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -40,6 +37,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -84,6 +82,13 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
+]
+
+# 允许的请求方法
+CORS_ALLOW_METHODS = [
+    'GET',
+    'POST',
+    'OPTIONS',  # 必须包含OPTIONS
 ]
 
 

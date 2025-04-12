@@ -19,6 +19,7 @@ DATABASES = {
     }
 }
 INSTALLED_APPS_DEV = [
+    'corsheaders',
     'apps.user.apps.UserConfig'
 ]
 
@@ -31,12 +32,8 @@ SECURE_HSTS_SECONDS = 0  # 禁用HSTS
 SECURE_SSL_REDIRECT = False  # 不强制HTTPS
 SESSION_COOKIE_SECURE = False  # 允许HTTP传输Cookie
 CSRF_COOKIE_SECURE = False  # 允许HTTP传输CSRF Token
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']  # 开发环境允许的域名
+ALLOWED_HOSTS = ['localhost', '127.0.0.1','35a71b61.r26.cpolar.top']  # 开发环境允许的域名
 
-# 生成随机密钥（运行后复制到配置中）
-# from django.core.management.utils import get_random_secret_key
-# print(f"SECRET_KEY = '{get_random_secret_key()}'")  # 运行后替换下面的值
-# SECRET_KEY = '你的新密钥'  # 替换为打印出来的随机值
 
 
 AUTH_USER_MODEL = 'user.User_Login'  # 替换 your_app 为实际应用名
