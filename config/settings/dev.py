@@ -34,12 +34,7 @@ SESSION_COOKIE_SECURE = False  # 允许HTTP传输Cookie
 CSRF_COOKIE_SECURE = False  # 允许HTTP传输CSRF Token
 ALLOWED_HOSTS = ['localhost', '127.0.0.1','35a71b61.r26.cpolar.top']  # 开发环境允许的域名
 
-# 允许的请求方法
-CORS_ALLOW_METHODS = [
-    'GET',
-    'POST',
-    'OPTIONS',  # 必须包含OPTIONS
-]
+
 
 AUTH_USER_MODEL = 'user.User_Login'  # 替换 your_app 为实际应用名
 AUTHENTICATION_BACKENDS = [
