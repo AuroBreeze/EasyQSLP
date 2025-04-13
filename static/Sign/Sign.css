@@ -489,3 +489,25 @@ input {
     margin: 0;
     width: 100%;
 }
+
+/* 在文件末尾添加以下样式 */
+
+.back-to-login {
+    display: block;
+    text-align: center;
+    margin-top: 15px;
+    color: #333;
+    font-size: 14px;
+    text-decoration: none;
+}
+
+.back-to-login:hover {
+    text-decoration: underline;
+}
+
+/* 确保获取验证码按钮样式一致 */
+#forgotGetCode {
+    font-size: 10px;
+    padding: 10px 15px;
+    margin-left: 10px;
+}
