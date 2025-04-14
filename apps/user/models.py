@@ -10,9 +10,7 @@ from django.contrib.auth.models import AbstractBaseUser,BaseUserManager
 # URLValidator() 表示验证是否为网址格式
 # RegexValidator(r'^[a-zA-Z0-9_-]{5,20}$') 表示验证是否为字母、数字、下划线、减号组成的字符串，长度为5到20
 from django.core.validators import MinLengthValidator
-
 from uuid import uuid4
-
 # Create your models here.
 class UserRegisterManager(BaseUserManager):
     """
@@ -25,18 +23,15 @@ class UserRegisterManager(BaseUserManager):
             raise ValueError({"username":"用户名不能为空"})
         if not password:
             raise ValueError({"password":"密码不能为空"})
-        
-        
-        
+
         return self.model(
             email=self.normalize_email(email),
             username=username,
             password=make_password(password)
             )
-    def create_user(self,email,username,password,is_active,uuid_user):
+    def create_user(self,email,username,password,is_active):
         user = self.create(email,username,password)
         user.is_active = is_active
-        user.uuid_user = uuid_user
         user.save()
         return user
 
@@ -46,7 +41,7 @@ class User_Login(AbstractBaseUser): #正常django会生成一个 app名_类名 �
     join_date = models.DateTimeField(auto_now_add=True)
     email = models.EmailField(max_length=50,unique=True)
     is_active = models.BooleanField(default=True) #是否激活
-    uuid_user = models.CharField(max_length=50,unique=True) #用户唯一标识符
+    uuid_user = models.UUIDField(default=uuid4,editable=False,unique=True) #用户唯一标识符
     
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
