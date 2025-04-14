@@ -1,3 +1,4 @@
+from django.contrib.auth.hashers import make_password
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser,BaseUserManager
 #验证器
@@ -27,6 +28,16 @@ class UserRegisterManager(BaseUserManager):
         
         
         
+        return self.model(
+            email=self.normalize_email(email),
+            username=username,
+            password=make_password(password)
+            )
+    def create_user(self,email,username,password,is_active,uuid_user):
+        user = self.create(email,username,password)
+        user.is_active = is_active
+        user.uuid_user = uuid_user
+        user.save()
         return user
 
 class User_Login(AbstractBaseUser): #正常django会生成一个 app名_类名 的表名
