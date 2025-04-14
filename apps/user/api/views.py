@@ -9,7 +9,7 @@ from django_ratelimit.decorators import ratelimit
 # Create your views here.
 
 class RegisterAPI(APIView):
-    @ratelimit(key='ip', rate='3/hour')  # 同一 IP 每小时最多注册5次
+    #@ratelimit(key='ip', rate='3/hour')  # 同一 IP 每小时最多注册5次
     def post(self, request):
         # user = User_Login(username="AuroBreeze", password="123123123",email="123@qq.com")
         # user.save()
@@ -23,13 +23,14 @@ class RegisterAPI(APIView):
         #return Response({"message": "User registered successfully!"})
 
 class LoginAPI(APIView):
+    #@ratelimit(key='ip', rate='5/hour')  # 同一 IP 每小时最多登录5次
     def post(self, request):
         serializer = UserLoginSerializer(data=request.data)
 
         if serializer.is_valid():
             user = serializer.validated_data['user']
             # 这里可以添加生成 token 或 session 的逻辑
-            return Response({"success": True,"message": "Login successful", "user_id": user.id}, status=status.HTTP_200_OK)
+            return Response({"success": True,"message": "Login successful", "uuid_user": user.uuid_user,"username": user.username}, status=status.HTTP_200_OK)
         else:
             errors = serializer.errors
             error_dict = {}
@@ -71,7 +72,7 @@ class Querr(APIView):
         # users = User_Login.objects.filter(username__regex=r'^123') #获取用户名以'123'开头的用户,'__regex'是正则匹配,'__iregex'是忽略大小写的正则匹配
         
         # users = User_Login.objects.filter(articles__title__icontains="Article") #使用根据关联表进行查询，获取作者名包含'Article'的文章
-        users = [user.username for user in users]
+        users = [user.password for user in users]
         
         # F表达式
         # 查找用户名和密码都相同的用户
