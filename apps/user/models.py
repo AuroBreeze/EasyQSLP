@@ -10,24 +10,47 @@ from django.contrib.auth.models import AbstractBaseUser,BaseUserManager
 # RegexValidator(r'^[a-zA-Z0-9_-]{5,20}$') 表示验证是否为字母、数字、下划线、减号组成的字符串，长度为5到20
 from django.core.validators import MinLengthValidator
 
+from uuid import uuid4
+
 # Create your models here.
+class UserRegisterManager(BaseUserManager):
+    """
+    自定义用户注册管理器
+    """
+    def create(self,email,username,password):
+        if not email:
+            raise ValueError({"email":"邮箱不能为空"})
+        if not username:
+            raise ValueError({"username":"用户名不能为空"})
+        if not password:
+            raise ValueError({"password":"密码不能为空"})
+        
+        
+        
+        return user
 
 class User_Login(AbstractBaseUser): #正常django会生成一个 app名_类名 的表名
     username = models.CharField(max_length=20,validators=[MinLengthValidator(5)],unique=True)
     password = models.CharField(max_length=255)#最大长度要保证哈希后的长度能够放进数据库
     join_date = models.DateTimeField(auto_now_add=True)
     email = models.EmailField(max_length=50,unique=True)
-
+    is_active = models.BooleanField(default=True) #是否激活
+    uuid_user = models.CharField(max_length=50,unique=True) #用户唯一标识符
+    
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
 
-    objects = BaseUserManager()  # 使用默认管理器或自定义管理器
+    objects = UserRegisterManager() #用户注册管理器
+    
+    # def get_by_natural_key(self,email):
+    #     return self.get(email=email)
     class Meta: #指定元数据，固定写法
         db_table = 'user_login' #指定表名
         
         #先按join_date降序排序，再按username升序排序
         #ordering = ['-join_date','username'] #指定默认排序字段,加‘-’表示降序排序
-
+    #用户注册
+    
 class User_Profile(models.Model):
     profile_text = models.TextField(max_length=500,default='')
     
