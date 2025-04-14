@@ -31,7 +31,6 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(max_length=50,required=True)
     password = serializers.CharField(max_length=255,required=True,write_only=True)
     username = serializers.CharField(max_length=20,validators=[MinLengthValidator(2)],required=True)
-    uuid_user = serializers.CharField(max_length=50,required=False,read_only=True)
 
     def validate(self, data):
         email = data.get('email')
@@ -47,16 +46,16 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        uuid_user = uuid4().hex
+
         user = User_Login.objects.create_user(
             email=validated_data['email'],
             password=validated_data['password'],
             username=validated_data['username'],
             is_active=True,
-            uuid_user=uuid_user)
+            uuid_user=uuid4().hex)
         user.save()
         return user
 
     class Meta:
         model = User_Login
-        fields = ['email','password','username',"uuid_user"]
+        fields = ['email','password','username']
