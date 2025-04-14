@@ -52,7 +52,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             password=validated_data['password'],
             username=validated_data['username'],
             is_active=True,
-            uuid_user=uuid4().hex)
+            )
         user.save()
         return user
 
