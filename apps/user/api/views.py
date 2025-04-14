@@ -1,4 +1,4 @@
-from django.shortcuts import render,HttpResponse
+from django.utils.decorators import method_decorator
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -9,7 +9,7 @@ from django_ratelimit.decorators import ratelimit
 # Create your views here.
 
 class RegisterAPI(APIView):
-    #@ratelimit(key='ip', rate='3/hour')  # 同一 IP 每小时最多注册5次
+    @method_decorator(ratelimit(key='ip', rate='3/hour'))  # 同一 IP 每小时最多注册5次
     def post(self, request):
         # user = User_Login(username="AuroBreeze", password="123123123",email="123@qq.com")
         # user.save()
@@ -17,13 +17,13 @@ class RegisterAPI(APIView):
         #print(request.data)
         if serialize.is_valid():
             serialize.save()
-            return Response({"message": "User registered successfully!"})
+            return Response({"message": "User registered successfully!"},status=status.HTTP_201_CREATED)
         else:
             return Response(serialize.errors, status=status.HTTP_400_BAD_REQUEST)
         #return Response({"message": "User registered successfully!"})
 
 class LoginAPI(APIView):
-    #@ratelimit(key='ip', rate='5/hour')  # 同一 IP 每小时最多登录5次
+    @method_decorator(ratelimit(key='ip', rate='3/hour'))  # 同一 IP 每小时最多登录5次
     def post(self, request):
         serializer = UserLoginSerializer(data=request.data)
 
