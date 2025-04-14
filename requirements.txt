@@ -1,5 +1,8 @@
 django
-python-dotenv
-djangorestframework
-tzdata
-requests
+python-dotenv # environment variables support
+djangorestframework # REST API framework
+tzdata # timezone support
+requests # HTTP requests support
+psycopg2 # PostgreSQL database driver
+django-cors-headers # CORS support
+django_ratelimit # rate limiting support
