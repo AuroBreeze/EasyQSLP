@@ -37,7 +37,6 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         email = data.get('email')
         password = data.get('password')
         username = data.get('username')
-        uuid_user = data.get('uuid_user')
         if email and password and username:
             if User_Login.objects.filter(email=email).exists():
                 raise ValidationError({"ValidationError":"邮箱已被注册"})
@@ -53,6 +52,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             email=validated_data['email'],
             password=validated_data['password'],
             username=validated_data['username'],
+            is_active=True,
             uuid_user=uuid_user)
         user.save()
         return user
