@@ -1,10 +1,9 @@
-from django.contrib.auth.hashers import make_password
 from django.core.validators import MinLengthValidator
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
-from ..models import User_Login
-from uuid import uuid4
+from ..models import *
+from django.utils import timezone
 
 class UserLoginSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True,error_messages={"required":"邮箱不能为空","invalid":"邮箱格式不正确"})
@@ -59,3 +58,23 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User_Login
         fields = ['email','password','username']
+class EmailCodeSendSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(max_length=50,required=True)
+    def validate(self, data):
+        email = data.get('email')
+        if User_Login.objects.filter(email=email).exists():
+            raise ValidationError({"ValidationError":"邮箱已被注册"})
+        if Email_Verify_Code.objects.filter(email=email).exists():
+            if timezone.now() > Email_Verify_Code.objects.get(email=email).expire_time:
+                raise ValidationError({"ValidationError":"验证码已过期"})
+            if timezone.now() - Email_Verify_Code.objects.get(email=email).send_time < timezone.timedelta(minutes=1):
+                raise ValidationError({"ValidationError":"验证码发送频率过快"})
+        return data
+    def create(self, validated_data):
+        email = validated_data['email']
+        code_generator = Email_Verify_Code.objects.update_or_create(email=email)
+        code_generator.save()
+        return code_generator
+    class Meta:
+        model = Email_Verify_Code
+        fields = ['email']

@@ -2,9 +2,8 @@ from django.utils.decorators import method_decorator
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from django.db import connection
 from ..models import *
-from .serializers import UserLoginSerializer,UserRegisterSerializer
+from .serializers import *
 from django_ratelimit.decorators import ratelimit
 # Create your views here.
 
@@ -43,6 +42,28 @@ class LoginAPI(APIView):
                 "message": "Invalid credentials",
                 "errors": error_dict  # 仅包含有错误的字段
             }, status=status.HTTP_400_BAD_REQUEST)
+class EmailCodeSendAPI(APIView):
+    #@method_decorator(ratelimit(key="ip", rate='1/minute'))
+    def post(self,request):
+        serializer = EmailCodeSendSerializer(data=request.data)
+        if not serializer.is_valid():
+            errors = serializer.errors
+            error_dict = {}
+            # 提取错误信息并转换为字符串
+            for field, error_list in errors.items():
+                if error_list:
+                    error_dict[field] = error_list[0] 
+            return Response({
+                "success": False,
+                "message": "Invalid email",
+                "errors": error_dict  # 仅包含有错误的字段
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        serializer.save()
+        #print(serializer.data['code'])
+        #send_email(email, serializer.data['code'])
+        return Response({"success": True, "message": "Email code sent successfully!","code":serializer.data['code']},status=status.HTTP_201_CREATED)
+            
 
 class DeletAPI(APIView):
     def post(self, request):
