@@ -60,21 +60,24 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         fields = ['email','password','username']
 class EmailCodeSendSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(max_length=50,required=True)
+    code = serializers.CharField(max_length=6,required=True,write_only=True)
     def validate(self, data):
         email = data.get('email')
+        code = data.get('code')
         if User_Login.objects.filter(email=email).exists():
             raise ValidationError({"ValidationError":"邮箱已被注册"})
-        if Email_Verify_Code.objects.filter(email=email).exists():
-            if timezone.now() > Email_Verify_Code.objects.get(email=email).expire_time:
-                raise ValidationError({"ValidationError":"验证码已过期"})
-            if timezone.now() - Email_Verify_Code.objects.get(email=email).send_time < timezone.timedelta(minutes=1):
-                raise ValidationError({"ValidationError":"验证码发送频率过快"})
+            return data
+        try:
+            record = Email_Verify_Code.objects.get(email=email)
+        except Email_Verify_Code.DoesNotExist:
+            raise ValidationError({"ValidationError":"验证码无效或已过期"})
+        if record.code != code:
+            raise ValidationError({"ValidationError":"验证码错误"})
+        if record.is_expired():
+            raise ValidationError({"ValidationError":"验证码已过期"})
+        if record.send_limit():
+            raise ValidationError({"ValidationError":"验证码发送太频繁"})
         return data
-    def create(self, validated_data):
-        email = validated_data['email']
-        code_generator = Email_Verify_Code.objects.update_or_create(email=email)
-        code_generator.save()
-        return code_generator
     class Meta:
         model = Email_Verify_Code
         fields = ['email']
