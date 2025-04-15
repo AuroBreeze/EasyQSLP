@@ -75,10 +75,10 @@ class User_Login(AbstractBaseUser): #正常django会生成一个 app名_类名 �
 class Email_Verify_Code(models.Model):
     email = models.EmailField(max_length=50,unique=True,verbose_name='用户标识')
     code = models.CharField(max_length=6,verbose_name='验证码')
-    send_time = models.DateTimeField(verbose_name='发送时间')
+    send_time = models.DateTimeField(verbose_name='发送时间',)
     expire_time = models.DateTimeField(verbose_name='过期时间')
     
-    object = EmailCodeSendManager() #验证码管理器
+    objects = EmailCodeSendManager() #验证码管理器
     class Meta:
         db_table = 'email_verify_code'
         verbose_name = '邮箱验证码'
