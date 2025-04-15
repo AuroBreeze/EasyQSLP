@@ -5,6 +5,8 @@ from rest_framework.response import Response
 from ..models import *
 from .serializers import *
 from django_ratelimit.decorators import ratelimit
+import random
+from django.utils import timezone
 # Create your views here.
 
 class RegisterAPI(APIView):
@@ -45,25 +47,18 @@ class LoginAPI(APIView):
 class EmailCodeSendAPI(APIView):
     #@method_decorator(ratelimit(key="ip", rate='1/minute'))
     def post(self,request):
-        serializer = EmailCodeSendSerializer(data=request.data)
-        if not serializer.is_valid():
-            errors = serializer.errors
-            error_dict = {}
-            # 提取错误信息并转换为字符串
-            for field, error_list in errors.items():
-                if error_list:
-                    error_dict[field] = error_list[0] 
-            return Response({
-                "success": False,
-                "message": "Invalid email",
-                "errors": error_dict  # 仅包含有错误的字段
-            }, status=status.HTTP_400_BAD_REQUEST)
+        email = request.data.get('email')
+        if email is None:
+            return Response({"message": "邮箱不能为空"}, status=status.HTTP_400_BAD_REQUEST)
         
-        #print(serializer.instance)
-        serializer.save()
+        code = ''.join(random.choices('0123456789', k=6))
+        
+        Email_Verify_Code.objects.update_or_create(email=email, defaults={"code": code,
+                                                                   "expire_time": timezone.now() + timezone.timedelta(minutes=5),
+                                                                   "send_time": timezone.now()})
         #print(serializer.data['code'])
         #send_email(email, serializer.data['code'])
-        return Response({"success": True, "message": "Email code sent successfully!","code":serializer.data['code']},status=status.HTTP_201_CREATED)
+        return Response({"success": True, "message": "Email code sent successfully!","code":code},status=status.HTTP_201_CREATED)
             
 
 class DeletAPI(APIView):
