@@ -59,6 +59,7 @@ class EmailCodeSendAPI(APIView):
                 "errors": error_dict  # 仅包含有错误的字段
             }, status=status.HTTP_400_BAD_REQUEST)
         
+        #print(serializer.instance)
         serializer.save()
         #print(serializer.data['code'])
         #send_email(email, serializer.data['code'])
