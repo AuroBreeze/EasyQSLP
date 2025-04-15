@@ -76,9 +76,15 @@ class Email_Verify_Code(models.Model):
     email = models.EmailField(max_length=50,unique=True,verbose_name='用户标识')
     code = models.CharField(max_length=6,verbose_name='验证码')
     send_time = models.DateTimeField(verbose_name='发送时间',)
-    expire_time = models.DateTimeField(verbose_name='过期时间')
+    expire_time = models.DateTimeField(verbose_name='过期时间/s')
     
     objects = EmailCodeSendManager() #验证码管理器
+
+    def is_expired(self):
+        return (timezone.now() - self.send_time).total_seconds() > 300 #5分钟过期
+    def send_limit(self):
+        return (timezone.now() - self.send_time).total_seconds() < 60 #一分钟内不能重复发送
+            
     class Meta:
         db_table = 'email_verify_code'
         verbose_name = '邮箱验证码'
