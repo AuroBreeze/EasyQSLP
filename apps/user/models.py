@@ -10,6 +10,8 @@ from django.contrib.auth.models import AbstractBaseUser,BaseUserManager
 # URLValidator() 表示验证是否为网址格式
 # RegexValidator(r'^[a-zA-Z0-9_-]{5,20}$') 表示验证是否为字母、数字、下划线、减号组成的字符串，长度为5到20
 from django.core.validators import MinLengthValidator
+from random import choice
+from django.utils import timezone
 # Create your models here.
 class UserRegisterManager(BaseUserManager):
     """
@@ -33,6 +35,20 @@ class UserRegisterManager(BaseUserManager):
         user.is_active = is_active
         user.save()
         return user
+class EmailCodeSendManager(models.Manager):
+    def create(self,email):
+        if not email:
+            raise ValueError({"email":"邮箱不能为空"})
+        code = "".join(choice('0123456789'),k=6)
+        send_time = timezone.now()
+        expire_time = send_time + timezone.timedelta(minutes=5)
+        
+        return self.model(
+            email=email,
+            code=code,
+            send_time=send_time,
+            expire_time=expire_time
+        )
 
 class User_Login(AbstractBaseUser): #正常django会生成一个 app名_类名 的表名
     username = models.CharField(max_length=20,validators=[MinLengthValidator(5)],unique=True)
@@ -59,8 +75,10 @@ class User_Login(AbstractBaseUser): #正常django会生成一个 app名_类名 �
 class Email_Verify_Code(models.Model):
     email = models.EmailField(max_length=50,unique=True,verbose_name='用户标识')
     code = models.CharField(max_length=6,verbose_name='验证码')
-    send_time = models.DateTimeField(auto_now_add=True,verbose_name='发送时间')
+    send_time = models.DateTimeField(verbose_name='发送时间')
     expire_time = models.DateTimeField(verbose_name='过期时间')
+    
+    object = EmailCodeSendManager() #验证码管理器
     class Meta:
         db_table = 'email_verify_code'
         verbose_name = '邮箱验证码'
@@ -68,6 +86,8 @@ class Email_Verify_Code(models.Model):
 
     def __str__(self):
         return f"{self.email} - {self.code}"
+
+    
 class User_Profile(models.Model):
     profile_text = models.TextField(max_length=500,default='')
     

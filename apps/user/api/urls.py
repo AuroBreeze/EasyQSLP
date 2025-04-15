@@ -10,5 +10,6 @@ urlpatterns=[
     path("register/",RegisterAPI.as_view(),name="register"),
     path("querr/",Querr.as_view(),name="querr"),
     path("article/",ArticleAPI.as_view(),name="article"),
-    path("articlelist/",ArticleListAPI.as_view(),name="articlelist")
+    path("articlelist/",ArticleListAPI.as_view(),name="articlelist"),
+    path("emailsendcode/",EmailCodeSendAPI.as_view(),name="emailsendcode"),
 ]
