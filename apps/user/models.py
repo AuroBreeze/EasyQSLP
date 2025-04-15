@@ -10,7 +10,6 @@ from django.contrib.auth.models import AbstractBaseUser,BaseUserManager
 # URLValidator() 表示验证是否为网址格式
 # RegexValidator(r'^[a-zA-Z0-9_-]{5,20}$') 表示验证是否为字母、数字、下划线、减号组成的字符串，长度为5到20
 from django.core.validators import MinLengthValidator
-from uuid import uuid4
 # Create your models here.
 class UserRegisterManager(BaseUserManager):
     """
@@ -41,7 +40,7 @@ class User_Login(AbstractBaseUser): #正常django会生成一个 app名_类名 �
     join_date = models.DateTimeField(auto_now_add=True)
     email = models.EmailField(max_length=50,unique=True)
     is_active = models.BooleanField(default=True) #是否激活
-    uuid_user = models.UUIDField(default=uuid4,editable=False,unique=True) #用户唯一标识符
+    #uuid_user = models.UUIDField(default=uuid4,editable=False,unique=True) #用户唯一标识符
     
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
@@ -56,7 +55,19 @@ class User_Login(AbstractBaseUser): #正常django会生成一个 app名_类名 �
         #先按join_date降序排序，再按username升序排序
         #ordering = ['-join_date','username'] #指定默认排序字段,加‘-’表示降序排序
     #用户注册
-    
+
+class Email_Verify_Code(models.Model):
+    email = models.EmailField(max_length=50,unique=True,verbose_name='用户标识')
+    code = models.CharField(max_length=6,verbose_name='验证码')
+    send_time = models.DateTimeField(auto_now_add=True,verbose_name='发送时间')
+    expire_time = models.DateTimeField(verbose_name='过期时间')
+    class Meta:
+        db_table = 'email_verify_code'
+        verbose_name = '邮箱验证码'
+        verbose_name_plural = '邮箱验证码'
+
+    def __str__(self):
+        return f"{self.email} - {self.code}"
 class User_Profile(models.Model):
     profile_text = models.TextField(max_length=500,default='')
     
