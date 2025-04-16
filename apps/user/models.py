@@ -42,12 +42,14 @@ class EmailCodeSendManager(models.Manager):
         code = "".join(choice('0123456789'),k=6)
         send_time = timezone.now()
         expire_time = send_time + timezone.timedelta(minutes=5)
+        usage = "Register"
         
         return self.model(
             email=email,
             code=code,
             send_time=send_time,
-            expire_time=expire_time
+            expire_time=expire_time,
+            usage=usage
         )
 
 class User_Login(AbstractBaseUser): #正常django会生成一个 app名_类名 的表名
@@ -77,6 +79,7 @@ class Email_Verify_Code(models.Model):
     code = models.CharField(max_length=6,verbose_name='验证码')
     send_time = models.DateTimeField(verbose_name='发送时间',)
     expire_time = models.DateTimeField(verbose_name='过期时间/s')
+    usage = models.CharField(max_length=5,verbose_name='用途')
     
     objects = EmailCodeSendManager() #验证码管理器
 
