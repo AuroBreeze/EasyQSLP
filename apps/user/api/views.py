@@ -10,7 +10,7 @@ from django.utils import timezone
 # Create your views here.
 
 class RegisterAPI(APIView):
-    @method_decorator(ratelimit(key='ip', rate='3/hour'))  # 同一 IP 每小时最多注册5次
+    @method_decorator(ratelimit(key='ip', rate='3/hour'))  # 同一 IP 每小时最多注册3次
     def post(self, request):
         # user = User_Login(username="AuroBreeze", password="123123123",email="123@qq.com")
         # user.save()
@@ -45,7 +45,7 @@ class LoginAPI(APIView):
                 "errors": error_dict  # 仅包含有错误的字段
             }, status=status.HTTP_400_BAD_REQUEST)
 class EmailCodeSendAPI(APIView):
-    #@method_decorator(ratelimit(key="ip", rate='1/minute'))
+    @method_decorator(ratelimit(key="ip", rate='3/minute'))
     def post(self,request):
         email = request.data.get('email')
         if email is None:
@@ -54,15 +54,12 @@ class EmailCodeSendAPI(APIView):
             send_time = Email_Verify_Code.objects.get(email=email).send_time
             if (timezone.now() - send_time).total_seconds() < 60:
                 return Response({"message": "发送频率过快，请稍后再试"}, status=status.HTTP_429_TOO_MANY_REQUESTS)
-            expire_time = Email_Verify_Code.objects.get(email=email).expire_time
 
         code = ''.join(random.choices('0123456789', k=6))
         
         Email_Verify_Code.objects.update_or_create(email=email, defaults={"code": code,
                                                                    "expire_time": timezone.now() + timezone.timedelta(minutes=5),
                                                                    "send_time": timezone.now()})
-        #print(serializer.data['code'])
-        #send_email(email, serializer.data['code'])
         return Response({"success": True, "message": "Email code sent successfully!","code":code},status=status.HTTP_201_CREATED)
             
 
