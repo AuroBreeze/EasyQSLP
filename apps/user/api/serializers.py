@@ -42,7 +42,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
                 raise ValidationError({"ValidationError":"用户名已被注册"})
         else:
             raise ValidationError({"ValidationError":"邮箱、密码、用户名、验证码不能为空"})
-        if Email_Verify_Code.objects.filter(email=email).exists():
+        if Email_Verify_Code.objects.filter(email=email).exists() and Email_Verify_Code.objects.filter(email=email).first().usage == "Register":
             if Email_Verify_Code.objects.filter(email=email).first().is_expired():
                 raise ValidationError({"ValidationError":"验证码已过期"})
             if Email_Verify_Code.objects.filter(email=email).first().code != code:
@@ -87,3 +87,45 @@ class EmailCodeSendSerializer(serializers.ModelSerializer):
     class Meta:
         model = Email_Verify_Code
         fields = ['email']
+class ResetPasswordSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(max_length=50,required=True)
+    code = serializers.CharField(min_length=6,max_length=6,required=True,write_only=True)
+    password = serializers.CharField(min_length=8,max_length=255,required=True,write_only=True)
+    password_confirm = serializers.CharField(min_length=8,max_length=255,required=True,write_only=True)
+    
+    class Meta:
+        model = Email_Verify_Code
+        fields = ['email','code','password','password_confirm']
+        
+    def validate(self,data):
+        email = data.get('email')
+        code = data.get('code')
+        password = data.get('password')
+        password_confirm = data.get('password_confirm')
+        
+        if User_Login.objects.filter(email=email).DoesNotExist:
+            raise ValidationError({"ValidationError":"邮箱未注册"})
+        if password != password_confirm:
+            raise ValidationError({"ValidationError":"两次密码不一致"})
+        
+        if Email_Verify_Code.objects.filter(email=email).exists() and Email_Verify_Code.objects.filter(email=email).first().usage == "ResetPassword":
+            if Email_Verify_Code.objects.filter(email=email).first().is_expired():
+                raise ValidationError({"ValidationError":"验证码已过期"})
+            if Email_Verify_Code.objects.filter(email=email).first().code != code:
+                raise ValidationError({"ValidationError":"验证码错误"})
+        else:
+            raise ValidationError({"ValidationError":"邮箱未发送验证码"})
+        
+        return data
+    
+    def update(self,instance,validated_data):
+        email = validated_data.get('email')
+        password = validated_data.get('password')
+        
+        user = User_Login.objects.get(email=email)
+        user.set_password(password)
+        user.save()
+        return user
+        
+        
+        
