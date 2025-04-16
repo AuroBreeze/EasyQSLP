@@ -90,7 +90,7 @@ class EmailCodeSendSerializer(serializers.ModelSerializer):
         return data
     class Meta:
         model = Email_Verify_Code
-        fields = ['email']
+        fields = ['email',"code"]
 class ResetPasswordSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(max_length=50,required=True)
     code = serializers.CharField(min_length=6,max_length=6,required=True,write_only=True)
