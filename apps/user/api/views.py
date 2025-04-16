@@ -16,9 +16,9 @@ class RegisterAPI(APIView):
         #print(request.data)
         if serialize.is_valid():
             serialize.save()
-            return Response({"message": "User registered successfully!"},status=status.HTTP_201_CREATED)
+            return Response({"success": True,"message": "User registered successfully!"},status=status.HTTP_201_CREATED)
         else:
-            return Response(serialize.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"success": False,"message": "Invalid data", "errors": serialize.errors}, status=status.HTTP_400_BAD_REQUEST)
         #return Response({"message": "User registered successfully!"})
 
 class LoginAPI(APIView):
@@ -29,7 +29,7 @@ class LoginAPI(APIView):
         if serializer.is_valid():
             user = serializer.validated_data['user']
             # 这里可以添加生成 token 或 session 的逻辑
-            return Response({"success": True,"message": "Login successful", "uuid_user": user.uuid_user,"username": user.username}, status=status.HTTP_200_OK)
+            return Response({"success": True,"message": "Login successful","username": user.username}, status=status.HTTP_200_OK)
         else:
             errors = serializer.errors
             error_dict = {}
@@ -48,13 +48,16 @@ class EmailCodeSendAPI(APIView):
         email = request.data.get('email')
         usage = request.data.get('usage')
         if usage is None:
-            return Response({"message": "注册异常"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"success": False,"message": "注册异常"}, status=status.HTTP_400_BAD_REQUEST)
         if email is None:
-            return Response({"message": "邮箱不能为空"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"success": False,"message": "邮箱不能为空"}, status=status.HTTP_400_BAD_REQUEST)
+        if User_Login.objects.filter(email=email).exists() and usage == 'Register':
+            return Response({"success": False,"message": "邮箱已被注册"}, status=status.HTTP_400_BAD_REQUEST)
+
         if Email_Verify_Code.objects.filter(email=email).exists():
             send_time = Email_Verify_Code.objects.get(email=email).send_time
             if (timezone.now() - send_time).total_seconds() < 60:
-                return Response({"message": "发送频率过快，请稍后再试"}, status=status.HTTP_429_TOO_MANY_REQUESTS)
+                return Response({"success": False,"message": "发送频率过快，请稍后再试"}, status=status.HTTP_429_TOO_MANY_REQUESTS)
 
         code = ''.join(random.choices('0123456789', k=6))
         
