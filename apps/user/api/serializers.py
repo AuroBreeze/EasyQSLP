@@ -29,12 +29,16 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(max_length=255,required=True,write_only=True)
     username = serializers.CharField(max_length=20,validators=[MinLengthValidator(2)],required=True)
     code = serializers.CharField(max_length=6,min_length=6,required=True,write_only=True)
+    usage = serializers.CharField(max_length=25,required=False,write_only=True)
 
     def validate(self, data):
         email = data.get('email')
         password = data.get('password')
         username = data.get('username')
         code = data.get('code')
+        usage = data.get('usage')
+        if usage != "Register":
+            raise ValidationError({"ValidationError":"注册方式错误"})
         if email and password and username and code:
             if User_Login.objects.filter(email=email).exists():
                 raise ValidationError({"ValidationError":"邮箱已被注册"})
@@ -64,7 +68,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User_Login
-        fields = ['email','password','username','code']
+        fields = ['email','password','username','code',"usage"]
 class EmailCodeSendSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(max_length=50,required=True)
     code = serializers.CharField(max_length=6,required=True,write_only=True)
