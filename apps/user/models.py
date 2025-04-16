@@ -10,7 +10,7 @@ from django.contrib.auth.models import AbstractBaseUser,BaseUserManager
 # URLValidator() 表示验证是否为网址格式
 # RegexValidator(r'^[a-zA-Z0-9_-]{5,20}$') 表示验证是否为字母、数字、下划线、减号组成的字符串，长度为5到20
 from django.core.validators import MinLengthValidator
-from random import choice
+import random
 from django.utils import timezone
 # Create your models here.
 class UserRegisterManager(BaseUserManager):
@@ -39,7 +39,7 @@ class EmailCodeSendManager(models.Manager):
     def create(self,email):
         if not email:
             raise ValueError({"email":"邮箱不能为空"})
-        code = "".join(choice('0123456789'),k=6)
+        code = "".join(random.choice('0123456789'),k=6)
         send_time = timezone.now()
         expire_time = send_time + timezone.timedelta(minutes=5)
         usage = "Register"
@@ -79,7 +79,7 @@ class Email_Verify_Code(models.Model):
     code = models.CharField(max_length=6,verbose_name='验证码')
     send_time = models.DateTimeField(verbose_name='发送时间',)
     expire_time = models.DateTimeField(verbose_name='过期时间/s')
-    usage = models.CharField(max_length=25,verbose_name='用途')
+    usage = models.CharField(max_length=25,verbose_name='用途',default='Register')
     
     objects = EmailCodeSendManager() #验证码管理器
 
