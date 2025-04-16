@@ -12,8 +12,6 @@ from django.utils import timezone
 class RegisterAPI(APIView):
     @method_decorator(ratelimit(key='ip', rate='3/hour'))  # 同一 IP 每小时最多注册3次
     def post(self, request):
-        # user = User_Login(username="AuroBreeze", password="123123123",email="123@qq.com")
-        # user.save()
         serialize = UserRegisterSerializer(data=request.data)
         #print(request.data)
         if serialize.is_valid():
@@ -48,6 +46,9 @@ class EmailCodeSendAPI(APIView):
     @method_decorator(ratelimit(key="ip", rate='3/minute'))
     def post(self,request):
         email = request.data.get('email')
+        usage = request.data.get('usage')
+        if usage is None:
+            return Response({"message": "注册异常"}, status=status.HTTP_400_BAD_REQUEST)
         if email is None:
             return Response({"message": "邮箱不能为空"}, status=status.HTTP_400_BAD_REQUEST)
         if Email_Verify_Code.objects.filter(email=email).exists():
@@ -59,7 +60,8 @@ class EmailCodeSendAPI(APIView):
         
         Email_Verify_Code.objects.update_or_create(email=email, defaults={"code": code,
                                                                    "expire_time": timezone.now() + timezone.timedelta(minutes=5),
-                                                                   "send_time": timezone.now()})
+                                                                   "send_time": timezone.now(),
+                                                                    "usage": usage})
         return Response({"success": True, "message": "Email code sent successfully!","code":code},status=status.HTTP_201_CREATED)
             
 
