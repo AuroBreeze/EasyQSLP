@@ -79,7 +79,7 @@ class Email_Verify_Code(models.Model):
     code = models.CharField(max_length=6,verbose_name='验证码')
     send_time = models.DateTimeField(verbose_name='发送时间',)
     expire_time = models.DateTimeField(verbose_name='过期时间/s')
-    usage = models.CharField(max_length=5,verbose_name='用途')
+    usage = models.CharField(max_length=25,verbose_name='用途')
     
     objects = EmailCodeSendManager() #验证码管理器
 
