@@ -50,7 +50,12 @@ class EmailCodeSendAPI(APIView):
         email = request.data.get('email')
         if email is None:
             return Response({"message": "邮箱不能为空"}, status=status.HTTP_400_BAD_REQUEST)
-        
+        if Email_Verify_Code.objects.filter(email=email).exists():
+            send_time = Email_Verify_Code.objects.get(email=email).send_time
+            if (timezone.now() - send_time).total_seconds() < 60:
+                return Response({"message": "发送频率过快，请稍后再试"}, status=status.HTTP_429_TOO_MANY_REQUESTS)
+            expire_time = Email_Verify_Code.objects.get(email=email).expire_time
+
         code = ''.join(random.choices('0123456789', k=6))
         
         Email_Verify_Code.objects.update_or_create(email=email, defaults={"code": code,
