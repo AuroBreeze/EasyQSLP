@@ -16,11 +16,13 @@ login_data1={
     "password": "123123123"
 }
 register_data = {
-    "email": "123123@qq.com",
+    "email": "13122313@qq.com",
     "password": "123123123",
-    "username": "AuroBreeze111"
+    "username": "AuroBree110",
+    "code": "495261",#572741
+    "usage": "Register"
 }
-#res = requests.post(url_register, json=register_data).json()
+res = requests.post(url_register, json=register_data).json()
 #res = requests.post(url_login, json=login_data1).json()
-res = requests.post(url_codesend, json={"email": "1231231231@qq.com"}).json()
+#res = requests.post(url_codesend, json={"email": "13122313@qq.com", "usage": "Register"}).json()
 print(res)
