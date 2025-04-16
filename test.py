@@ -5,7 +5,7 @@ url_querr = "http://127.0.0.1:8000/api/v1/user/querr/"
 url_login = "http://127.0.0.1:8000/api/v1/user/login/"
 url_article = "http://127.0.0.1:8000/api/v1/user/article/"
 url_articlelist = "http://127.0.0.1:8000/api/v1/user/articlelist/"
-
+url_codesend = "http://127.0.0.1:8000/api/v1/user/emailsendcode/"
 # 登录测试
 login_data = {
     "email": "123@qq.com",
@@ -16,11 +16,13 @@ login_data1={
     "password": "123123123"
 }
 register_data = {
-    "email": "123123@qq.com",
+    "email": "13122313@qq.com",
     "password": "123123123",
-    "username": "AuroBreeze111"
+    "username": "AuroBree110",
+    "code": "495261",#572741
+    "usage": "Register"
 }
-#res = requests.post(url_register, json=register_data).json()
+res = requests.post(url_register, json=register_data).json()
 #res = requests.post(url_login, json=login_data1).json()
-res = requests.post(url_querr).json()
+#res = requests.post(url_codesend, json={"email": "13122313@qq.com", "usage": "Register"}).json()
 print(res)
