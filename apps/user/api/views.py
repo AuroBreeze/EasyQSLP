@@ -66,6 +66,16 @@ class EmailCodeSendAPI(APIView):
                                                                    "send_time": timezone.now(),
                                                                     "usage": usage})
         return Response({"success": True, "message": "Email code sent successfully!","code":code},status=status.HTTP_201_CREATED)
+
+class ResetPasswordAPI(APIView):
+    @method_decorator(ratelimit(key="ip", rate='3/minute'))
+    def post(self,request):
+        serializer = ResetPasswordSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"success": True,"message": "Password reset successful!"},status=status.HTTP_200_OK)
+        else:
+            return Response({"success": False,"message": "Invalid data", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
             
 
 class DeletAPI(APIView):
