@@ -6,3 +6,6 @@ requests # HTTP requests support
 psycopg2 # PostgreSQL database driver
 django-cors-headers # CORS support
 django_ratelimit # rate limiting support
+celery # asynchronous task support
+redis # Redis database driver
+toml # configuration file support
