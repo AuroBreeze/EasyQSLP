@@ -107,7 +107,7 @@ class ResetPasswordSerializer(serializers.ModelSerializer):
         password = data.get('password')
         password_confirm = data.get('password_confirm')
         
-        if User_Login.objects.filter(email=email).DoesNotExist:
+        if User_Login.objects.filter(email=email).exists() == False:
             raise ValidationError({"ValidationError":"邮箱未注册"})
         if password != password_confirm:
             raise ValidationError({"ValidationError":"两次密码不一致"})
@@ -130,6 +130,7 @@ class ResetPasswordSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+
         
         
         
