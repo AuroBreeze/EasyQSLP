@@ -103,7 +103,7 @@ tags: [Login, API]
 }
 ```
 
-## 验证码接口 [Login]
+## 验证码接口 [EmailSendCode]
 
 ### 接口基本信息
 
@@ -179,7 +179,7 @@ tags: [Login, API]
 
 
 
-## 注册接口 [Login]
+## 注册接口 [Register]
 
 ### 接口基本信息
 
@@ -257,6 +257,91 @@ tags: [Login, API]
     }
 }
 ```
+
+## 忘记密码接口 [ResetPassword]
+
+### 接口基本信息
+
+| 属性 | 值                             |
+|------|----------|
+| 接口名称 | 忘记密码                          |
+| 请求方法 | POST                          |
+| 接口版本 | v1                            |
+| 接口路径 | `/api/v1/user/resetpassword/` |
+| 更新时间 | 2025-04-17                    |
+
+---
+
+### 请求参数说明
+
+#### 请求体参数
+
+| 字段名 | 类型 | 必填 | 描述 | 示例值 |
+|--------|-------|-----|------|-------|
+| email | string | 是 | 用户邮箱 | test@test.com |
+| code | string | 是 | 验证码 | 495261 |
+| password | string | 是 | 用户密码 | 123456 |
+| password_confirm | string | 是 | 用户密码确认 | 123456 |
+
+--- 
+
+#### 请求示例
+
+```json
+{
+    "email": "13122313@qq.com",
+    "code": "495261",
+    "password": "123123123",
+    "password_confirm": "123123123"
+}   
+```
+
+---
+
+### 响应参数
+
+成功响应参数：
+
+| 字段 | 类型 | 说明 | 存在情况 |
+| ---- | ---- |
+| success | bool | 状态码 | 总是 |
+| message | string | 状态信息 | 总是 |
+
+成功响应示例：
+```json
+{
+    "success": True,
+    "message": "Password reset successfully!"
+}
+```
+
+失败响应参数：
+
+| 字段              | 类型 | 说明 | 存在情况 |
+|-----------------| ---- | ---- | ---- |
+| success         | bool | 状态码 | 总是 |
+| message         | string | 状态信息 | 总是 |
+| errors          | string | 错误信息 | 邮箱错误、验证码错误、密码错误、验证错误 |
+| email           | string | 邮箱错误 | 邮箱未填写或邮箱格式错误 |
+| code            | string | 验证码错误 | 验证码未填写或验证码错误 |
+| password        | string | 密码错误 | 密码未填写或密码格式错误 |
+| password_confirm | string | 密码确认错误 | 密码确认未填写或密码确认格式错误 |
+| ValidationError | string | 验证错误 | 邮箱或验证码错误、密码错误、密码确认错误 |
+
+失败响应示例(未触发验证错误)：
+```json
+{
+    "success": False,
+    "message": "Invalid input",
+    "errors": {
+        "email": ["邮箱不能为空"],
+        "password": ["密码不能为空"],
+        "password_confirm": ["密码确认不能为空"]
+    }
+}
+```
+
+
 
 
 
