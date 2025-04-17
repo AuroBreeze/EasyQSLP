@@ -10,7 +10,7 @@ from django.utils import timezone
 # Create your views here.
 
 class RegisterAPI(APIView):
-    @method_decorator(ratelimit(key='ip', rate='3/hour'))  # 同一 IP 每小时最多注册3次
+    #@method_decorator(ratelimit(key='ip', rate='3/hour'))  # 同一 IP 每小时最多注册3次
     def post(self, request):
         serialize = UserRegisterSerializer(data=request.data)
         #print(request.data)
@@ -47,7 +47,7 @@ class EmailCodeSendAPI(APIView):
     def post(self,request):
         email = request.data.get('email')
         usage = request.data.get('usage')
-        if usage is None:
+        if usage is None or usage not in ['Register', 'ResetPassword']:
             return Response({"success": False,"message": "注册异常"}, status=status.HTTP_400_BAD_REQUEST)
         if email is None:
             return Response({"success": False,"message": "邮箱不能为空"}, status=status.HTTP_400_BAD_REQUEST)
