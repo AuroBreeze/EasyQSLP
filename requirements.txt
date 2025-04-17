@@ -9,3 +9,4 @@ django_ratelimit # rate limiting support
 celery # asynchronous task support
 redis # Redis database driver
 toml # configuration file support
+django-redis # Redis cache support
