@@ -70,7 +70,7 @@ class EmailCodeSendAPI(APIView):
 class ResetPasswordAPI(APIView):
     @method_decorator(ratelimit(key="ip", rate='3/minute'))
     def post(self,request):
-        serializer = ResetPasswordSerializer(data=request.data)
+        serializer = ResetPasswordSerializer(instance=request.data["email"], data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response({"success": True,"message": "Password reset successful!"},status=status.HTTP_200_OK)
