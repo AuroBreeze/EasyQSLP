@@ -125,7 +125,7 @@ import toml
 
 # 读取配置文件
 try:
-    config_env = toml.load(BASE_DIR / 'config_env.toml')
+    config_env = toml.load(BASE_DIR.parent / './config_env.toml')
 
 except FileNotFoundError:
     raise FileNotFoundError('config.toml文件不存在')
