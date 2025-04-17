@@ -12,4 +12,5 @@ urlpatterns=[
     path("article/",ArticleAPI.as_view(),name="article"),
     path("articlelist/",ArticleListAPI.as_view(),name="articlelist"),
     path("emailsendcode/",EmailCodeSendAPI.as_view(),name="emailsendcode"),
+    path("resetpassword/",ResetPasswordAPI.as_view(),name="restpassword")
 ]
