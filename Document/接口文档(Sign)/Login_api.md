@@ -163,6 +163,18 @@ tags: [Login, API]
 | message         | string | 状态信息 | 总是 |
 | errors          | string | 错误信息 | 邮箱错误、验证码错误、验证错误 |
 
+失败响应示例(触发验证错误)：
+```json
+{
+    "success": False,
+    "message": "Invalid input",
+    "errors": {
+        "ValidationError": "邮箱或验证码错误"
+    }
+}
+```
+
+
 
 
 
