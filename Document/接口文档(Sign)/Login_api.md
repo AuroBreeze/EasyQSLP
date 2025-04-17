@@ -52,11 +52,11 @@ tags: [Login, API]
 
 成功响应参数：
 
-| 字段 | 类型 | 说明 | 存在情况 |
-| ---- | ---- | ---- | ---- |
-| success | bool | 状态码 | 总是 |
-| message | string | 状态信息 | 总是 |
-| user_id | int | 用户ID | 总是 |
+| 字段       | 类型     | 说明   | 存在情况 |
+|----------|--------|------| ---- |
+| success  | bool   | 状态码  | 总是 |
+| message  | string | 状态信息 | 总是 |
+| username | string | 用户名称 | 总是 |
 
 成功响应示例：
 
@@ -64,7 +64,7 @@ tags: [Login, API]
 {
     "success": True, 
     "message": "Login successful", 
-    "user_id": 1
+    "username": "test"
 }
 ```
 
