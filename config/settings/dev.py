@@ -43,7 +43,8 @@ SECURE_HSTS_SECONDS = 0  # 禁用HSTS
 SECURE_SSL_REDIRECT = False  # 不强制HTTPS
 SESSION_COOKIE_SECURE = False  # 允许HTTP传输Cookie
 CSRF_COOKIE_SECURE = False  # 允许HTTP传输CSRF Token
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']  # 开发环境允许的域名
+
+
 
 # 登录配置
 AUTH_USER_MODEL = 'user.User_Login'  # 替换 your_app 为实际应用名
@@ -78,3 +79,13 @@ EMAIL_USE_SSL = True
 #EMAIL_USE_TLS = True
 EMAIL_HOST_USER = config_env["EMAIL"]["USER"]
 EMAIL_HOST_PASSWORD = config_env["EMAIL"]["PASSWORD"]
+
+
+url = config_env['DEV']["CORA_URL"]
+allow_host = config_env['DEV']["ALLOW_HOST"]
+ALLOWED_HOSTS = ['localhost', '127.0.0.1',allow_host]  # 开发环境允许的域名
+CORS_ORIGIN_WHITELIST = (
+    'http://localhost',
+    'http://127.0.0.1',
+    url,
+)
