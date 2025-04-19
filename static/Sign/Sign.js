@@ -44,6 +44,11 @@ document.querySelector('.sign-in-container form').addEventListener('submit', asy
             
             // 存储用户ID到本地存储
             localStorage.setItem('user_id', data.user_id);
+
+            // 等待2秒后自动跳转到start/界面
+            setTimeout(() => {
+                window.location.href = '/start/';
+            }, 2000);
         } else {
             let errorMsg = data.message;
             if (data.errors) {
