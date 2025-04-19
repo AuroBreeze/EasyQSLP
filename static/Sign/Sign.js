@@ -21,7 +21,35 @@ document.querySelector('.sign-in-container form').addEventListener('submit', asy
     
     const email = document.getElementById('signinEmail').value;
     const password = document.getElementById('signinPassword').value;
-    
+
+    // 添加表单验证
+    if (!email || !password) {
+        // 显示错误提示
+        const errorMessage = document.createElement('div');
+        errorMessage.className = 'error-message';
+        errorMessage.textContent = '邮箱和密码不能为空';
+        const form = document.querySelector('.sign-in-container form');
+        form.insertBefore(errorMessage, form.firstChild);
+
+        // 添加红色边框提示
+        if (!email) {
+            document.getElementById('signinEmail').style.border = '1px solid red';
+        } else {
+            document.getElementById('signinEmail').style.border = '';
+        }
+        if (!password) {
+            document.getElementById('signinPassword').style.border = '1px solid red';
+        } else {
+            document.getElementById('signinPassword').style.border = '';
+        }
+
+        // 3秒后移除错误提示
+        setTimeout(() => {
+            errorMessage.remove();
+        }, 3000);
+        return;
+    }
+
     try {
         const response = await fetch('http://localhost:8000/api/v1/user/login/', {
             method: 'POST',
