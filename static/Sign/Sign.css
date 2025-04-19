@@ -544,6 +544,20 @@ input {
     margin-left: 10px;
 }
 
+/* 添加错误提示样式 */
+.error-message {
+    color: red;
+    font-size: 14px;
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #ffe6e6;
+    border: 1px solid red;
+    border-radius: 5px;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+
 #successContainer {
     background: linear-gradient(to right, #FF4B2B, #FF416C);
     border-radius: 10px;
