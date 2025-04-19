@@ -12,7 +12,7 @@
     <!-- 引入 CSS 文件 -->
     <link rel="stylesheet" href="Sign.css">
     <!-- 引入外部 CSS 文件，用于设置页面样式 -->
-    <title>登录注册界面</title>
+    <title>Login</title>
     <!-- 设置页面标题 -->
 </head>
 
@@ -114,6 +114,29 @@
             </div>
         </div>
     </div>
+
+    <!-- 登录成功后的界面 -->
+    <div class="container" id="successContainer" style="display: none;">
+        <div class="form-container">
+            <form>
+                <h1>登录成功🎉</h1>
+                <p>您已成功登录，欢迎回来！</p>
+                <p>页面将在 <span id="countdown">3</span> 秒后自动跳转...</p>
+            </form>
+        </div>
+        <!-- 新增右边框内容 -->
+        <div class="overlay-container">
+            <div class="overlay">
+                <div class="overlay-panel overlay-right">
+                    <h1><strong>欢迎回来！😊</strong></h1>
+                    <p>您已成功登录，可以开始使用我们的服务了。</p>
+                    <p>如果您有任何问题，请随时联系我们的支持团队。</p>
+                    <button class="ghost" id="goToSupport">联系支持</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 引入 JavaScript 文件 -->
     <script src="Sign.js"></script>
     <!-- 引入外部 JavaScript 文件，用于实现交互功能 -->
