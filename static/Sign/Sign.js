@@ -48,7 +48,7 @@ document.querySelector('.sign-in-container form').addEventListener('submit', asy
             // 等待2秒后自动跳转到start/界面
             setTimeout(() => {
                 window.location.href = '/start/';
-            }, 2000);
+            }, 3000);
         } else {
             let errorMsg = data.message;
             if (data.errors) {
@@ -67,6 +67,11 @@ document.querySelector('.sign-in-container form').addEventListener('submit', asy
 // 前往仪表盘按钮点击事件
 document.getElementById('goToDashboard')?.addEventListener('click', () => {
     window.location.href = '/dashboard';
+});
+
+// 联系支持按钮点击事件
+document.getElementById('goToSupport')?.addEventListener('click', () => {
+    window.location.href = '/support';
 });
 
 // 忘记密码链接点击事件
