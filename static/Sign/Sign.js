@@ -92,6 +92,99 @@ document.querySelector('.sign-in-container form').addEventListener('submit', asy
     }
 });
 
+// 注册表单提交处理
+document.querySelector('.sign-up-container form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const email = document.getElementById('signupEmail').value;
+    const password = document.getElementById('signupPassword').value;
+    const username = document.getElementById('nameInput').value;
+    const code = document.getElementById('signupCode').value;
+
+    // 添加表单验证
+    if (!email || !password || !username || !code) {
+        alert('请填写所有必填项');
+        return;
+    }
+
+    try {
+        const response = await fetch('http://localhost:8000/api/v1/user/register/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                email: email,
+                password: password,
+                username: username,
+                code: code,
+                usage: 'Register'
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert('注册成功，请登录');
+            location.reload();
+        } else {
+            let errorMsg = data.message;
+            if (data.errors) {
+                if (data.errors.email) errorMsg += `\n${data.errors.email}`;
+                if (data.errors.password) errorMsg += `\n${data.errors.password}`;
+                if (data.errors.username) errorMsg += `\n${data.errors.username}`;
+                if (data.errors.code) errorMsg += `\n${data.errors.code}`;
+                if (data.errors.ValidationError) errorMsg += `\n${data.errors.ValidationError}`;
+            }
+            alert(errorMsg);
+        }
+    } catch (error) {
+        console.error('注册请求失败:', error);
+        alert('注册请求失败，请检查网络连接');
+    }
+});
+
+// 注册获取验证码事件
+document.getElementById('signupGetCode').addEventListener('click', async () => {
+    const email = document.getElementById('signupEmail').value;
+    if (!email) {
+        alert('请输入邮箱地址');
+        return;
+    }
+
+    try {
+        const response = await fetch('http://localhost:8000/api/v1/user/emailsendcode/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                email: email,
+                usage: 'Register'
+            })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            alert('验证码已发送到您的邮箱');
+        } else {
+            let errorMsg = data.message;
+            if (data.errors) {
+                if (data.errors.email) errorMsg += `\n${data.errors.email}`;
+                if (data.errors.ValidationError) errorMsg += `\n${data.errors.ValidationError}`;
+            }
+            alert(errorMsg);
+        }
+    } catch (error) {
+        console.error('验证码请求失败:', error);
+        alert('验证码请求失败，请检查网络连接');
+    }
+});
+
+
+
 // 前往仪表盘按钮点击事件
 document.getElementById('goToDashboard')?.addEventListener('click', () => {
     window.location.href = '/dashboard';
@@ -148,17 +241,7 @@ document.querySelector('.sign-in-container a').addEventListener('click', (e) => 
         e.preventDefault();
         location.reload();
     });
-    
-    // 获取验证码事件
-    document.getElementById('forgotGetCode').addEventListener('click', async () => {
-        const email = document.getElementById('forgotEmail').value;
-        if (!email) {
-            alert('请输入邮箱地址');
-            return;
-        }
-        // 这里添加发送验证码的逻辑
-        alert('验证码已发送到您的邮箱');
-    });
+
     
     // 表单提交事件
     document.getElementById('forgotPasswordForm').addEventListener('submit', (e) => {
@@ -176,4 +259,96 @@ document.querySelector('.sign-in-container a').addEventListener('click', (e) => 
         alert('密码重置成功，请使用新密码登录');
         location.reload();
     });
+
+    // 忘记密码表单提交处理
+    document.getElementById('forgotPasswordForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById('forgotEmail').value;
+    const code = document.getElementById('forgotCode').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    if (newPassword !== confirmPassword) {
+        alert('两次输入的密码不一致，请重新输入');
+        return;
+    }
+
+    try {
+        const response = await fetch('http://localhost:8000/api/v1/user/resetpassword/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                email: email,
+                code: code,
+                password: newPassword,
+                password_confirm: confirmPassword
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            alert('密码重置成功，请使用新密码登录');
+            location.reload();
+        } else {
+            let errorMsg = data.message;
+            if (data.errors) {
+                if (data.errors.email) errorMsg += `\n${data.errors.email}`;
+                if (data.errors.code) errorMsg += `\n${data.errors.code}`;
+                if (data.errors.password) errorMsg += `\n${data.errors.password}`;
+                if (data.errors.password_confirm) errorMsg += `\n${data.errors.password_confirm}`;
+                if (data.errors.ValidationError) errorMsg += `\n${data.errors.ValidationError}`;
+            }
+            alert(errorMsg);
+        }
+    } catch (error) {
+        console.error('密码重置请求失败:', error);
+        alert('密码重置请求失败，请检查网络连接');
+    }
 });
+// 忘记密码获取验证码事件
+document.getElementById('forgotGetCode').addEventListener('click', async () => {
+    const email = document.getElementById('forgotEmail').value;
+    if (!email) {
+        alert('请输入邮箱地址');
+        return;
+    }
+
+    try {
+        const response = await fetch('http://localhost:8000/api/v1/user/emailsendcode/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                email: email,
+                usage: 'ResetPassword'
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            alert('验证码已发送到您的邮箱');
+        } else {
+            let errorMsg = data.message;
+            if (data.errors) {
+                if (data.errors.email) errorMsg += `\n${data.errors.email}`;
+                if (data.errors.ValidationError) errorMsg += `\n${data.errors.ValidationError}`;
+            }
+            alert(errorMsg);
+        }
+    } catch (error) {
+        console.error('验证码请求失败:', error);
+        alert('验证码请求失败，请检查网络连接');
+    }
+});
+
+});
+
+
