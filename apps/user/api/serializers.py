@@ -69,28 +69,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User_Login
         fields = ['email','password','username','code',"usage"]
-class EmailCodeSendSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(max_length=50,required=True)
-    code = serializers.CharField(max_length=6,required=True,write_only=True)
-    def validate(self, data):
-        email = data.get('email')
-        code = data.get('code')
-        if User_Login.objects.filter(email=email).exists():
-            raise ValidationError({"ValidationError":"邮箱已被注册"})
-        try:
-            record = Email_Verify_Code.objects.get(email=email)
-        except Email_Verify_Code.DoesNotExist:
-            raise ValidationError({"ValidationError":"验证码无效或已过期"})
-        if record.code != code:
-            raise ValidationError({"ValidationError":"验证码错误"})
-        if record.is_expired():
-            raise ValidationError({"ValidationError":"验证码已过期"})
-        if record.send_limit():
-            raise ValidationError({"ValidationError":"验证码发送太频繁"})
-        return data
-    class Meta:
-        model = Email_Verify_Code
-        fields = ['email',"code"]
+
 class ResetPasswordSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(max_length=50,required=True)
     code = serializers.CharField(min_length=6,max_length=6,required=True,write_only=True)
