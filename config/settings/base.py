@@ -84,12 +84,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# 允许的请求方法
-CORS_ALLOW_METHODS = [
-    'GET',
-    'POST',
-    'OPTIONS',  # 必须包含OPTIONS
-]
+
 
 
 # Internationalization
