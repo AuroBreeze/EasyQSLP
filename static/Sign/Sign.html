@@ -121,8 +121,19 @@
             <form>
                 <h1>登录成功🎉</h1>
                 <p>您已成功登录，欢迎回来！</p>
-                <button type="button" id="goToDashboard">前往仪表盘</button>
+                <p>页面将在 <span id="countdown">3</span> 秒后自动跳转...</p>
             </form>
+        </div>
+        <!-- 新增右边框内容 -->
+        <div class="overlay-container">
+            <div class="overlay">
+                <div class="overlay-panel overlay-right">
+                    <h1><strong>欢迎回来！😊</strong></h1>
+                    <p>您已成功登录，可以开始使用我们的服务了。</p>
+                    <p>如果您有任何问题，请随时联系我们的支持团队。</p>
+                    <button class="ghost" id="goToSupport">联系支持</button>
+                </div>
+            </div>
         </div>
     </div>
 
