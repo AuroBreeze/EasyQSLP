@@ -25,16 +25,19 @@ register_data = {
 }
 
 email_data = {
-    "email": "123123@qq.com",
+    "email": "123123123@qq.com",
+
     "usage": "ResetPassword"#Register or ResetPassword
 }
 
 
 #res = requests.post(url_register, json=register_data).json()
-res = requests.post(url_login, json=login_data1).json()
-# code_data = requests.post(url_codesend, json=email_data).json()
-# print(code_data)
-# code = code_data["code"]
+
+#res = requests.post(url_login, json=login_data1).json()
+code_data = requests.post(url_codesend, json=email_data).json()
+print(code_data)
+#code = code_data["code"]
+
 # print(code)
 # resetpwd_data = {
 #     "email": "123123@qq.com",
@@ -43,4 +46,6 @@ res = requests.post(url_login, json=login_data1).json()
 #     "password_confirm": "123456789"
 # }
 # res = requests.post(url_resetpwd, json=resetpwd_data).json()
+
 print(res)
+
