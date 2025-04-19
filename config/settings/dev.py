@@ -35,6 +35,8 @@ INSTALLED_APPS_DEV = [
 
 INSTALLED_APPS = INSTALLED_APPS_DEV + INSTALLED_APPS
 
+
+
 # 静态文件配置
 MEDIA_ROOT = BASE_DIR.parent / 'media'  # 媒体文件存储路径
 
@@ -52,6 +54,12 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',  # 默认后端（支持 USERNAME_FIELD）
 ]
 
+# 跨域配置
+ALLOWED_HOSTS = ['localhost','localhost:63342', '127.0.0.1:63342']  # 开发环境允许的域名
+CORS_ORIGIN_WHITELIST = (
+    'http://localhost:63342',
+    'http://127.0.0.1:63342',
+)  # 允许跨域请求的域名
 
 #celery配置
 CELERY_BROKER_URL = 'redis://localhost:6379/0'#broker地址
@@ -80,12 +88,3 @@ EMAIL_USE_SSL = True
 EMAIL_HOST_USER = config_env["EMAIL"]["USER"]
 EMAIL_HOST_PASSWORD = config_env["EMAIL"]["PASSWORD"]
 
-
-url = config_env['DEV']["CORA_URL"]
-allow_host = config_env['DEV']["ALLOW_HOST"]
-ALLOWED_HOSTS = ['localhost', '127.0.0.1',allow_host]  # 开发环境允许的域名
-CORS_ORIGIN_WHITELIST = (
-    'http://localhost',
-    'http://127.0.0.1',
-    url,
-)
