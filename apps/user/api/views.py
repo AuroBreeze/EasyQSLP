@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from ..models import *
 from ..task import send_email_task
+
 from .serializers import *
 from django_ratelimit.decorators import ratelimit
 import random
@@ -62,6 +63,7 @@ class EmailCodeSendAPI(APIView):
 
         code = ''.join(random.choices('0123456789', k=6))
         send_email_task.delay(email, code)
+
         
         Email_Verify_Code.objects.update_or_create(email=email, defaults={"code": code,
                                                                    "expire_time": timezone.now() + timezone.timedelta(minutes=5),
