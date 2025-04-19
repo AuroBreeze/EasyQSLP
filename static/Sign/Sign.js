@@ -23,7 +23,7 @@ document.querySelector('.sign-in-container form').addEventListener('submit', asy
     const password = document.getElementById('signinPassword').value;
     
     try {
-        const response = await fetch('http://35a71b61.r26.cpolar.top/api/v1/user/login/', {
+        const response = await fetch('http://localhost:8000/api/v1/user/login/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
