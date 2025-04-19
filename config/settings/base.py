@@ -84,12 +84,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# 允许的请求方法
-CORS_ALLOW_METHODS = [
-    'GET',
-    'POST',
-    'OPTIONS',  # 必须包含OPTIONS
-]
+
 
 
 # Internationalization
@@ -97,7 +92,7 @@ CORS_ALLOW_METHODS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True
 
@@ -113,3 +108,4 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField' #默认自增长字段类型
+
