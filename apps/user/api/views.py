@@ -12,7 +12,7 @@ from django.utils import timezone
 # Create your views here.
 
 class RegisterAPI(APIView):
-    #@method_decorator(ratelimit(key='ip', rate='3/hour'))  # 同一 IP 每小时最多注册3次
+    @method_decorator(ratelimit(key='ip', rate='3/hour'))  # 同一 IP 每小时最多注册3次
     def post(self, request):
         serialize = UserRegisterSerializer(data=request.data)
         #print(request.data)
@@ -55,6 +55,9 @@ class EmailCodeSendAPI(APIView):
             return Response({"success": False,"message": "邮箱不能为空"}, status=status.HTTP_400_BAD_REQUEST)
         if User_Login.objects.filter(email=email).exists() and usage == 'Register':
             return Response({"success": False,"message": "邮箱已被注册"}, status=status.HTTP_400_BAD_REQUEST)
+        if User_Login.objects.filter(email=email).exists() == False and usage == 'ResetPassword':
+            return Response({"success": False,"message": "邮箱未注册"}, status=status.HTTP_400_BAD_REQUEST)
+
 
         if Email_Verify_Code.objects.filter(email=email).exists():
             send_time = Email_Verify_Code.objects.get(email=email).send_time
