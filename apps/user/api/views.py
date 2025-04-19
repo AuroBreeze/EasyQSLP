@@ -1,36 +1,37 @@
-from django.shortcuts import render,HttpResponse
+from django.utils.decorators import method_decorator
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from django.db import connection
 from ..models import *
-from .serializers import UserLoginSerializer,UserRegisterSerializer
+from ..task import send_email_task
+
+from .serializers import *
 from django_ratelimit.decorators import ratelimit
+import random
+from django.utils import timezone
 # Create your views here.
 
 class RegisterAPI(APIView):
-    #@ratelimit(key='ip', rate='3/hour')  # 同一 IP 每小时最多注册5次
+    #@method_decorator(ratelimit(key='ip', rate='3/hour'))  # 同一 IP 每小时最多注册3次
     def post(self, request):
-        # user = User_Login(username="AuroBreeze", password="123123123",email="123@qq.com")
-        # user.save()
         serialize = UserRegisterSerializer(data=request.data)
         #print(request.data)
         if serialize.is_valid():
             serialize.save()
-            return Response({"message": "User registered successfully!"})
+            return Response({"success": True,"message": "User registered successfully!"},status=status.HTTP_201_CREATED)
         else:
-            return Response(serialize.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"success": False,"message": "Invalid data", "errors": serialize.errors}, status=status.HTTP_400_BAD_REQUEST)
         #return Response({"message": "User registered successfully!"})
 
 class LoginAPI(APIView):
-    #@ratelimit(key='ip', rate='5/hour')  # 同一 IP 每小时最多登录5次
+    @method_decorator(ratelimit(key='ip', rate='3/hour'))  # 同一 IP 每小时最多登录5次
     def post(self, request):
         serializer = UserLoginSerializer(data=request.data)
 
         if serializer.is_valid():
             user = serializer.validated_data['user']
             # 这里可以添加生成 token 或 session 的逻辑
-            return Response({"success": True,"message": "Login successful", "uuid_user": user.uuid_user,"username": user.username}, status=status.HTTP_200_OK)
+            return Response({"success": True,"message": "Login successful","username": user.username}, status=status.HTTP_200_OK)
         else:
             errors = serializer.errors
             error_dict = {}
@@ -43,6 +44,43 @@ class LoginAPI(APIView):
                 "message": "Invalid credentials",
                 "errors": error_dict  # 仅包含有错误的字段
             }, status=status.HTTP_400_BAD_REQUEST)
+class EmailCodeSendAPI(APIView):
+    @method_decorator(ratelimit(key="ip", rate='3/minute'))
+    def post(self,request):
+        email = request.data.get('email')
+        usage = request.data.get('usage')
+        if usage is None or usage not in ['Register', 'ResetPassword']:
+            return Response({"success": False,"message": "注册异常"}, status=status.HTTP_400_BAD_REQUEST)
+        if email is None:
+            return Response({"success": False,"message": "邮箱不能为空"}, status=status.HTTP_400_BAD_REQUEST)
+        if User_Login.objects.filter(email=email).exists() and usage == 'Register':
+            return Response({"success": False,"message": "邮箱已被注册"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if Email_Verify_Code.objects.filter(email=email).exists():
+            send_time = Email_Verify_Code.objects.get(email=email).send_time
+            if (timezone.now() - send_time).total_seconds() < 60:
+                return Response({"success": False,"message": "发送频率过快，请稍后再试"}, status=status.HTTP_429_TOO_MANY_REQUESTS)
+
+        code = ''.join(random.choices('0123456789', k=6))
+        send_email_task.delay(email, code)
+
+        
+        Email_Verify_Code.objects.update_or_create(email=email, defaults={"code": code,
+                                                                   "expire_time": timezone.now() + timezone.timedelta(minutes=5),
+                                                                   "send_time": timezone.now(),
+                                                                    "usage": usage})
+        return Response({"success": True, "message": "Email code sent successfully!","code":code},status=status.HTTP_201_CREATED)
+
+class ResetPasswordAPI(APIView):
+    @method_decorator(ratelimit(key="ip", rate='3/minute'))
+    def post(self,request):
+        serializer = ResetPasswordSerializer(instance=request.data["email"], data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"success": True,"message": "Password reset successful!"},status=status.HTTP_200_OK)
+        else:
+            return Response({"success": False,"message": "Invalid data", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            
 
 class DeletAPI(APIView):
     def post(self, request):
