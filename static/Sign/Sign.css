@@ -447,38 +447,70 @@ footer a {
     margin: 8px 0;
 }
 
-/* 标签样式 */
 .input-group label {
     position: absolute;
     left: 15px;
     top: 12px;
     color: #999;
     pointer-events: none;
-    transition: all 0.3s ease;
+  
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     font-size: 12px;
-    background-color: #eee;
+    background-color: transparent;
     padding: 0 5px;
+    transform-origin: left center;
 }
 
-/* 输入框聚焦/有内容时的标签效果 */
+.input-group input {
+    background-color: #eee;
+    border: none;
+    padding: 12px 15px;
+    margin: 0;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+.input-group input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 75, 43, 0.2);
+}
+
 .input-group input:focus + label,
 .input-group input:not(:placeholder-shown) + label {
-    transform: translateY(-20px) scale(0.8);
+    transform: translateY(-22px) scale(0.85);
     color: #FF4B2B;
     background-color: white;
-    z-index: 1;
+    padding: 0 5px;
+    left: 10px;
 }
 
-/* 输入框placeholder样式 */
 .input-group input::placeholder {
-    opacity: 1;
-    transition: opacity 0.3s ease;
+    color: #999;
+    transition: opacity 0.2s ease;
 }
 
-/* 输入框聚焦/有内容时的placeholder效果 */
+
 .input-group input:focus::placeholder,
 .input-group input:not(:placeholder-shown)::placeholder {
     opacity: 0;
+}
+
+.input-group input:focus + label,
+.input-group input:not(:placeholder-shown) + label {
+    transform: translateY(-22px) scale(0.85);
+    color: #FF4B2B;
+    background-color: white;
+    padding: 0 5px;
+    left: 10px;
+}
+
+.input-group input::placeholder {
+    color: transparent;
+    transition: color 0.3s ease;
+}
+
+.input-group input:focus {
+    color: #999;
 }
 
 /* 保持原有输入框样式 */
