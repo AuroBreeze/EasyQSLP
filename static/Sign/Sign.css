@@ -453,6 +453,7 @@ footer a {
     top: 12px;
     color: #999;
     pointer-events: none;
+  
     transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     font-size: 12px;
     background-color: transparent;
@@ -487,6 +488,7 @@ footer a {
     color: #999;
     transition: opacity 0.2s ease;
 }
+
 
 .input-group input:focus::placeholder,
 .input-group input:not(:placeholder-shown)::placeholder {
