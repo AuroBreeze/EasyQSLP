@@ -38,11 +38,12 @@ document.querySelector('.sign-in-container form').addEventListener('submit', asy
         const data = await response.json();
         
         if (data.success) {
-            alert('登录成功');
+            // 隐藏登录界面，显示登录成功界面
+            document.getElementById('container').style.display = 'none';
+            document.getElementById('successContainer').style.display = 'block';
+            
             // 存储用户ID到本地存储
             localStorage.setItem('user_id', data.user_id);
-            // 跳转到仪表盘
-            window.location.href = '/dashboard';
         } else {
             let errorMsg = data.message;
             if (data.errors) {
@@ -52,10 +53,15 @@ document.querySelector('.sign-in-container form').addEventListener('submit', asy
             }
             alert(errorMsg);
         }
-    } catch (errors) {
+    } catch (error) {
         console.error('登录请求失败:', error);
         alert('登录请求失败，请检查网络连接');
     }
+});
+
+// 前往仪表盘按钮点击事件
+document.getElementById('goToDashboard')?.addEventListener('click', () => {
+    window.location.href = '/dashboard';
 });
 
 // 忘记密码链接点击事件
