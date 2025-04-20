@@ -96,24 +96,23 @@
 
       <!-- 登录成功后的界面 -->
       <div class="container" id="successContainer" v-if="isLoginSuccess">
-      <div class="form-container">
-        <form>
-          <h1>登录成功🎉</h1>
-          <p>您已成功登录，欢迎回来！</p>
-          <p>页面将在 <span id="countdown">{{ countdown }}</span> 秒后自动跳转...</p>
-        </form>
-      </div>
-      <!-- 新增右边框内容 -->
-      <div class="overlay-container">
-        <div class="overlay">
-          <div class="overlay-panel overlay-right">
-            <h1><strong>欢迎回来！😊</strong></h1>
-            <p>您已成功登录，可以开始使用我们的服务了。</p>
-            <p>如果您有任何问题，请随时联系我们的支持团队。</p>
-            <button class="ghost" id="goToSupport" @click="goToSupport">联系支持</button>
+        <div class="form-container">
+          <form>
+            <h1>登录成功🎉</h1>
+            <p>您已成功登录，欢迎回来！</p>
+            <p>页面将在 <span id="countdown">{{ countdown }}</span> 秒后自动跳转...</p>
+          </form>
+        </div>
+        <div class="overlay-container">
+          <div class="overlay">
+            <div class="overlay-panel overlay-right">
+              <h1>欢迎回来！😊</h1>
+              <p>您已成功登录，可以开始使用我们的服务了。</p>
+              <p>如果您有任何问题，请随时联系我们的支持团队。</p>
+              <button class="ghost" id="goToSupport" @click="goToSupport">联系支持</button>
+            </div>
           </div>
         </div>
-      </div>
       </div>
     </div>
   </div>
@@ -853,111 +852,119 @@ input {
 }
 
 #successContainer {
-    background: linear-gradient(to right, #FF4B2B, #FF416C);
-    border-radius: 10px;
-    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
-    color: #FFFFFF;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 480px;
-    width: 768px;
-    max-width: 100%;
-    position: relative;
-    overflow: hidden;
-    margin: 0 auto; /* 添加自动居中 */
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+  position: relative;
+  overflow: hidden;
+  width: 768px;
+  max-width: 100%;
+  min-height: 480px;
+  margin: 20px 0;
 }
 
 #successContainer .form-container {
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 10px;
-    padding: 40px;
-    text-align: center;
-    width: 100%;
-    max-width: 400px;
-}
-
-#successContainer h1 {
-    font-size: 32px;
-    margin-bottom: 20px;
-    color: #FF4B2B;
-}
-
-#successContainer p {
-    font-size: 16px;
-    margin-bottom: 20px;
-    color: #333;
-}
-
-#successContainer #countdown {
-    color: #FF4B2B;
-    font-weight: bold;
-}
-
-#successContainer button {
-    background-color: #FF4B2B;
-    border: none;
-    border-radius: 20px;
-    color: #FFFFFF;
-    font-size: 14px;
-    font-weight: bold;
-    padding: 12px 20px;
-    margin-top: 20px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-#successContainer button:hover {
-    background-color: #FF416C;
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 50%;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 0 50px;
+  text-align: center;
 }
 
 #successContainer .overlay-container {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    width: 50%;
-    height: 100%;
-    overflow: hidden;
-    transition: transform 0.6s ease-in-out;
-    z-index: 100;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 50%;
+  height: 100%;
+  overflow: hidden;
+  transition: transform 0.6s ease-in-out;
+  z-index: 100;
 }
 
 #successContainer .overlay {
-    background: linear-gradient(to right, #FF4B2B, #FF416C);
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: 0 0;
-    color: #FFFFFF;
-    position: relative;
-    left: -100%;
-    height: 100%;
-    width: 200%;
-    transform: translateX(0);
-    transition: transform 0.6s ease-in-out;
+  background: linear-gradient(to right, #FF4B2B, #FF416C);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: 0 0;
+  color: #FFFFFF;
+  position: relative;
+  left: -100%;
+  height: 100%;
+  width: 200%;
+  transform: translateX(0);
+  transition: transform 0.6s ease-in-out;
 }
 
 #successContainer .overlay-panel {
-    position: absolute;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    padding: 0 40px;
-    text-align: center;
-    top: 0;
-    height: 100%;
-    width: 50%;
-    transform: translateX(0);
-    transition: transform 0.6s ease-in-out;
-}
-
-#successContainer .overlay-panel h1,
-#successContainer .overlay-panel p {
-    color: #000; /* 将字体颜色改为黑色 */
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 0 40px;
+  text-align: center;
+  top: 0;
+  height: 100%;
+  width: 50%;
+  transform: translateX(0);
+  transition: transform 0.6s ease-in-out;
 }
 
 #successContainer .overlay-right {
-    right: 0;
-    transform: translateX(0);
+  right: 0;
+  transform: translateX(0);
+}
+
+#successContainer h1 {
+  font-weight: bold;
+  margin: 0;
+  color: #333;
+}
+
+#successContainer p {
+  font-size: 14px;
+  font-weight: 100;
+  line-height: 20px;
+  letter-spacing: 0.5px;
+  margin: 20px 0 30px;
+  color: #333;
+}
+
+#successContainer #countdown {
+  color: #FF4B2B;
+  font-weight: bold;
+}
+
+#successContainer button {
+  border-radius: 20px;
+  border: 1px solid #FF4B2B;
+  background-color: #FF4B2B;
+  color: #FFFFFF;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 12px 20px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: transform 80ms ease-in;
+}
+
+#successContainer button.ghost {
+  background-color: transparent;
+  border-color: #FFFFFF;
+}
+
+#successContainer button:active {
+  transform: scale(0.95);
+}
+
+#successContainer button:focus {
+  outline: none;
 }
 </style>
