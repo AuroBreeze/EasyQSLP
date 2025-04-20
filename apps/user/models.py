@@ -107,7 +107,7 @@ class User_Profile(models.Model):
     school = models.CharField(max_length=50,null=True,default='')
 
     last_login = models.DateTimeField(null=True)
-    user_id = models.ForeignKey('User_Login',on_delete=models.CASCADE,) #外键关联到User_Login表
+    user_id = models.ForeignKey('User_Login',on_delete=models.CASCADE,related_name='profile',default=0) #外键关联到User_Login表
 
     class Meta:
         db_table = 'user_profile'
