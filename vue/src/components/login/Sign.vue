@@ -2,7 +2,7 @@
   <div>
     <!-- 波浪背景容器 -->
     <!-- <div class="wave-background"></div> -->
-    <WaveBackground/>
+    <WaveBackground />
     <h2>欢迎来到EasyQFLP</h2>
     <!-- 显示欢迎标题 -->
     <div class="container" id="container">
@@ -119,180 +119,163 @@
   </div>
 </template>
 
-<script>
+<script lang="ts" setup>
 import { ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import WaveBackground from '@/components/background/wave_background.vue';
+import WaveBackground from '@/components/background/WaveBackground.vue';
 
-export default {
-  setup() {
-    const router = useRouter();
+const router = useRouter();
 
-    const signUpData = reactive({
-      name: '',
-      email: '',
-      code: '',
-      password: ''
-    });
+const signUpData = reactive({
+  name: '',
+  email: '',
+  code: '',
+  password: ''
+});
 
-    const signInData = reactive({
-      email: '',
-      password: ''
-    });
+const signInData = reactive({
+  email: '',
+  password: ''
+});
 
-    const isLoginSuccess = ref(false);
-    const countdown = ref(3);
+const isLoginSuccess = ref(false);
+const countdown = ref(3);
 
-    const togglePanel = (isRightPanelActive) => {
-      const container = document.getElementById('container');
-      if (isRightPanelActive) {
-        container.classList.add("right-panel-active");
-      } else {
-        container.classList.remove("right-panel-active");
-      }
-    };
-
-    const handleSignIn = async () => {
-      const { email, password } = signInData;
-      if (!email || !password) {
-        showError('邮箱和密码不能为空');
-        return;
-      }
-
-      try {
-        const response = await fetch('http://localhost:8000/api/v1/user/login/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify({
-            email: email,
-            password: password
-          })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-          isLoginSuccess.value = true;
-          localStorage.setItem('user_id', data.user_id);
-          startCountdown();
-        } else {
-          showError(data.message);
-        }
-      } catch (error) {
-        console.error('登录请求失败:', error);
-        showError('登录请求失败，请检查网络连接');
-      }
-    };
-
-    const handleSignUp = async () => {
-      const { name, email, code, password } = signUpData;
-      if (!name || !email || !code || !password) {
-        showError('请填写所有必填项');
-        return;
-      }
-
-      try {
-        const response = await fetch('http://localhost:8000/api/v1/user/register/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify({
-            email: email,
-            password: password,
-            username: name,
-            code: code,
-            usage: 'Register'
-          })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-          alert('注册成功，请登录');
-          location.reload();
-        } else {
-          showError(data.message);
-        }
-      } catch (error) {
-        console.error('注册请求失败:', error);
-        showError('注册请求失败，请检查网络连接');
-      }
-    };
-
-    const handleGetSignUpCode = async () => {
-      const { email } = signUpData;
-      if (!email) {
-        showError('请输入邮箱地址');
-        return;
-      }
-
-      try {
-        const response = await fetch('http://localhost:8000/api/v1/user/emailsendcode/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify({
-            email: email,
-            usage: 'Register'
-          })
-        });
-
-        const data = await response.json();
-        if (data.success) {
-          alert('验证码已发送到您的邮箱');
-        } else {
-          showError(data.message);
-        }
-      } catch (error) {
-        console.error('验证码请求失败:', error);
-        showError('验证码请求失败，请检查网络连接');
-      }
-    };
-
-    const handleForgotPassword = () => {
-      // 忘记密码逻辑
-    };
-
-    const showError = (message) => {
-      alert(message);
-    };
-
-    const startCountdown = () => {
-      const interval = setInterval(() => {
-        countdown.value--;
-        if (countdown.value <= 0) {
-          clearInterval(interval);
-          router.push('/start/');
-        }
-      }, 1000);
-    };
-
-    const goToSupport = () => {
-      router.push('/support');
-    };
-
-    return {
-      signUpData,
-      signInData,
-      isLoginSuccess,
-      countdown,
-      togglePanel,
-      handleSignIn,
-      handleSignUp,
-      handleGetSignUpCode,
-      handleForgotPassword,
-      showError,
-      startCountdown,
-      goToSupport
-    };
+const togglePanel = (isRightPanelActive:boolean) => {
+  const container = document.getElementById('container');
+  if (container) {
+  if (isRightPanelActive) {
+    container.classList.add("right-panel-active");
+  } else {
+    container.classList.remove("right-panel-active");
   }
+}
+};
+
+const handleSignIn = async () => {
+  const { email, password } = signInData;
+  if (!email || !password) {
+    showError('邮箱和密码不能为空');
+    return;
+  }
+
+  try {
+    const response = await fetch('http://localhost:8000/api/v1/user/login/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        email: email,
+        password: password
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      isLoginSuccess.value = true;
+      localStorage.setItem('user_id', data.user_id);
+      startCountdown();
+    } else {
+      showError(data.message);
+    }
+  } catch (error) {
+    console.error('登录请求失败:', error);
+    showError('登录请求失败，请检查网络连接');
+  }
+};
+
+const handleSignUp = async () => {
+  const { name, email, code, password } = signUpData;
+  if (!name || !email || !code || !password) {
+    showError('请填写所有必填项');
+    return;
+  }
+
+  try {
+    const response = await fetch('http://localhost:8000/api/v1/user/register/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        email: email,
+        password: password,
+        username: name,
+        code: code,
+        usage: 'Register'
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      alert('注册成功，请登录');
+      location.reload();
+    } else {
+      showError(data.message);
+    }
+  } catch (error) {
+    console.error('注册请求失败:', error);
+    showError('注册请求失败，请检查网络连接');
+  }
+};
+
+const handleGetSignUpCode = async () => {
+  const { email } = signUpData;
+  if (!email) {
+    showError('请输入邮箱地址');
+    return;
+  }
+
+  try {
+    const response = await fetch('http://localhost:8000/api/v1/user/emailsendcode/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        email: email,
+        usage: 'Register'
+      })
+    });
+
+    const data = await response.json();
+    if (data.success) {
+      alert('验证码已发送到您的邮箱');
+    } else {
+      showError(data.message);
+    }
+  } catch (error) {
+    console.error('验证码请求失败:', error);
+    showError('验证码请求失败，请检查网络连接');
+  }
+};
+
+const handleForgotPassword = () => {
+  // 忘记密码逻辑
+};
+
+const showError = (message:string) => {
+  alert(message);
+};
+
+const startCountdown = () => {
+  const interval = setInterval(() => {
+    countdown.value--;
+    if (countdown.value <= 0) {
+      clearInterval(interval);
+      router.push('/start/');
+    }
+  }, 1000);
+};
+
+const goToSupport = () => {
+  router.push('/support');
 };
 </script>
 
@@ -326,7 +309,7 @@ body {
     font-family: Arial, sans-serif;
 }
 
-/* .wave-background {
+.wave-background {
     position: absolute;
     top: 0;
     left: 0;
@@ -359,7 +342,7 @@ body {
     100% {
         transform: translateX(-50%);
     }
-} */
+} 
 
 /* 一级标题样式 */
 h1 {
