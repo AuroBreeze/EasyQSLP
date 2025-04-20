@@ -1,9 +1,9 @@
 <template>
-    <WaveBackground />
+  <Sign />
 </template>
 
 <script lang="ts" setup>
-import WaveBackground from "@/components/background/wave_background.vue"
+import Sign from "@/components/login/Sign.vue";
 </script>
 
 <style scoped></style>
