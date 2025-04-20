@@ -159,6 +159,19 @@ const handleSignIn = async () => {
     return;
   }
 
+  // 检查URL参数是否有mock=true
+  const urlParams = new URLSearchParams(window.location.search);
+  const mockMode = urlParams.get('mock') === 'true';
+
+  if (mockMode) {
+    // Mock模式 - 直接模拟成功登录
+    console.log('Running in mock mode - simulating successful login');
+    isLoginSuccess.value = true;
+    localStorage.setItem('user_id', 'mock-user-123');
+    startCountdown();
+    return;
+  }
+
   try {
     const response = await fetch('http://localhost:8000/api/v1/user/login/', {
       method: 'POST',
