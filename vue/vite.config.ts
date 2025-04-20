@@ -8,7 +8,7 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 // https://vite.dev/config/
 export default defineConfig({
   server: {
-    port: 8080 // 设置开发服务器端口为3000
+    port: 7856 // 设置开发服务器端口为3000
   },
   plugins: [
     vue(),
