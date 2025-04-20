@@ -1,4 +1,5 @@
 <template>
+  <div>
   <WaveBackground />
   <div class="content-wrapper">
     <h1 class="site-title">EasyQFLP</h1>
@@ -29,6 +30,7 @@
         <span class="btn-icon">→</span>
       </a>
     </div>
+  </div>
   </div>
 </template>
 
