@@ -1,4 +1,5 @@
 <template>
+  <div>
   <WaveBackground />
   <div class="content-wrapper">
     <h1 class="site-title">EasyQFLP</h1>
@@ -30,11 +31,12 @@
       </a>
     </div>
   </div>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
-import WaveBackground from '@/components/wave_background.vue'
+import WaveBackground from '@/components/background/wave_background.vue'
 </script>
 
 <style scoped>
