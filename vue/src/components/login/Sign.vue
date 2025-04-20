@@ -1,11 +1,10 @@
 <template>
-  <div>
+  <div class="page-container">
     <!-- 波浪背景容器 -->
-    <!-- <div class="wave-background"></div> -->
     <WaveBackground />
-    <h2>欢迎来到EasyQFLP</h2>
-    <!-- 显示欢迎标题 -->
-    <div class="container" id="container">
+    <div class="content-wrapper">
+      <h2>欢迎来到EasyQFLP</h2>
+      <div class="container" id="container">
       <!-- 容器，包含注册和登录表单及切换面板 -->
       <!-- 注册表单部分 -->
       <div class="form-container sign-up-container">
@@ -95,8 +94,8 @@
       </div>
     </div>
 
-    <!-- 登录成功后的界面 -->
-    <div class="container" id="successContainer" v-if="isLoginSuccess">
+      <!-- 登录成功后的界面 -->
+      <div class="container" id="successContainer" v-if="isLoginSuccess">
       <div class="form-container">
         <form>
           <h1>登录成功🎉</h1>
@@ -114,6 +113,7 @@
             <button class="ghost" id="goToSupport" @click="goToSupport">联系支持</button>
           </div>
         </div>
+      </div>
       </div>
     </div>
   </div>
@@ -280,6 +280,30 @@ const goToSupport = () => {
 </script>
 
 <style scoped>
+/* 页面容器样式 */
+.page-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+/* 内容包装器样式 */
+.content-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 800px;
+  padding: 20px;
+}
+
 /* 引入外部字体 */
 @import url('https://fonts.googleapis.com/css?family=Montserrat:400,800');
 
@@ -303,46 +327,34 @@ body {
     /* 设置高度为视口高度 */
     height: 100vh;
     /* 设置上下外边距 */
-    margin: -20px 0 50px;
+    margin: 0; /* 去除默认的 margin */
     /* 防止滚动条出现 */
-    overflow: hidden; /* 防止滚动条出现 */
+    overflow: hidden;
     font-family: Arial, sans-serif;
 }
 
-.wave-background {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-    --animation-duration: 10s;
-    --animation-direction: -1;
-    background: linear-gradient(to right, #FF4B2B, #FF416C);
+/* 容器样式 */
+.container {
+    /* 设置背景颜色 */
+    background-color: #fff;
+    /* 设置圆角 */
+    border-radius: 10px;
+    /* 设置阴影 */
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25),
+        0 10px 10px rgba(0, 0, 0, 0.22);
+    /* 设置定位方式为相对定位 */
+    position: relative;
+    /* 隐藏溢出内容 */
     overflow: hidden;
+    /* 设置宽度 */
+    width: 768px;
+    /* 设置最大宽度 */
+    max-width: 100%;
+    /* 设置最小高度 */
+    min-height: 480px;
+    /* 居中显示 */
+    margin: 20px 0;
 }
-
-.wave-background::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 200%;
-    height: 100%;
-    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(255, 255, 255, 0.2)" fill-opacity="1" d="M0,256L48,261.3C96,267,192,277,288,256C384,235,480,181,576,181.3C672,181,768,235,864,250.7C960,267,1056,245,1152,213.3C1248,181,1344,139,1392,117.3L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
-    background-repeat: repeat-x;
-    background-size: 50% 100%;
-    animation: wave var(--animation-duration) linear infinite;
-}
-
-@keyframes wave {
-    0% {
-        transform: translateX(0);
-    }
-    100% {
-        transform: translateX(-50%);
-    }
-} 
 
 /* 一级标题样式 */
 h1 {
@@ -482,29 +494,6 @@ input {
     margin: 8px 0;
     /* 设置宽度为 100% */
     width: 100%;
-}
-
-/* 容器样式 */
-.container {
-    /* 设置背景颜色 */
-    background-color: #fff;
-    /* 设置圆角 */
-    border-radius: 10px;
-    /* 设置阴影 */
-    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25),
-        0 10px 10px rgba(0, 0, 0, 0.22);
-    /* 设置定位方式为相对定位 */
-    position: relative;
-    /* 隐藏溢出内容 */
-    overflow: hidden;
-    /* 设置宽度 */
-    width: 768px;
-    /* 设置最大宽度 */
-    max-width: 100%;
-    /* 设置最小高度 */
-    min-height: 480px;
-
-    
 }
 
 /* 表单容器样式 */
@@ -863,6 +852,7 @@ input {
     max-width: 100%;
     position: relative;
     overflow: hidden;
+    margin: 0 auto; /* 添加自动居中 */
 }
 
 #successContainer .form-container {
