@@ -3,10 +3,10 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from ..models import *
-from ..task import send_email_task
+from ..task import send_email_task # 导入发送邮件的任务，异步
 
 from .serializers import *
-from django_ratelimit.decorators import ratelimit
+from django_ratelimit.decorators import ratelimit # 导入限流装饰器
 import random
 from django.utils import timezone
 # Create your views here.

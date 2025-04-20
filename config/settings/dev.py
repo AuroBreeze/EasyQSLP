@@ -10,22 +10,22 @@ CORS_ALLOW_METHODS = [
 ]
 
 # 数据库配置
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'test',  # 确保路径正确
-        'USER': 'postgres',
-        'PASSWORD': 'AuroBreeze',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'test',  # 确保路径正确
+#         'USER': 'postgres',
+#         'PASSWORD': 'AuroBreeze',
+#         'HOST': 'localhost',
+#         'PORT': '5432',
+#     }
+# }
 
 # 安装的应用
 INSTALLED_APPS_DEV = [
