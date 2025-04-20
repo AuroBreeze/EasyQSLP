@@ -96,9 +96,19 @@ class Email_Verify_Code(models.Model):
 
     
 class User_Profile(models.Model):
-    profile_text = models.TextField(max_length=500,default='')
-    
-    #user = models.ForeignKey('User_Login',on_delete=models.CASCADE) #外键关联到User_Login表
+    #自我介绍
+    introduction = models.TextField(max_length=60,null=True,default='')
+    avater = models.ImageField(upload_to='avater/',null=True,default='avater/default.png')
+    #性别
+    sex = models.CharField(max_length=10,null=True,default='')
+    #生日
+    birthday = models.DateField(null=True)
+    #学校
+    school = models.CharField(max_length=50,null=True,default='')
+
+    last_login = models.DateTimeField(null=True)
+
+    user_login = models.ForeignKey('User_Login',on_delete=models.CASCADE,) #外键关联到User_Login表
 
 class Article(models.Model): #一对多关系
     title = models.CharField(max_length=100)
