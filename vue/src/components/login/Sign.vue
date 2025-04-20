@@ -1,7 +1,8 @@
 <template>
   <div>
     <!-- 波浪背景容器 -->
-    <div class="wave-background"></div>
+    <!-- <div class="wave-background"></div> -->
+    <WaveBackground/>
     <h2>欢迎来到EasyQFLP</h2>
     <!-- 显示欢迎标题 -->
     <div class="container" id="container">
@@ -119,36 +120,42 @@
 </template>
 
 <script>
+import { ref, reactive, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import WaveBackground from '@/components/background/wave_background.vue';
+
 export default {
-  data() {
-    return {
-      signUpData: {
-        name: '',
-        email: '',
-        code: '',
-        password: ''
-      },
-      signInData: {
-        email: '',
-        password: ''
-      },
-      isLoginSuccess: false,
-      countdown: 3
-    };
-  },
-  methods: {
-    togglePanel(isRightPanelActive) {
+  setup() {
+    const router = useRouter();
+
+    const signUpData = reactive({
+      name: '',
+      email: '',
+      code: '',
+      password: ''
+    });
+
+    const signInData = reactive({
+      email: '',
+      password: ''
+    });
+
+    const isLoginSuccess = ref(false);
+    const countdown = ref(3);
+
+    const togglePanel = (isRightPanelActive) => {
       const container = document.getElementById('container');
       if (isRightPanelActive) {
         container.classList.add("right-panel-active");
       } else {
         container.classList.remove("right-panel-active");
       }
-    },
-    async handleSignIn() {
-      const { email, password } = this.signInData;
+    };
+
+    const handleSignIn = async () => {
+      const { email, password } = signInData;
       if (!email || !password) {
-        this.showError('邮箱和密码不能为空');
+        showError('邮箱和密码不能为空');
         return;
       }
 
@@ -168,21 +175,22 @@ export default {
         const data = await response.json();
         
         if (data.success) {
-          this.isLoginSuccess = true;
+          isLoginSuccess.value = true;
           localStorage.setItem('user_id', data.user_id);
-          this.startCountdown();
+          startCountdown();
         } else {
-          this.showError(data.message);
+          showError(data.message);
         }
       } catch (error) {
         console.error('登录请求失败:', error);
-        this.showError('登录请求失败，请检查网络连接');
+        showError('登录请求失败，请检查网络连接');
       }
-    },
-    async handleSignUp() {
-      const { name, email, code, password } = this.signUpData;
+    };
+
+    const handleSignUp = async () => {
+      const { name, email, code, password } = signUpData;
       if (!name || !email || !code || !password) {
-        this.showError('请填写所有必填项');
+        showError('请填写所有必填项');
         return;
       }
 
@@ -208,17 +216,18 @@ export default {
           alert('注册成功，请登录');
           location.reload();
         } else {
-          this.showError(data.message);
+          showError(data.message);
         }
       } catch (error) {
         console.error('注册请求失败:', error);
-        this.showError('注册请求失败，请检查网络连接');
+        showError('注册请求失败，请检查网络连接');
       }
-    },
-    async handleGetSignUpCode() {
-      const { email } = this.signUpData;
+    };
+
+    const handleGetSignUpCode = async () => {
+      const { email } = signUpData;
       if (!email) {
-        this.showError('请输入邮箱地址');
+        showError('请输入邮箱地址');
         return;
       }
 
@@ -239,31 +248,50 @@ export default {
         if (data.success) {
           alert('验证码已发送到您的邮箱');
         } else {
-          this.showError(data.message);
+          showError(data.message);
         }
       } catch (error) {
         console.error('验证码请求失败:', error);
-        this.showError('验证码请求失败，请检查网络连接');
+        showError('验证码请求失败，请检查网络连接');
       }
-    },
-    handleForgotPassword() {
+    };
+
+    const handleForgotPassword = () => {
       // 忘记密码逻辑
-    },
-    showError(message) {
+    };
+
+    const showError = (message) => {
       alert(message);
-    },
-    startCountdown() {
+    };
+
+    const startCountdown = () => {
       const interval = setInterval(() => {
-        this.countdown--;
-        if (this.countdown <= 0) {
+        countdown.value--;
+        if (countdown.value <= 0) {
           clearInterval(interval);
-          this.$router.push('/start/');
+          router.push('/start/');
         }
       }, 1000);
-    },
-    goToSupport() {
-      this.$router.push('/support');
-    }
+    };
+
+    const goToSupport = () => {
+      router.push('/support');
+    };
+
+    return {
+      signUpData,
+      signInData,
+      isLoginSuccess,
+      countdown,
+      togglePanel,
+      handleSignIn,
+      handleSignUp,
+      handleGetSignUpCode,
+      handleForgotPassword,
+      showError,
+      startCountdown,
+      goToSupport
+    };
   }
 };
 </script>
@@ -298,7 +326,7 @@ body {
     font-family: Arial, sans-serif;
 }
 
-.wave-background {
+/* .wave-background {
     position: absolute;
     top: 0;
     left: 0;
@@ -331,7 +359,7 @@ body {
     100% {
         transform: translateX(-50%);
     }
-}
+} */
 
 /* 一级标题样式 */
 h1 {
