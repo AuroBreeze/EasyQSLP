@@ -109,6 +109,13 @@ class User_Profile(models.Model):
     last_login = models.DateTimeField(null=True)
     user_id = models.ForeignKey('User_Login',on_delete=models.CASCADE,) #外键关联到User_Login表
 
+    class Meta:
+        db_table = 'user_profile'
+        verbose_name = '用户信息'
+        verbose_name_plural = '用户信息'
+    def __str__(self):
+        return f"{self.user_id.username} - {self.introduction}"
+
 class Article(models.Model): #一对多关系
     title = models.CharField(max_length=100)
     content = models.TextField(max_length=1000)
