@@ -1,19 +1,25 @@
 <template>
-
   <div class="wave-background"></div>
     <div class="content-wrapper">
       <h1 class="site-title">EasyQFLP</h1>
+    </div>
+    <div class="main-content-wrapper">
       <div class="main-content">
-        <h2 class="quick-start-title">快速开始</h2>
         <div class="action-buttons">
-          <RouterLink to="/login" class="action-btn login-btn">
-            <span class="btn-text">登录</span>
+          <a href="index.html" class="action-btn quick-start-btn">
+            <span class="btn-text">快速开始</span>
             <span class="btn-icon">→</span>
-          </RouterLink>
-          <RouterLink to="/register" class="action-btn register-btn">
-            <span class="btn-text">注册</span>
-            <span class="btn-icon">→</span>
-          </RouterLink>
+          </a>
+          <div class="sub-buttons">
+            <RouterLink to="/login" class="action-btn login-btn">
+              <span class="btn-text">登录</span>
+              <span class="btn-icon">→</span>
+            </RouterLink>
+            <RouterLink to="/register" class="action-btn register-btn">
+              <span class="btn-text">注册</span>
+              <span class="btn-icon">→</span>
+            </RouterLink>
+          </div>
         </div>
       </div>
   </div>
@@ -76,7 +82,17 @@ import { RouterLink } from 'vue-router'
 }
 
 .content-wrapper {
-  text-align: center;
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 1;
+}
+
+.main-content-wrapper {
+  position: absolute;
+  top: 50%;
+  right: 20px;
+  transform: translateY(-50%);
   z-index: 1;
 }
 
@@ -86,26 +102,36 @@ import { RouterLink } from 'vue-router'
   font-weight: 700;
   text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   letter-spacing: 1px;
-  margin-bottom: 20px;
+  margin-bottom: 0;
 }
 
 .main-content {
   text-align: center;
 }
 
-.quick-start-title {
+.quick-start-btn {
+  background-color: #1e3c72;
   color: white;
-  font-size: 2.5rem;
-  margin-bottom: 40px;
-  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  font-weight: 700;
-  letter-spacing: 1px;
+  border: none;
+  box-shadow: 0 4px 15px rgba(30, 60, 114, 0.3);
+  margin-bottom: 20px;
 }
 
-.action-buttons {
+.quick-start-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(30, 60, 114, 0.4);
+}
+
+.sub-buttons {
   display: flex;
-  flex-direction: column;
   gap: 20px;
+  justify-content: center;
+}
+
+.login-btn, .register-btn {
+  padding: 10px 30px;
+  font-size: 0.9rem;
+  min-width: 120px;
 }
 
 .action-btn {
@@ -159,5 +185,36 @@ import { RouterLink } from 'vue-router'
 .action-btn:hover .btn-icon {
   opacity: 1;
   transform: translateX(0);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .content-wrapper {
+    top: 10px;
+    left: 10px;
+  }
+
+  .main-content-wrapper {
+    right: 10px;
+  }
+
+  .site-title {
+    font-size: 2rem;
+  }
+
+  .quick-start-title {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+
+  .action-buttons {
+    gap: 10px;
+  }
+
+  .action-btn {
+    padding: 10px 30px;
+    font-size: 1rem;
+    min-width: 150px;
+  }
 }
 </style>
