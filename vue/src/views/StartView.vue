@@ -10,16 +10,6 @@
             <span class="btn-text">快速开始</span>
             <span class="btn-icon">→</span>
           </a>
-          <div class="sub-buttons">
-            <RouterLink to="/login" class="action-btn login-btn">
-              <span class="btn-text">登录</span>
-              <span class="btn-icon">→</span>
-            </RouterLink>
-            <RouterLink to="/register" class="action-btn register-btn">
-              <span class="btn-text">注册</span>
-              <span class="btn-icon">→</span>
-            </RouterLink>
-          </div>
         </div>
       </div>
   </div>
@@ -32,19 +22,6 @@ import { RouterLink } from 'vue-router'
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
 
-/* .start-page {
-  position: relative;
-  height: 100vh;
-  width: 100vw;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  font-family: 'Montserrat', sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-sizing: border-box;
-} */
 
 .wave-background {
   position: absolute;
@@ -115,6 +92,9 @@ import { RouterLink } from 'vue-router'
   border: none;
   box-shadow: 0 4px 15px rgba(30, 60, 114, 0.3);
   margin-bottom: 20px;
+  padding: 10px 30px;
+  font-size: 1rem;
+  min-width: 150px;
 }
 
 .quick-start-btn:hover {
@@ -126,12 +106,6 @@ import { RouterLink } from 'vue-router'
   display: flex;
   gap: 20px;
   justify-content: center;
-}
-
-.login-btn, .register-btn {
-  padding: 10px 30px;
-  font-size: 0.9rem;
-  min-width: 120px;
 }
 
 .action-btn {
@@ -149,31 +123,6 @@ import { RouterLink } from 'vue-router'
   justify-content: space-between;
   min-width: 200px;
   cursor: pointer;
-}
-
-.login-btn {
-  background-color: white;
-  color: #FF4B2B;
-  border: none;
-  box-shadow: 0 4px 15px rgba(255, 75, 43, 0.3);
-}
-
-.login-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(255, 75, 43, 0.4);
-}
-
-.register-btn {
-  background-color: rgba(255, 255, 255, 0.15);
-  color: white;
-  border: 2px solid rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(5px);
-}
-
-.register-btn:hover {
-  background-color: rgba(255, 255, 255, 0.25);
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(255, 255, 255, 0.2);
 }
 
 .btn-icon {
