@@ -28,7 +28,7 @@ import WaveBackground from '@/components/wave_background.vue'
 
 .content-wrapper {
   position: absolute;
-  top: 20%;
+  top: 10%;
   left: 50%;
   transform: translateX(-50%);
   z-index: 1;
@@ -64,7 +64,7 @@ import WaveBackground from '@/components/wave_background.vue'
 
 .site-title {
   color: white;
-  font-size: 3rem;
+  font-size: 4rem;
   font-weight: 700;
   text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   letter-spacing: 1px;
@@ -110,6 +110,7 @@ import WaveBackground from '@/components/wave_background.vue'
   display: flex;
   gap: 20px;
   justify-content: center;
+  margin-top: 30px; /* 新增：增加上边距，避免悬停时与简介接触 */
 }
 
 .action-btn {
