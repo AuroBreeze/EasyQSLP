@@ -69,7 +69,12 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             username=validated_data['username'],
             is_active=True,
             )
-        user.save()
+        user.save() # 创建用户
+
+        user_profile = User_Profile.objects.create(
+            user_id=user.id,
+        )
+        user_profile.save() # 创建用户资料
         return user
 
     class Meta:
