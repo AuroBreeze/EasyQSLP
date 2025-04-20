@@ -107,8 +107,7 @@ class User_Profile(models.Model):
     school = models.CharField(max_length=50,null=True,default='')
 
     last_login = models.DateTimeField(null=True)
-
-    user_login = models.ForeignKey('User_Login',on_delete=models.CASCADE,) #外键关联到User_Login表
+    user_id = models.ForeignKey('User_Login',on_delete=models.CASCADE,) #外键关联到User_Login表
 
 class Article(models.Model): #一对多关系
     title = models.CharField(max_length=100)
