@@ -5,6 +5,20 @@
     <p class="site-description">
       EasyQFLP 是一个基于项目的知识分享型网站，致力于打破信息差，提供更多的其他领域的<strong>从零开始</strong>的学习项目，让更多的人可以接触到更多的知识，以便寻找到属于自己的方向。🌍
     </p>
+    <div class="info-boxes">
+      <div class="info-box">
+        <h2 class="info-box-title">基于项目</h2>
+        <p class="info-box-content">通过实际项目学习，快速掌握技能。</p>
+      </div>
+      <div class="info-box">
+        <h2 class="info-box-title">新手友好</h2>
+        <p class="info-box-content">从零开始，适合所有水平的学习者。</p>
+      </div>
+      <div class="info-box">
+        <h2 class="info-box-title">打破信息差</h2>
+        <p class="info-box-content">提供全面的知识，消除信息不对称。</p>
+      </div>
+    </div>
     <div class="action-buttons">
       <a href="index.html" class="action-btn quick-start-btn">
         <span class="btn-text">快速开始</span>
@@ -63,6 +77,37 @@ import WaveBackground from '@/components/wave_background.vue'
   margin-bottom: 0;
 }
 
+.info-boxes {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.info-box {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 20px;
+  text-align: center;
+  flex: 1;
+}
+
+.info-box-title {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.info-box-content {
+  color: white;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
 .quick-start-btn {
   background-color: white;
   color: #FF416C;
@@ -98,7 +143,7 @@ import WaveBackground from '@/components/wave_background.vue'
   display: flex;
   gap: 20px;
   justify-content: center;
-  margin-top: 30px; /* 新增：增加上边距，避免悬停时与简介接触 */
+  margin-top: 30px;
 }
 
 .action-btn {
@@ -157,6 +202,15 @@ import WaveBackground from '@/components/wave_background.vue'
     padding: 10px 30px;
     font-size: 1rem;
     min-width: 150px;
+  }
+
+  .info-boxes {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .info-box {
+    width: 100%;
   }
 }
 </style>
