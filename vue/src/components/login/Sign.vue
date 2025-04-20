@@ -305,7 +305,7 @@ const goToSupport = () => {
 }
 
 /* 引入外部字体 */
-@import url('https://fonts.googleapis.com/css?family=Montserrat:400,800');
+/* @import url('https://fonts.googleapis.com/css?family=Montserrat:400,800'); */
 
 /* 全局设置，将所有元素的盒模型设置为 border-box */
 * {
