@@ -356,6 +356,14 @@ h1 {
 h2 {
     /* 文本居中 */
     text-align: center;
+    /* 设置字体大小 */
+    font-size: 30px;
+    /* 设置字体颜色 */
+    color: #333;
+    /* 设置字体粗细 */
+    font-weight: 700;
+    /* 设置字体样式 */
+    font-style: italic;
 }
 
 /* 段落样式 */
@@ -495,6 +503,8 @@ input {
     max-width: 100%;
     /* 设置最小高度 */
     min-height: 480px;
+
+    
 }
 
 /* 表单容器样式 */
