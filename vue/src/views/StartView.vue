@@ -2,6 +2,9 @@
   <WaveBackground />
   <div class="content-wrapper">
     <h1 class="site-title">EasyQFLP</h1>
+    <p class="site-description">
+      EasyQFLP 是一个基于项目的知识分享型网站，致力于打破信息差，提供更多的其他领域的<strong>从零开始</strong>的学习项目，让更多的人可以接触到更多的知识，以便寻找到属于自己的方向。🌍
+    </p>
   </div>
   <div class="main-content-wrapper">
     <div class="main-content">
@@ -23,12 +26,30 @@ import WaveBackground from '@/components/wave_background.vue'
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
 
-
 .content-wrapper {
   position: absolute;
   top: 20px;
   left: 20px;
   z-index: 1;
+  max-width: 600px;
+}
+
+.site-description {
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 400;
+  line-height: 1.6;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  margin-top: 20px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.site-description strong {
+  font-weight: 600;
 }
 
 .main-content-wrapper {
