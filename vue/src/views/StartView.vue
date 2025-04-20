@@ -5,19 +5,15 @@
     <p class="site-description">
       EasyQFLP 是一个基于项目的知识分享型网站，致力于打破信息差，提供更多的其他领域的<strong>从零开始</strong>的学习项目，让更多的人可以接触到更多的知识，以便寻找到属于自己的方向。🌍
     </p>
-  </div>
-  <div class="main-content-wrapper">
-    <div class="main-content">
-      <div class="action-buttons">
-        <a href="index.html" class="action-btn quick-start-btn">
-          <span class="btn-text">快速开始</span>
-          <span class="btn-icon">→</span>
-        </a>
-        <a href="#" class="action-btn explore-btn">
-          <span class="btn-text">探索更多</span>
-          <span class="btn-icon">→</span>
-        </a>
-      </div>
+    <div class="action-buttons">
+      <a href="index.html" class="action-btn quick-start-btn">
+        <span class="btn-text">快速开始</span>
+        <span class="btn-icon">→</span>
+      </a>
+      <a href="#" class="action-btn explore-btn">
+        <span class="btn-text">探索更多</span>
+        <span class="btn-icon">→</span>
+      </a>
     </div>
   </div>
 </template>
@@ -110,7 +106,7 @@ import WaveBackground from '@/components/wave_background.vue'
   box-shadow: 0 8px 25px rgba(255, 75, 43, 0.4);
 }
 
-.sub-buttons {
+.action-buttons {
   display: flex;
   gap: 20px;
   justify-content: center;
