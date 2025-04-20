@@ -10,3 +10,4 @@ celery # asynchronous task support
 redis # Redis database driver
 toml # configuration file support
 django-redis # Redis cache support
+Pillow # image processing support
