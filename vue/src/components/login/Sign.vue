@@ -95,22 +95,13 @@
     </div>
 
       <!-- 登录成功后的界面 -->
-      <div class="container" id="successContainer" v-if="isLoginSuccess">
-        <div class="form-container">
-          <form>
+      <div v-if="isLoginSuccess" class="success-page">
+        <div class="success-container">
+          <div class="success-content">
             <h1>登录成功🎉</h1>
             <p>您已成功登录，欢迎回来！</p>
-            <p>页面将在 <span id="countdown">{{ countdown }}</span> 秒后自动跳转...</p>
-          </form>
-        </div>
-        <div class="overlay-container">
-          <div class="overlay">
-            <div class="overlay-panel overlay-right">
-              <h1>欢迎回来！😊</h1>
-              <p>您已成功登录，可以开始使用我们的服务了。</p>
-              <p>如果您有任何问题，请随时联系我们的支持团队。</p>
-              <button class="ghost" id="goToSupport" @click="goToSupport">联系支持</button>
-            </div>
+            <p>页面将在 <span class="countdown">{{ countdown }}</span> 秒后自动跳转...</p>
+            <button class="success-button" @click="goToSupport">联系支持</button>
           </div>
         </div>
       </div>
@@ -851,121 +842,58 @@ input {
     box-sizing: border-box;
 }
 
-#successContainer {
-  background-color: #fff;
-  border-radius: 10px;
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
-  position: relative;
-  overflow: hidden;
-  width: 768px;
-  max-width: 100%;
-  min-height: 480px;
-  margin: 20px auto;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-#successContainer .form-container {
-  position: relative;
-  height: 100%;
-  width: 100%;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  padding: 0 50px;
-  text-align: center;
-}
-
-#successContainer .overlay-container {
-  position: absolute;
+.success-page {
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  overflow: hidden;
-  transition: transform 0.6s ease-in-out;
-  z-index: 100;
-}
-
-#successContainer .overlay {
-  background: linear-gradient(to right, #FF4B2B, #FF416C);
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: 0 0;
-  color: #FFFFFF;
-  position: relative;
-  height: 100%;
-  width: 100%;
-  transform: translateX(0);
-  transition: transform 0.6s ease-in-out;
-}
-
-#successContainer .overlay-panel {
-  position: absolute;
   display: flex;
-  align-items: center;
   justify-content: center;
-  flex-direction: column;
-  padding: 0 40px;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.success-container {
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+  width: 500px;
+  max-width: 90%;
+  padding: 40px;
   text-align: center;
-  top: 0;
-  height: 100%;
-  width: 100%;
-  transform: translateX(0);
-  transition: transform 0.6s ease-in-out;
 }
 
-#successContainer .overlay-right {
-  right: 0;
-  transform: translateX(0);
+.success-content h1 {
+  color: #FF4B2B;
+  margin-bottom: 20px;
 }
 
-#successContainer h1 {
-  font-weight: bold;
-  margin: 0;
+.success-content p {
+  margin: 10px 0;
   color: #333;
 }
 
-#successContainer p {
-  font-size: 14px;
-  font-weight: 100;
-  line-height: 20px;
-  letter-spacing: 0.5px;
-  margin: 20px 0 30px;
-  color: #333;
-}
-
-#successContainer #countdown {
+.countdown {
   color: #FF4B2B;
   font-weight: bold;
 }
 
-#successContainer button {
-  border-radius: 20px;
-  border: 1px solid #FF4B2B;
+.success-button {
+  margin-top: 20px;
   background-color: #FF4B2B;
-  color: #FFFFFF;
-  font-size: 12px;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 20px;
+  cursor: pointer;
   font-weight: bold;
-  padding: 12px 20px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  transition: transform 80ms ease-in;
+  transition: all 0.3s ease;
 }
 
-#successContainer button.ghost {
-  background-color: transparent;
-  border-color: #FFFFFF;
-}
-
-#successContainer button:active {
-  transform: scale(0.95);
-}
-
-#successContainer button:focus {
-  outline: none;
+.success-button:hover {
+  background-color: #ff5e3a;
+  transform: scale(1.05);
 }
 </style>
