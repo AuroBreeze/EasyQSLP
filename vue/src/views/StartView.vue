@@ -34,7 +34,7 @@
 
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
-import WaveBackground from '@/components/wave_background.vue'
+import WaveBackground from '@/components/background/wave_background.vue'
 </script>
 
 <style scoped>
