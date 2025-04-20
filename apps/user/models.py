@@ -39,7 +39,7 @@ class EmailCodeSendManager(models.Manager):
     def create(self,email):
         if not email:
             raise ValueError({"email":"邮箱不能为空"})
-        code = "".join(random.choice('0123456789'),k=6)
+        code = "".join(random.choices('0123456789', k=6))
         send_time = timezone.now()
         expire_time = send_time + timezone.timedelta(minutes=5)
         usage = "Register"
@@ -146,5 +146,3 @@ class Comment(models.Model):
     
     # 二级评论 外键关联到Comment表
     original_comment = models.ForeignKey('self',on_delete=models.CASCADE,null=True)
-    
-    
