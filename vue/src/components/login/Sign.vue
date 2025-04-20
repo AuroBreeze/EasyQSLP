@@ -851,49 +851,142 @@ input {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.7);
   z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
 }
 
 .success-container {
-  background-color: #fff;
-  border-radius: 10px;
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+  background: linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%);
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
   width: 500px;
   max-width: 90%;
-  padding: 40px;
+  padding: 50px;
   text-align: center;
+  position: relative;
+  overflow: hidden;
+  animation: slideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.success-container::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,75,43,0.1) 0%, rgba(255,75,43,0) 70%);
+  z-index: -1;
 }
 
 .success-content h1 {
   color: #FF4B2B;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
+  font-size: 2.2rem;
+  font-weight: 700;
+  position: relative;
+  display: inline-block;
+}
+
+.success-content h1::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(to right, #FF4B2B, #FF416C);
+  border-radius: 3px;
 }
 
 .success-content p {
-  margin: 10px 0;
-  color: #333;
+  margin: 15px 0;
+  color: #555;
+  font-size: 1.1rem;
+  line-height: 1.6;
 }
 
 .countdown {
   color: #FF4B2B;
   font-weight: bold;
+  font-size: 1.3rem;
+  display: inline-block;
+  min-width: 30px;
 }
 
 .success-button {
-  margin-top: 20px;
-  background-color: #FF4B2B;
+  margin-top: 30px;
+  background: linear-gradient(to right, #FF4B2B, #FF416C);
   color: white;
   border: none;
-  padding: 12px 30px;
-  border-radius: 20px;
+  padding: 15px 40px;
+  border-radius: 30px;
   cursor: pointer;
   font-weight: bold;
+  font-size: 1rem;
   transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(255, 75, 43, 0.4);
+  position: relative;
+  overflow: hidden;
 }
 
 .success-button:hover {
-  background-color: #ff5e3a;
-  transform: scale(1.05);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(255, 75, 43, 0.6);
+}
+
+.success-button:active {
+  transform: translateY(1px);
+}
+
+.success-button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%);
+  transform-origin: 50% 50%;
+}
+
+.success-button:focus:not(:active)::after {
+  animation: ripple 1s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to { 
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0, 0);
+    opacity: 1;
+  }
+  20% {
+    transform: scale(25, 25);
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(40, 40);
+  }
 }
 </style>
