@@ -13,6 +13,10 @@
           <span class="btn-text">快速开始</span>
           <span class="btn-icon">→</span>
         </a>
+        <a href="#" class="action-btn explore-btn">
+          <span class="btn-text">探索更多</span>
+          <span class="btn-icon">→</span>
+        </a>
       </div>
     </div>
   </div>
@@ -28,10 +32,12 @@ import WaveBackground from '@/components/wave_background.vue'
 
 .content-wrapper {
   position: absolute;
-  top: 20px;
-  left: 20px;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 1;
   max-width: 600px;
+  text-align: center;
 }
 
 .site-description {
@@ -86,8 +92,20 @@ import WaveBackground from '@/components/wave_background.vue'
   transition: all 0.3s ease;
 }
 
-.quick-start-btn:hover {
-  background-color: white; /* 保持背景颜色不变 */
+.explore-btn {
+  background-color: #FF416C;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  box-shadow: 0 4px 15px rgba(255, 65, 108, 0.3);
+  margin-bottom: 20px;
+  padding: 10px 30px;
+  font-size: 1rem;
+  min-width: 150px;
+  transition: all 0.3s ease;
+}
+
+.quick-start-btn:hover, .explore-btn:hover {
   transform: translateY(-3px);
   box-shadow: 0 8px 25px rgba(255, 75, 43, 0.4);
 }
