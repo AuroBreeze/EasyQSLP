@@ -54,14 +54,6 @@ import WaveBackground from '@/components/wave_background.vue'
   font-weight: 600;
 }
 
-.main-content-wrapper {
-  position: absolute;
-  top: 50%;
-  right: 20px;
-  transform: translateY(-50%);
-  z-index: 1;
-}
-
 .site-title {
   color: white;
   font-size: 4rem;
@@ -69,10 +61,6 @@ import WaveBackground from '@/components/wave_background.vue'
   text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   letter-spacing: 1px;
   margin-bottom: 0;
-}
-
-.main-content {
-  text-align: center;
 }
 
 .quick-start-btn {
