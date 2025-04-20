@@ -860,14 +860,16 @@ input {
   width: 768px;
   max-width: 100%;
   min-height: 480px;
-  margin: 20px 0;
+  margin: 20px auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 #successContainer .form-container {
-  position: absolute;
-  top: 0;
+  position: relative;
   height: 100%;
-  width: 50%;
+  width: 100%;
   z-index: 2;
   display: flex;
   align-items: center;
@@ -880,8 +882,8 @@ input {
 #successContainer .overlay-container {
   position: absolute;
   top: 0;
-  left: 50%;
-  width: 50%;
+  left: 0;
+  width: 100%;
   height: 100%;
   overflow: hidden;
   transition: transform 0.6s ease-in-out;
@@ -895,9 +897,8 @@ input {
   background-position: 0 0;
   color: #FFFFFF;
   position: relative;
-  left: -100%;
   height: 100%;
-  width: 200%;
+  width: 100%;
   transform: translateX(0);
   transition: transform 0.6s ease-in-out;
 }
@@ -912,7 +913,7 @@ input {
   text-align: center;
   top: 0;
   height: 100%;
-  width: 50%;
+  width: 100%;
   transform: translateX(0);
   transition: transform 0.6s ease-in-out;
 }
