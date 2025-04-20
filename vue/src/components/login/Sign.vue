@@ -95,25 +95,15 @@
     </div>
 
       <!-- 登录成功后的界面 -->
-      <div class="container" id="successContainer" v-if="isLoginSuccess">
-      <div class="form-container">
-        <form>
-          <h1>登录成功🎉</h1>
-          <p>您已成功登录，欢迎回来！</p>
-          <p>页面将在 <span id="countdown">{{ countdown }}</span> 秒后自动跳转...</p>
-        </form>
-      </div>
-      <!-- 新增右边框内容 -->
-      <div class="overlay-container">
-        <div class="overlay">
-          <div class="overlay-panel overlay-right">
-            <h1><strong>欢迎回来！😊</strong></h1>
-            <p>您已成功登录，可以开始使用我们的服务了。</p>
-            <p>如果您有任何问题，请随时联系我们的支持团队。</p>
-            <button class="ghost" id="goToSupport" @click="goToSupport">联系支持</button>
+      <div v-if="isLoginSuccess" class="success-page">
+        <div class="success-container">
+          <div class="success-content">
+            <h1>登录成功🎉</h1>
+            <p>您已成功登录，欢迎回来！</p>
+            <p>页面将在 <span class="countdown">{{ countdown }}</span> 秒后自动跳转...</p>
+            <button class="success-button" @click="goToSupport">联系支持</button>
           </div>
         </div>
-      </div>
       </div>
     </div>
   </div>
@@ -156,6 +146,19 @@ const handleSignIn = async () => {
   const { email, password } = signInData;
   if (!email || !password) {
     showError('邮箱和密码不能为空');
+    return;
+  }
+
+  // 检查URL参数是否有mock=true
+  const urlParams = new URLSearchParams(window.location.search);
+  const mockMode = urlParams.get('mock') === 'true';
+
+  if (mockMode) {
+    // Mock模式 - 直接模拟成功登录
+    console.log('Running in mock mode - simulating successful login');
+    isLoginSuccess.value = true;
+    localStorage.setItem('user_id', 'mock-user-123');
+    startCountdown();
     return;
   }
 
@@ -305,7 +308,7 @@ const goToSupport = () => {
 }
 
 /* 引入外部字体 */
-@import url('https://fonts.googleapis.com/css?family=Montserrat:400,800');
+/* @import url('https://fonts.googleapis.com/css?family=Montserrat:400,800'); */
 
 /* 全局设置，将所有元素的盒模型设置为 border-box */
 * {
@@ -839,112 +842,151 @@ input {
     box-sizing: border-box;
 }
 
-#successContainer {
-    background: linear-gradient(to right, #FF4B2B, #FF416C);
-    border-radius: 10px;
-    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
-    color: #FFFFFF;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 480px;
-    width: 768px;
-    max-width: 100%;
-    position: relative;
-    overflow: hidden;
-    margin: 0 auto; /* 添加自动居中 */
+.success-page {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
 }
 
-#successContainer .form-container {
-    background: rgba(255, 255, 255, 0.9);
-    border-radius: 10px;
-    padding: 40px;
-    text-align: center;
-    width: 100%;
-    max-width: 400px;
+.success-container {
+  background: linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%);
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  width: 500px;
+  max-width: 90%;
+  padding: 50px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  animation: slideUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-#successContainer h1 {
-    font-size: 32px;
-    margin-bottom: 20px;
-    color: #FF4B2B;
+.success-container::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,75,43,0.1) 0%, rgba(255,75,43,0) 70%);
+  z-index: -1;
 }
 
-#successContainer p {
-    font-size: 16px;
-    margin-bottom: 20px;
-    color: #333;
+.success-content h1 {
+  color: #FF4B2B;
+  margin-bottom: 25px;
+  font-size: 2.2rem;
+  font-weight: 700;
+  position: relative;
+  display: inline-block;
 }
 
-#successContainer #countdown {
-    color: #FF4B2B;
-    font-weight: bold;
+.success-content h1::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(to right, #FF4B2B, #FF416C);
+  border-radius: 3px;
 }
 
-#successContainer button {
-    background-color: #FF4B2B;
-    border: none;
-    border-radius: 20px;
-    color: #FFFFFF;
-    font-size: 14px;
-    font-weight: bold;
-    padding: 12px 20px;
-    margin-top: 20px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+.success-content p {
+  margin: 15px 0;
+  color: #555;
+  font-size: 1.1rem;
+  line-height: 1.6;
 }
 
-#successContainer button:hover {
-    background-color: #FF416C;
+.countdown {
+  color: #FF4B2B;
+  font-weight: bold;
+  font-size: 1.3rem;
+  display: inline-block;
+  min-width: 30px;
 }
 
-#successContainer .overlay-container {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    width: 50%;
-    height: 100%;
-    overflow: hidden;
-    transition: transform 0.6s ease-in-out;
-    z-index: 100;
+.success-button {
+  margin-top: 30px;
+  background: linear-gradient(to right, #FF4B2B, #FF416C);
+  color: white;
+  border: none;
+  padding: 15px 40px;
+  border-radius: 30px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(255, 75, 43, 0.4);
+  position: relative;
+  overflow: hidden;
 }
 
-#successContainer .overlay {
-    background: linear-gradient(to right, #FF4B2B, #FF416C);
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: 0 0;
-    color: #FFFFFF;
-    position: relative;
-    left: -100%;
-    height: 100%;
-    width: 200%;
-    transform: translateX(0);
-    transition: transform 0.6s ease-in-out;
+.success-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(255, 75, 43, 0.6);
 }
 
-#successContainer .overlay-panel {
-    position: absolute;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    padding: 0 40px;
-    text-align: center;
-    top: 0;
-    height: 100%;
-    width: 50%;
-    transform: translateX(0);
-    transition: transform 0.6s ease-in-out;
+.success-button:active {
+  transform: translateY(1px);
 }
 
-#successContainer .overlay-panel h1,
-#successContainer .overlay-panel p {
-    color: #000; /* 将字体颜色改为黑色 */
+.success-button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%);
+  transform-origin: 50% 50%;
 }
 
-#successContainer .overlay-right {
-    right: 0;
-    transform: translateX(0);
+.success-button:focus:not(:active)::after {
+  animation: ripple 1s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to { 
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0, 0);
+    opacity: 1;
+  }
+  20% {
+    transform: scale(25, 25);
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(40, 40);
+  }
 }
 </style>
