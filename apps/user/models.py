@@ -35,6 +35,15 @@ class UserRegisterManager(BaseUserManager):
         user.is_active = is_active
         user.save()
         return user
+    
+    def create_superuser(self, username, email, password, **extra_fields):
+        # 实现创建超级用户的逻辑
+        user = self.create(
+            email=email,username=username,password=password
+        )
+        user.save()
+        return user
+        
 class EmailCodeSendManager(models.Manager):
     def create(self,email):
         if not email:
