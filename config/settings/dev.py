@@ -16,16 +16,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'test',  # 确保路径正确
-#         'USER': 'postgres',
-#         'PASSWORD': 'AuroBreeze',
-#         'HOST': 'localhost',
-#         'PORT': '5432',
-#     }
-# }
 
 # 安装的应用
 INSTALLED_APPS_DEV = [
@@ -34,7 +24,6 @@ INSTALLED_APPS_DEV = [
 ]
 
 INSTALLED_APPS = INSTALLED_APPS_DEV + INSTALLED_APPS
-
 
 
 # 静态文件配置
@@ -68,6 +57,15 @@ CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'#结果存储地址
 CELERY_ACCEPT_CONTENT = ['json']#指定接受的内容类型
 CELERY_TASK_SERIALIZER = 'json'#任务序列化和反序列化方案
 CELERY_TIMEZONE = 'Asia/Shanghai'#时区
+
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    'clear_expired_codes': {
+        'task': 'apps.user.task.clear_expired_codes_task',
+        'schedule': crontab(minute='*/30'),
+    },
+}
 
 
 # 邮箱配置
