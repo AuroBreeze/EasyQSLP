@@ -42,4 +42,4 @@ def clear_expired_codes_task():
     count_num = expired_time.count()
     expired_time.delete()
     
-    return f"已删除{count_num} 个过期验证码。"
+    return f"已删除{count_num} 个过期验证码(当前时间：{timezone.now()})"
