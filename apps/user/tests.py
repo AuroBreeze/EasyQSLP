@@ -9,7 +9,7 @@ from django.utils import timezone
 class UserRegistrationTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.register_url = reverse('register')
+        self.register_url = reverse('user:register')
         self.valid_payload = {
             'email': 'test@example.com',
             'username': 'testuser',
@@ -18,12 +18,14 @@ class UserRegistrationTestCase(TestCase):
             'usage': 'Register'
         }
         # 创建一个验证码
-        Email_Verify_Code.objects.create(
+        Email_Verify_Code.objects.update_or_create(
             email='test@example.com',
-            code='123456',
-            send_time=timezone.now(),
-            expire_time=timezone.now() + timezone.timedelta(minutes=5),
-            usage='Register'
+            defaults={
+                'code': '123456',
+                'send_time': timezone.now(),
+                'expire_time': timezone.now() + timezone.timedelta(minutes=5),
+                'usage': 'Register'
+            }
         )
 
     def test_valid_user_registration(self):
@@ -41,12 +43,11 @@ class UserRegistrationTestCase(TestCase):
 class UserLoginTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.login_url = reverse('login')
+        self.login_url = reverse('user:login')
         self.user = User_Login.objects.create_user(
             email='test@example.com',
             username='testuser',
             password='testpassword',
-            is_active=True
         )
 
     def test_valid_user_login(self):
@@ -63,4 +64,40 @@ class UserLoginTestCase(TestCase):
             'password': 'wrongpassword'
         }
         response = self.client.post(self.login_url, invalid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+class UserResetPasswordTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.reset_pwd_url = reverse('user:restpassword')
+        self.user = User_Login.objects.create_user(
+            email='test@example.com',
+            username='testuser',
+            password='testpassword'
+        )
+        self.valid_payload = {
+            'email': 'test@example.com',
+            'password': 'testpassword123',
+            'password_confirm': 'testpassword123',
+            'code': '123456',
+            'usage': 'ResetPassword'
+        }
+        # 创建一个验证码
+        Email_Verify_Code.objects.update_or_create(
+            email='test@example.com',
+            defaults={
+                'code': '123456',
+                'send_time': timezone.now(),
+                'expire_time': timezone.now() + timezone.timedelta(minutes=5),
+                'usage': 'ResetPassword'
+            }
+        )
+    def test_valid_user_reset_password(self):
+        response = self.client.post(self.reset_pwd_url,self.valid_payload,format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_invalid_user_reset_password(self):
+        invalid_payload = self.valid_payload.copy()
+        invalid_payload['code'] = '654321'
+        response = self.client.post(self.reset_pwd_url, invalid_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
