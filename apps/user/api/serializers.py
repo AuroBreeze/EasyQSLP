@@ -67,7 +67,6 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             email=validated_data['email'],
             password=validated_data['password'],
             username=validated_data['username'],
-            is_active=True,
             )
         user.save() # 创建用户
 
