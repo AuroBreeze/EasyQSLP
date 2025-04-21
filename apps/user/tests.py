@@ -21,7 +21,7 @@ class UserRegistrationTestCase(TestCase):
         Email_Verify_Code.objects.update_or_create(
             email='test@example.com',
             defaults={
-                'code': '123456'
+                'code': '123456',
                 'send_time': timezone.now(),
                 'expire_time': timezone.now() + timezone.timedelta(minutes=5),
                 'usage': 'Register'
