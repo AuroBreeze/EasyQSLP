@@ -1,5 +1,7 @@
 from celery import shared_task
 from django.core.mail import send_mail
+from django.utils import timezone
+from .models import Email_Verify_Code
 
 @shared_task
 def send_email_task(user_email,code:str):
@@ -31,3 +33,13 @@ def send_email_task(user_email,code:str):
         recipient_list=[user_email],
         fail_silently=False,
     )
+
+@shared_task
+def clear_expired_codes_task():
+    expired_time = Email_Verify_Code.objects.filter(
+        expire_time__lte=timezone.now()
+    )
+    count_num = expired_time.count()
+    expired_time.delete()
+    
+    return f"已删除{count_num} 个过期验证码。"
