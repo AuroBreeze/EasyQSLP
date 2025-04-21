@@ -55,10 +55,11 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # 跨域配置
-ALLOWED_HOSTS = ['localhost','localhost:7856', '127.0.0.1:7856']  # 开发环境允许的域名
+ALLOWED_HOSTS = ['localhost','localhost:7856', '127.0.0.1:7856','127.0.0.1:20000','127.0.0.1']  # 开发环境允许的域名
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:7856',
     'http://127.0.0.1:7856',
+    'http://127.0.0.1:20000'
 )  # 允许跨域请求的域名
 
 #celery配置
