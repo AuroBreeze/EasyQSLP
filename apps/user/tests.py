@@ -48,7 +48,6 @@ class UserLoginTestCase(TestCase):
             email='test@example.com',
             username='testuser',
             password='testpassword',
-            is_active=True
         )
 
     def test_valid_user_login(self):
