@@ -9,7 +9,7 @@ from django.utils import timezone
 class UserRegistrationTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.register_url = reverse('register')
+        self.register_url = reverse('user:register')
         self.valid_payload = {
             'email': 'test@example.com',
             'username': 'testuser',
@@ -18,12 +18,14 @@ class UserRegistrationTestCase(TestCase):
             'usage': 'Register'
         }
         # 创建一个验证码
-        Email_Verify_Code.objects.create(
+        Email_Verify_Code.objects.update_or_create(
             email='test@example.com',
-            code='123456',
-            send_time=timezone.now(),
-            expire_time=timezone.now() + timezone.timedelta(minutes=5),
-            usage='Register'
+            defaults={
+                'code': '123456'
+                'send_time': timezone.now(),
+                'expire_time': timezone.now() + timezone.timedelta(minutes=5),
+                'usage': 'Register'
+            }
         )
 
     def test_valid_user_registration(self):
@@ -41,7 +43,7 @@ class UserRegistrationTestCase(TestCase):
 class UserLoginTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.login_url = reverse('login')
+        self.login_url = reverse('user:login')
         self.user = User_Login.objects.create_user(
             email='test@example.com',
             username='testuser',
