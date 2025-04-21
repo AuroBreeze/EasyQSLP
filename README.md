@@ -16,6 +16,16 @@
 - 前端:使用[HTML](https://www.w3.org/html/)/[CSS](https://www.w3.org/Style/CSS/Overview.en.html)/[JavaScript](https://www.javascript.com/)作为前端框架. 🎨
 - 数据库:使用[PostgreSQL](https://www.postgresql.org/)作为数据库. 🗄️
 
+## 项目更新进度
+
+| 指标 | 统计                                                                          |
+|------|-----------------------------------------------------------------------------|
+| 总提交数 | ![总提交](https://img.shields.io/github/commit-activity/t/AuroBreeze/EasyQFLP) |
+| 本周活跃 | ![周提交](https://img.shields.io/github/commit-activity/w/AuroBreeze/EasyQFLP) |
+| 开放问题 | ![问题数](https://img.shields.io/github/issues/AuroBreeze/EasyQFLP)            |
+
+
+
 ## 项目进展 📅
 
 - ✅ **2025-04-20** : 前端登录界面更换为VUE框架，并编写start界面. 🎨
@@ -32,9 +42,13 @@
 - 🔧 **前端登录界面美化**. 🎨
 - 📧 **用户搜索功能**. 📨
 
-
 ## 项目贡献者 👥
 
 - [AuroBreeze](https://github.com/AuroBreeze) : 项目发起者,全栈开发者. 🧑‍💻
 - [W1ndys](https://github.com/W1ndys) : 项目启发者. 💡
 - [Enternal369](https://github.com/Enternal369) : 登录界面设计. 🎨
+
+## 📊 仓库贡献看板
+
+[![核心贡献者](https://contrib.rocks/image?repo=AuroBreeze/EasyQFLP)](https://github.com/AuroBreeze/EasyQFLP/graphs/contributors)
+
