@@ -30,11 +30,11 @@ class UserRegisterManager(BaseUserManager):
             username=username,
             password=make_password(password)
             )
-    def create_user(self,email,username,password,is_active,is_staff,is_superuser):
+    def create_user(self,email,username,password):
         user = self.create(email,username,password)
-        user.is_active = is_active
-        user.is_staff = is_staff
-        user.is_superuser = is_superuser
+        user.is_active = True
+        user.is_staff = False
+        user.is_superuser = False
         user.save()
         return user
 
@@ -83,7 +83,7 @@ class User_Login(AbstractBaseUser,PermissionsMixin): #正常django会生成一�
     # 权限相关字段
     is_staff = models.BooleanField(
         default=False,
-        verbose_name="管理员权限"
+        verbose_name="管理员权限",
     )
     is_superuser = models.BooleanField(
         default=False,
