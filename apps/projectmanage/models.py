@@ -1,9 +1,11 @@
 from django.db import models
-from apps.users.models import User_Login
+from django.contrib.auth import get_user_model
+User = get_user_model()
+
 # Create your models here.
 class Article(models.Model):
-    adminer = models.ForeignKey(User_Login, on_delete=models.SET_NULL, null=True,blank=True)
-    title = models.TextField(min_length=1,max_length=50,verbose_name=' 项目名称')
+    adminer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True,blank=True,related_name='articles',verbose_name='文章管理者')
+    title = models.TextField(max_length=50,verbose_name=' 项目名称')
     introdect = models.TextField(max_length=200,verbose_name=' 项目简介',default='暂无简介')
     content_md = models.TextField(verbose_name=' 项目内容markdown') #存储原始markdown
     content_html = models.TextField(verbose_name=' 项目内容html') #存储渲染后的html

@@ -21,10 +21,11 @@ DATABASES = {
 INSTALLED_APPS_DEV = [
     'corsheaders',
     'apps.user.apps.UserConfig',
-    'apps.projectmanage.apps.ProjectmanageConfig'
+    'apps.projectmanage.apps.ProjectmanageConfig',  # 确保应用路径正确
 ]
 
-INSTALLED_APPS = INSTALLED_APPS_DEV + INSTALLED_APPS
+# 确保 INSTALLED_APPS_DEV 在 INSTALLED_APPS 之前
+INSTALLED_APPS = INSTALLED_APPS + INSTALLED_APPS_DEV
 
 
 # 静态文件配置
