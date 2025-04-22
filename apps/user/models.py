@@ -33,12 +33,16 @@ class UserRegisterManager(BaseUserManager):
     def create_user(self,email,username,password,**extra_fields):
         user = self.create(email,username,password)
         user.is_active = True
-        user.is_staff = False
-        user.is_superuser = False
+        if extra_fields:
+            for key, value in extra_fields.items():
+                setattr(user, key, value)
+        else:
+            user.is_staff = False
+            user.is_superuser = False
         user.save()
         return user
 
-    def create_superuser(self, email, username, password=None, **extra_fields):
+    def create_superuser(self, email, username, password, **extra_fields):
         """
         创建超级用户的专用方法
         注意：参数顺序要与USERNAME_FIELD和REQUIRED_FIELDS对应

@@ -13,3 +13,4 @@ django-redis # Redis cache support
 Pillow # image processing support
 markdown # markdown support
 bleach # HTML sanitization support
+djangorestframework-simplejwt # JWT support
