@@ -21,6 +21,7 @@ DATABASES = {
 INSTALLED_APPS_DEV = [
     'corsheaders',
     'apps.user.apps.UserConfig'
+    'apps.projectmanage.apps.ProjectmanageConfig'
 ]
 
 INSTALLED_APPS = INSTALLED_APPS_DEV + INSTALLED_APPS
