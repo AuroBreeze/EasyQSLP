@@ -36,10 +36,16 @@ def send_email_task(user_email,code:str):
 
 @shared_task
 def clear_expired_codes_task():
-    expired_time = Email_Verify_Code.objects.filter(
-        expire_time__lte=timezone.now()
-    )
-    count_num = expired_time.count()
-    expired_time.delete()
+    # 获取当前时间
+    now = timezone.now()
     
-    return f"已删除{count_num} 个过期验证码(当前时间：{timezone.now()})"
+    # 查询所有过期的验证码
+    expired_codes = Email_Verify_Code.objects.filter(expire_time__lte=now)
+    
+    # 获取过期验证码的数量
+    count_num = expired_codes.count()
+    
+    # 删除所有过期的验证码
+    expired_codes.delete()
+    
+    return f"已删除{count_num} 个过期验证码(当前时间：{now})"
