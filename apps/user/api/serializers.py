@@ -1,9 +1,18 @@
-from django.core.validators import MinLengthValidator
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
 from ..models import *
 from django.utils import timezone
+from rest_framework_simplejwt.serializers import TokenObtainSerializer
+
+class UserTokenObtainPairSerializer(TokenObtainSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        token['email'] = user.email
+        token['username'] = user.username
+        token['is_active'] = user.is_active
+        return token
 
 # 用户登录序列化器
 class UserLoginSerializer(serializers.Serializer):
