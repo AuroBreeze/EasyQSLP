@@ -48,6 +48,9 @@ class UserLoginTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.login_url = reverse('user:login')
+        self.jwt_token_url = reverse('user:token')
+        self.jwt_token_refresh_url = reverse('user:token_refresh')
+        self.jwt_token_verify_url = reverse('user:token_verify')
         self.user = User_Login.objects.create_user(email='test@example.com', username='testuser',
                                                    password='testpassword')
 
@@ -66,6 +69,16 @@ class UserLoginTestCase(TestCase):
         }
         response = self.client.post(self.login_url, invalid_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_user_jwt_token(self):
+        valid_payload = {
+            'email': 'test@example.com',
+            'password': 'testpassword'
+        }
+        response = self.client.post(self.login_url, valid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn('access', response.data)
+        self.assertIn('refresh', response.data)
 
 class UserResetPasswordTestCase(TestCase):
     def setUp(self):
