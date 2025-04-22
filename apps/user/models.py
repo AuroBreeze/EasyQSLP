@@ -30,7 +30,7 @@ class UserRegisterManager(BaseUserManager):
             username=username,
             password=make_password(password)
             )
-    def create_user(self,email,username,password):
+    def create_user(self,email,username,password,**extra_fields):
         user = self.create(email,username,password)
         user.is_active = True
         user.is_staff = False
@@ -77,8 +77,10 @@ class User_Login(AbstractBaseUser,PermissionsMixin): #正常django会生成一�
     username = models.CharField(max_length=20,validators=[MinLengthValidator(5)],unique=True,verbose_name='用户名')
     password = models.CharField(max_length=255,verbose_name='密码')#最大长度要保证哈希后的长度能够放进数据库
     join_date = models.DateTimeField(auto_now_add=True,verbose_name='注册日期')
+    last_login = models.DateTimeField(auto_now=True,verbose_name='上次登录日期')
     email = models.EmailField(max_length=50,unique=True,verbose_name='邮箱')
     is_active = models.BooleanField(default=True,verbose_name='是否激活') #是否激活
+    
     #uuid_user = models.UUIDField(default=uuid4,editable=False,unique=True) #用户唯一标识符
     # 权限相关字段
     is_staff = models.BooleanField(
@@ -129,17 +131,16 @@ class Email_Verify_Code(models.Model):
     
 class User_Profile(models.Model):
     #自我介绍
-    introduction = models.TextField(max_length=60,null=True,default='')
-    avater = models.ImageField(upload_to='avater/',null=True,default='avater/default.png')
+    introduction = models.TextField(max_length=60,null=True,default='',verbose_name='自我介绍')
+    avater = models.ImageField(upload_to='avater/',null=True,default='avater/default.png',verbose_name='头像')
     #性别
-    sex = models.CharField(max_length=10,null=True,default='')
+    sex = models.CharField(max_length=10,null=True,default='',verbose_name='性别')
     #生日
-    birthday = models.DateField(null=True)
+    birthday = models.DateField(null=True,verbose_name='生日')
     #学校
-    school = models.CharField(max_length=50,null=True,default='')
+    school = models.CharField(max_length=50,null=True,default='',verbose_name='学校')
 
-    last_login = models.DateTimeField(null=True)
-    user_id = models.ForeignKey('User_Login',on_delete=models.CASCADE,related_name='profile',default=0) #外键关联到User_Login表
+    user_Login = models.ForeignKey('User_Login',on_delete=models.CASCADE,related_name='profile',default=0) #外键关联到User_Login表
 
     class Meta:
         db_table = 'user_profile'

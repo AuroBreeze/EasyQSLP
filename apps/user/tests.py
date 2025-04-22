@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
-from .models import User_Login, Email_Verify_Code
+from .models import User_Login, Email_Verify_Code,User_Profile
 from django.utils import timezone
 
 
@@ -32,6 +32,7 @@ class UserRegistrationTestCase(TestCase):
         response = self.client.post(self.register_url, self.valid_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(User_Login.objects.filter(email='test@example.com').exists())
+        self.assertTrue(User_Profile.objects.filter(user_Login=User_Login.objects.get(email='test@example.com').id))
 
     def test_invalid_user_registration(self):
         # 测试无效的验证码
