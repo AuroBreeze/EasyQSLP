@@ -129,17 +129,16 @@ class Email_Verify_Code(models.Model):
     
 class User_Profile(models.Model):
     #自我介绍
-    introduction = models.TextField(max_length=60,null=True,default='')
-    avater = models.ImageField(upload_to='avater/',null=True,default='avater/default.png')
+    introduction = models.TextField(max_length=60,null=True,default='',verbose_name='自我介绍')
+    avater = models.ImageField(upload_to='avater/',null=True,default='avater/default.png',verbose_name='头像')
     #性别
-    sex = models.CharField(max_length=10,null=True,default='')
+    sex = models.CharField(max_length=10,null=True,default='',verbose_name='性别')
     #生日
-    birthday = models.DateField(null=True)
+    birthday = models.DateField(null=True,verbose_name='生日')
     #学校
-    school = models.CharField(max_length=50,null=True,default='')
+    school = models.CharField(max_length=50,null=True,default='',verbose_name='学校')
 
-    last_login = models.DateTimeField(null=True)
-    user_id = models.ForeignKey('User_Login',on_delete=models.CASCADE,related_name='profile',default=0) #外键关联到User_Login表
+    user_Login = models.ForeignKey('User_Login',on_delete=models.CASCADE,related_name='profile',default=0) #外键关联到User_Login表
 
     class Meta:
         db_table = 'user_profile'
