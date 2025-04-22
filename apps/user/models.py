@@ -30,7 +30,7 @@ class UserRegisterManager(BaseUserManager):
             username=username,
             password=make_password(password)
             )
-    def create_user(self,email,username,password):
+    def create_user(self,email,username,password,**extra_fields):
         user = self.create(email,username,password)
         user.is_active = True
         user.is_staff = False
