@@ -71,7 +71,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         user.save() # 创建用户
 
         user_profile = User_Profile.objects.create(
-            user_id=user,
+            user_Login=user,
         )
         user_profile.save() # 创建用户资料
         return user
