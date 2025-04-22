@@ -14,6 +14,7 @@ class Article(models.Model):
     def __str__(self):
         return f"文章管理者{self.adminer.username}，文章标题{self.title}"
     class Meta:
+        db_table = "project_article"
         verbose_name = '项目文章'
         verbose_name_plural = ' 项目文章'
     
