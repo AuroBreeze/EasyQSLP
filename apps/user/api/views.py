@@ -4,12 +4,16 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from ..models import *
 from ..task import send_email_task # 导入发送邮件的任务，异步
-
 from .serializers import *
 from django_ratelimit.decorators import ratelimit # 导入限流装饰器
 import random
 from django.utils import timezone
+from rest_framework_simplejwt.views import TokenObtainPairView
 # Create your views here.
+
+# 用户登录 JWT认证模块
+class UserTokenObtainPairAPI(TokenObtainPairView):
+    serializer_class = UserTokenObtainPairSerializer
 
 class RegisterAPI(APIView):
     @method_decorator(ratelimit(key='ip', rate='3/hour'))  # 同一 IP 每小时最多注册3次

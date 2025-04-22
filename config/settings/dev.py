@@ -19,6 +19,7 @@ DATABASES = {
 
 # 安装的应用
 INSTALLED_APPS_DEV = [
+    'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     'apps.user.apps.UserConfig',
     'apps.projectmanage.apps.ProjectmanageConfig',  # 确保应用路径正确
@@ -60,6 +61,23 @@ CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'#结果存储地址
 CELERY_ACCEPT_CONTENT = ['json']#指定接受的内容类型
 CELERY_TASK_SERIALIZER = 'json'#任务序列化和反序列化方案
 CELERY_TIMEZONE = 'Asia/Shanghai'#时区
+
+# JWT配置
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',  # 启用 JWT 认证
+    ),
+}
+from django.utils import timezone
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timezone.timedelta(minutes=30),  # 访问令牌有效期（示例：30分钟）
+    'REFRESH_TOKEN_LIFETIME': timezone.timedelta(days=7),     # 刷新令牌有效期（示例：7天）
+    'ROTATE_REFRESH_TOKENS': True,                   # 刷新令牌后是否生成新令牌
+    'BLACKLIST_AFTER_ROTATION': True,                # 旧刷新令牌是否加入黑名单
+    'ALGORITHM': 'HS256',                            # 加密算法
+    'SIGNING_KEY': SECRET_KEY,                        # 使用 Django 的 SECRET_KEY 作为签名密钥
+}
 
 from celery.schedules import crontab
 
