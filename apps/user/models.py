@@ -77,8 +77,10 @@ class User_Login(AbstractBaseUser,PermissionsMixin): #正常django会生成一�
     username = models.CharField(max_length=20,validators=[MinLengthValidator(5)],unique=True,verbose_name='用户名')
     password = models.CharField(max_length=255,verbose_name='密码')#最大长度要保证哈希后的长度能够放进数据库
     join_date = models.DateTimeField(auto_now_add=True,verbose_name='注册日期')
+    last_login = models.DateTimeField(auto_now=True,verbose_name='上次登录日期')
     email = models.EmailField(max_length=50,unique=True,verbose_name='邮箱')
     is_active = models.BooleanField(default=True,verbose_name='是否激活') #是否激活
+    
     #uuid_user = models.UUIDField(default=uuid4,editable=False,unique=True) #用户唯一标识符
     # 权限相关字段
     is_staff = models.BooleanField(
