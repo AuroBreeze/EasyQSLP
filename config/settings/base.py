@@ -90,13 +90,13 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'zh-hans'
+LANGUAGE_CODE = 'zh-CN'
 
 TIME_ZONE = 'Asia/Shanghai'
 
 USE_I18N = True # 此字段为默认值，如果为True，则Django会自动将所有日期和时间字段转换为当前时区，并使用当前时区进行排序。
 USE_L10N = True
-USE_TZ = True
+USE_TZ = False
 #
 
 # Static files (CSS, JavaScript, Images)
