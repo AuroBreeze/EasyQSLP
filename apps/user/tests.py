@@ -31,8 +31,11 @@ class UserRegistrationTestCase(TestCase):
     def test_valid_user_registration(self):
         response = self.client.post(self.register_url, self.valid_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertTrue(User_Login.objects.filter(email='test@example.com').exists())
-        self.assertTrue(User_Profile.objects.filter(user_Login=User_Login.objects.get(email='test@example.com').id))
+        user = User_Login.objects.get(email='test@example.com')
+        self.assertTrue(user.DoesNotExist) # 测试是否创建了用户
+        self.assertFalse(user.is_superuser) # 测试是否创建了管理员权限
+        self.assertFalse(user.is_staff) # 测试是否创建了管理员权限
+        self.assertTrue(User_Profile.objects.filter(user_Login=User_Login.objects.get(email='test@example.com').id)) # 测试是否创建了用户个人资料
 
     def test_invalid_user_registration(self):
         # 测试无效的验证码
@@ -45,11 +48,8 @@ class UserLoginTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.login_url = reverse('user:login')
-        self.user = User_Login.objects.create_user(
-            email='test@example.com',
-            username='testuser',
-            password='testpassword',
-        )
+        self.user = User_Login.objects.create_user(email='test@example.com', username='testuser',
+                                                   password='testpassword')
 
     def test_valid_user_login(self):
         valid_payload = {
@@ -71,11 +71,8 @@ class UserResetPasswordTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.reset_pwd_url = reverse('user:restpassword')
-        self.user = User_Login.objects.create_user(
-            email='test@example.com',
-            username='testuser',
-            password='testpassword'
-        )
+        self.user = User_Login.objects.create_user(email='test@example.com', username='testuser',
+                                                   password='testpassword')
         self.valid_payload = {
             'email': 'test@example.com',
             'password': 'testpassword123',
