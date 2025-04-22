@@ -20,7 +20,7 @@ DATABASES = {
 # 安装的应用
 INSTALLED_APPS_DEV = [
     'corsheaders',
-    'apps.user.apps.UserConfig'
+    'apps.user.apps.UserConfig',
     'apps.projectmanage.apps.ProjectmanageConfig'
 ]
 
