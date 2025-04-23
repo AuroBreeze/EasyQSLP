@@ -336,29 +336,40 @@ const handleSignUp = async () => {
       // 处理400/401错误
       if (data.errors) {
         if (data.errors.ValidationError) {
-          showError(data.errors.ValidationError);
+          showSignUpError(data.errors.ValidationError[0]);
         } else if (data.errors.email) {
-          showError(`邮箱错误: ${data.errors.email}`);
+          showSignUpError(`邮箱错误: ${data.errors.email}`);
         } else if (data.errors.password) {
-          showError(`密码错误: ${data.errors.password}`);
+          showSignUpError(`密码错误: ${data.errors.password}`);
         } else if (data.errors.code) {
-          showError(`验证码错误: ${data.errors.code}`);
+          showSignUpError(`验证码错误: ${data.errors.code}`);
         } else {
-          showError(data.message || '注册失败');
+          showSignUpError(data.message || '注册失败');
         }
       } else {
-        showError(data.message || '注册失败');
+        showSignUpError(data.message || '注册失败');
       }
       return;
     }
 
     if (data.success) {
-      alert('注册成功，请登录');
-      location.reload();
+      // 显示成功消息
+      signUpErrorMessage.value = '注册成功，正在跳转到登录页面...';
+      signUpErrorMessage.value = '';
+      
+      // 2秒后平滑切换到登录界面
+      setTimeout(() => {
+        togglePanel(false);
+        signUpData.name = '';
+        signUpData.email = '';
+        signUpData.code = '';
+        signUpData.password = '';
+        signUpErrorMessage.value = '注册成功，请登录';
+      }, 2000);
     }
   } catch (error) {
     console.error('注册请求失败:', error);
-    showError('网络错误，请检查连接后重试');
+    showSignUpError('网络错误，请检查连接后重试');
   }
 };
 
