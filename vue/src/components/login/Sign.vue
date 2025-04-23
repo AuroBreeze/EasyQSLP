@@ -163,7 +163,8 @@ const handleSignIn = async () => {
   }
 
   try {
-    const response = await fetch('http://localhost:8000/api/v1/user/login/', {
+    // 1. 先调用登录接口
+    const loginResponse = await fetch('http://localhost:8000/api/v1/user/login/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -174,19 +175,93 @@ const handleSignIn = async () => {
         password: password
       })
     });
+
+    const loginData = await loginResponse.json();
     
-    const data = await response.json();
-    
-    if (data.success) {
-      isLoginSuccess.value = true;
-      localStorage.setItem('user_id', data.user_id);
-      startCountdown();
+    if (loginData.success) {
+      // 2. 登录成功后再获取JWT token
+      const tokenResponse = await fetch('http://localhost:8000/api/v1/user/token/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          email: email,
+          password: password
+        })
+      });
+
+      const tokenData = await tokenResponse.json();
+      
+      if (tokenData.access) {
+        // 存储token和用户信息
+        localStorage.setItem('access_token', tokenData.access);
+        localStorage.setItem('refresh_token', tokenData.refresh);
+        localStorage.setItem('user_id', loginData.user_id);
+        localStorage.setItem('username', loginData.username);
+        
+        isLoginSuccess.value = true;
+        startCountdown();
+      } else {
+        showError(tokenData.detail || '获取token失败');
+      }
     } else {
-      showError(data.message);
+      showError(loginData.message || '登录失败', loginData.errors);
     }
   } catch (error) {
     console.error('登录请求失败:', error);
     showError('登录请求失败，请检查网络连接');
+  }
+};
+
+// 刷新token方法
+const refreshToken = async () => {
+  const refreshToken = localStorage.getItem('refresh_token');
+  if (!refreshToken) return null;
+
+  try {
+    const response = await fetch('http://localhost:8000/api/v1/user/token/refresh/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        refresh: refreshToken
+      })
+    });
+
+    const data = await response.json();
+    if (data.access) {
+      localStorage.setItem('access_token', data.access);
+      return data.access;
+    }
+    return null;
+  } catch (error) {
+    console.error('刷新token失败:', error);
+    return null;
+  }
+};
+
+// 验证token方法
+const verifyToken = async (token: string) => {
+  try {
+    const response = await fetch('http://localhost:8000/api/v1/user/token/verify/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        token: token
+      })
+    });
+
+    return response.ok;
+  } catch (error) {
+    console.error('验证token失败:', error);
+    return false;
   }
 };
 
@@ -263,8 +338,17 @@ const handleForgotPassword = () => {
   // 忘记密码逻辑
 };
 
-const showError = (message:string) => {
-  alert(message);
+const showError = (message: string, errors?: Record<string, string[]>) => {
+  if (errors) {
+    // 显示具体错误信息
+    let errorMsg = message + '\n\n';
+    for (const [field, fieldErrors] of Object.entries(errors)) {
+      errorMsg += `${field}: ${fieldErrors.join(', ')}\n`;
+    }
+    alert(errorMsg);
+  } else {
+    alert(message);
+  }
 };
 
 const startCountdown = () => {
