@@ -10,31 +10,24 @@ CORS_ALLOW_METHODS = [
 ]
 
 # 数据库配置
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'test',  # 确保路径正确
-        'USER': 'postgres',
-        'PASSWORD': 'AuroBreeze',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
 # 安装的应用
 INSTALLED_APPS_DEV = [
+    'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
-    'apps.user.apps.UserConfig'
+    'apps.user.apps.UserConfig',
+    'apps.projectmanage.apps.ProjectmanageConfig',  # 确保应用路径正确
+    'apps.api.apps.ApiConfig'
 ]
 
-INSTALLED_APPS = INSTALLED_APPS_DEV + INSTALLED_APPS
-
+# 确保 INSTALLED_APPS_DEV 在 INSTALLED_APPS 之前
+INSTALLED_APPS = INSTALLED_APPS + INSTALLED_APPS_DEV
 
 
 # 静态文件配置
@@ -55,10 +48,11 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # 跨域配置
-ALLOWED_HOSTS = ['localhost','localhost:63342', '127.0.0.1:63342']  # 开发环境允许的域名
+ALLOWED_HOSTS = ['localhost','localhost:7856', '127.0.0.1:7856','127.0.0.1:20000','127.0.0.1']  # 开发环境允许的域名
 CORS_ORIGIN_WHITELIST = (
-    'http://localhost:63342',
-    'http://127.0.0.1:63342',
+    'http://localhost:7856',
+    'http://127.0.0.1:7856',
+    'http://127.0.0.1:20000'
 )  # 允许跨域请求的域名
 
 #celery配置
@@ -67,6 +61,32 @@ CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'#结果存储地址
 CELERY_ACCEPT_CONTENT = ['json']#指定接受的内容类型
 CELERY_TASK_SERIALIZER = 'json'#任务序列化和反序列化方案
 CELERY_TIMEZONE = 'Asia/Shanghai'#时区
+
+# JWT配置
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',  # 启用 JWT 认证
+    ),
+}
+from django.utils import timezone
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timezone.timedelta(minutes=30),  # 访问令牌有效期（示例：30分钟）
+    'REFRESH_TOKEN_LIFETIME': timezone.timedelta(days=7),     # 刷新令牌有效期（示例：7天）
+    'ROTATE_REFRESH_TOKENS': True,                   # 刷新令牌后是否生成新令牌
+    'BLACKLIST_AFTER_ROTATION': True,                # 旧刷新令牌是否加入黑名单
+    'ALGORITHM': 'HS256',                            # 加密算法
+    'SIGNING_KEY': SECRET_KEY,                        # 使用 Django 的 SECRET_KEY 作为签名密钥
+}
+
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    'clear_expired_codes': {
+        'task': 'apps.user.task.clear_expired_codes_task',
+        'schedule': crontab(minute='*/30'),
+    },
+}
 
 
 # 邮箱配置

@@ -1,13 +1,26 @@
-from django.core.validators import MinLengthValidator
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
 from ..models import *
 from django.utils import timezone
+from rest_framework_simplejwt.serializers import TokenObtainSerializer, TokenObtainPairSerializer
 
+
+class UserTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        token['email'] = user.email
+        token['username'] = user.username
+        token['is_active'] = user.is_active
+        return token
+
+# 用户登录序列化器
 class UserLoginSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True,error_messages={"required":"邮箱不能为空","invalid":"邮箱格式不正确"})
     password = serializers.CharField(required=True,write_only=True,error_messages={"required":"密码不能为空","blank":"密码不能为空"})
+
+    # 验证邮箱和密码
     def validate(self, data):#使用中文注释
         email = data.get('email')
         password = data.get('password')
@@ -15,7 +28,7 @@ class UserLoginSerializer(serializers.Serializer):
         if email and password:
             user = authenticate(email=email, password=password)
             if user:
-                if user.is_active:
+                if user.is_active: # 判断用户是否激活
                     data['user'] = user
                 else:
                     raise ValidationError({"ValidationError":"用户已被禁用"})
@@ -24,11 +37,14 @@ class UserLoginSerializer(serializers.Serializer):
         else:
             raise ValidationError({"ValidationError":"邮箱或密码不能为空"})
         return data
+
+# 用户注册序列化器
 class UserRegisterSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(max_length=50,required=True)
     password = serializers.CharField(max_length=255,required=True,write_only=True)
     username = serializers.CharField(max_length=20,validators=[MinLengthValidator(2)],required=True)
     code = serializers.CharField(max_length=6,min_length=6,required=True,write_only=True)
+    # 验证码用途，防止一码多用(注册和重置密码)
     usage = serializers.CharField(max_length=25,required=False,write_only=True)
 
     def validate(self, data):
@@ -37,10 +53,10 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         username = data.get('username')
         code = data.get('code')
         usage = data.get('usage')
-        if usage != "Register":
+        if usage != "Register": # 注册方式错误
             raise ValidationError({"ValidationError":"注册方式错误"})
-        if email and password and username and code:
-            if User_Login.objects.filter(email=email).exists():
+        if email and password and username and code: # 验证数据
+            if User_Login.objects.filter(email=email).exists(): # 邮箱已被注册
                 raise ValidationError({"ValidationError":"邮箱已被注册"})
             if User_Login.objects.filter(username=username).exists():
                 raise ValidationError({"ValidationError":"用户名已被注册"})
@@ -57,18 +73,22 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
 
-        user = User_Login.objects.create_user(
-            email=validated_data['email'],
-            password=validated_data['password'],
-            username=validated_data['username'],
-            is_active=True,
-            )
-        user.save()
+        user = User_Login.objects.create_user(email=validated_data['email'], username=validated_data['username'],
+                                              password=validated_data['password'])
+        user.save() # 创建用户
+
+        user_profile = User_Profile.objects.create(
+            user_Login=user,
+        )
+        user_profile.save() # 创建用户资料
         return user
 
     class Meta:
         model = User_Login
         fields = ['email','password','username','code',"usage"]
+
+
+# 重置密码序列化器
 
 class ResetPasswordSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(max_length=50,required=True)
