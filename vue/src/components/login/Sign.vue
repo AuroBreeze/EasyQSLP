@@ -24,26 +24,14 @@
             <label for="nameInput">姓名</label>
           </div>
           
-          <!-- 邮箱输入框 -->
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <div class="input-group" style="flex-grow: 1;">
-              <input type="email" placeholder="邮箱" id="signupEmail" v-model="signUpData.email" />
-              <label for="signupEmail">邮箱</label>
-            </div>
-            <button 
-              type="button" 
-              id="signupGetCode" 
-              @click="handleGetSignUpCode"
-              :disabled="!canGetCode"
-            >
-              {{ canGetCode ? '获取验证码' : `${codeCountdown}秒后重试` }}
-            </button>
-          </div>
-          
-          <!-- 验证码错误提示区域 -->
-          <div v-if="codeErrorMessage" class="error-message">
-            {{ codeErrorMessage }}
-          </div>
+          <!-- 邮箱输入框和验证码按钮 -->
+          <EmailCode 
+            v-model="signUpData.email"
+            input-id="signupEmail"
+            button-id="signupGetCode"
+            usage="Register"
+            @code-sent="handleCodeSent"
+          />
           <!-- 验证码输入框 -->
           <div class="input-group">
             <input type="text" placeholder="验证码" id="signupCode" v-model="signUpData.code" />
@@ -130,9 +118,10 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import WaveBackground from '@/components/background/WaveBackground.vue';
+import EmailCode from '@/components/login/EmailCode.vue';
 
 const router = useRouter();
 
@@ -152,9 +141,11 @@ const isLoginSuccess = ref(false);
 const countdown = ref(3);
 const errorMessage = ref('');
 const signUpErrorMessage = ref('');
-const codeErrorMessage = ref('');
-const codeCountdown = ref(0);
-const canGetCode = ref(true);
+const handleCodeSent = (success: boolean) => {
+  if (!success) {
+    signUpErrorMessage.value = '验证码发送失败';
+  }
+};
 
 const togglePanel = (isRightPanelActive:boolean) => {
   const container = document.getElementById('container');
@@ -167,7 +158,6 @@ const togglePanel = (isRightPanelActive:boolean) => {
     // 切换面板时清除所有提示信息
     signUpErrorMessage.value = '';
     errorMessage.value = '';
-    codeErrorMessage.value = '';
   }
 };
 
@@ -377,48 +367,7 @@ const handleSignUp = async () => {
   }
 };
 
-const handleGetSignUpCode = async () => {
-  if (!canGetCode.value) return;
-  
-  const { email } = signUpData;
-  if (!email) {
-    showCodeError('请输入邮箱地址');
-    return;
-  }
 
-  try {
-    const response = await fetch('http://localhost:8000/api/v1/user/emailsendcode/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        email: email,
-        usage: 'Register'
-      })
-    });
-
-    const data = await response.json();
-    if (data.success) {
-      // 开始倒计时
-      canGetCode.value = false;
-      codeCountdown.value = 60;
-      const timer = setInterval(() => {
-        codeCountdown.value--;
-        if (codeCountdown.value <= 0) {
-          clearInterval(timer);
-          canGetCode.value = true;
-        }
-      }, 1000);
-    } else {
-      showCodeError(data.message);
-    }
-  } catch (error) {
-    console.error('验证码请求失败:', error);
-    showCodeError('验证码请求失败，请检查网络连接');
-  }
-};
 
 const handleForgotPassword = () => {
   // 忘记密码逻辑
@@ -440,13 +389,6 @@ const showSignUpError = (message: string) => {
     }, 5000);
 };
 
-const showCodeError = (message: string) => {
-    codeErrorMessage.value = message;
-    // 5秒后自动清除错误信息
-    setTimeout(() => {
-        codeErrorMessage.value = '';
-    }, 5000);
-};
 
 const startCountdown = () => {
   const interval = setInterval(() => {
