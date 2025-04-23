@@ -24,26 +24,14 @@
             <label for="nameInput">姓名</label>
           </div>
           
-          <!-- 邮箱输入框 -->
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <div class="input-group" style="flex-grow: 1;">
-              <input type="email" placeholder="邮箱" id="signupEmail" v-model="signUpData.email" />
-              <label for="signupEmail">邮箱</label>
-            </div>
-            <button 
-              type="button" 
-              id="signupGetCode" 
-              @click="handleGetSignUpCode"
-              :disabled="!canGetCode"
-            >
-              {{ canGetCode ? '获取验证码' : `${codeCountdown}秒后重试` }}
-            </button>
-          </div>
-          
-          <!-- 验证码错误提示区域 -->
-          <div v-if="codeErrorMessage" class="error-message">
-            {{ codeErrorMessage }}
-          </div>
+          <!-- 邮箱输入框和验证码按钮 -->
+          <EmailCode 
+            v-model="signUpData.email"
+            input-id="signupEmail"
+            button-id="signupGetCode"
+            usage="Register"
+            @code-sent="handleCodeSent"
+          />
           <!-- 验证码输入框 -->
           <div class="input-group">
             <input type="text" placeholder="验证码" id="signupCode" v-model="signUpData.code" />
@@ -83,12 +71,54 @@
             <input type="password" placeholder="密码" id="signinPassword" v-model="signInData.password" />
             <label for="signinPassword">密码</label>
           </div>
-          <a href="#" @click.prevent="handleForgotPassword">忘记密码?</a>
+          <a href="#" class="forgot-password" @click.prevent="handleForgotPassword">忘记密码?</a>
           <!-- 忘记密码的链接 -->
           <button>登录</button>
           <!-- 提交登录表单的按钮 -->
         </form>
       </div>
+      <!-- 忘记密码表单部分 -->
+      <div class="form-container forgot-password-container">
+        <form @submit.prevent="handleResetPassword">
+          <h1>重置密码</h1>
+          <span>请输入您的邮箱和验证码</span>
+          
+          <div v-if="forgotPasswordError" class="error-message">
+            {{ forgotPasswordError }}
+          </div>
+
+          <!-- 邮箱输入框和验证码按钮 -->
+          <EmailCode 
+            v-model="forgotPasswordData.email"
+            input-id="forgotEmail"
+            button-id="forgotGetCode"
+            usage="ResetPassword"
+            @code-sent="handleCodeSent"
+          />
+
+          <!-- 验证码输入框 -->
+          <div class="input-group">
+            <input type="text" placeholder="验证码" id="forgotCode" v-model="forgotPasswordData.code" />
+            <label for="forgotCode">验证码</label>
+          </div>
+
+          <!-- 新密码输入框 -->
+          <div class="input-group">
+            <input type="password" placeholder="新密码" id="newPassword" v-model="forgotPasswordData.password" />
+            <label for="newPassword">新密码</label>
+          </div>
+
+          <!-- 确认新密码输入框 -->
+          <div class="input-group">
+            <input type="password" placeholder="确认新密码" id="confirmPassword" v-model="forgotPasswordData.password_confirm" />
+            <label for="confirmPassword">确认新密码</label>
+          </div>
+
+          <button type="submit">重置密码</button>
+          <a href="#" class="back-to-login" @click.prevent="handleBackToLogin">返回登录</a>
+        </form>
+      </div>
+
       <div class="overlay-container">
         <!-- 覆盖层容器，用于切换注册和登录界面 -->
         <div class="overlay">
@@ -130,9 +160,10 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import WaveBackground from '@/components/background/WaveBackground.vue';
+import EmailCode from '@/components/login/EmailCode.vue';
 
 const router = useRouter();
 
@@ -152,13 +183,21 @@ const isLoginSuccess = ref(false);
 const countdown = ref(3);
 const errorMessage = ref('');
 const signUpErrorMessage = ref('');
-const codeErrorMessage = ref('');
-const codeCountdown = ref(0);
-const canGetCode = ref(true);
+const handleCodeSent = (success: boolean) => {
+  if (!success) {
+    showSignUpError("验证码发送失败");
+  }
+};
 
 const togglePanel = (isRightPanelActive:boolean) => {
   const container = document.getElementById('container');
   if (container) {
+    // 如果当前是忘记密码面板且要切换到注册面板
+    if (isForgotPasswordActive.value && isRightPanelActive) {
+      container.classList.remove("forgot-panel-active");
+      isForgotPasswordActive.value = false;
+    }
+    
     if (isRightPanelActive) {
       container.classList.add("right-panel-active");
     } else {
@@ -167,7 +206,6 @@ const togglePanel = (isRightPanelActive:boolean) => {
     // 切换面板时清除所有提示信息
     signUpErrorMessage.value = '';
     errorMessage.value = '';
-    codeErrorMessage.value = '';
   }
 };
 
@@ -312,6 +350,7 @@ const verifyToken = async (token: string) => {
 
 const handleSignUp = async () => {
   const { name, email, code, password } = signUpData;
+  //console.log(name, email, code, password);
   if (!name || !email || !code || !password) {
     showSignUpError('请填写所有必填项');
     return;
@@ -377,17 +416,57 @@ const handleSignUp = async () => {
   }
 };
 
-const handleGetSignUpCode = async () => {
-  if (!canGetCode.value) return;
+
+
+const forgotPasswordData = reactive({
+  email: '',
+  code: '',
+  password: '',
+  password_confirm: ''
+});
+const forgotPasswordError = ref('');
+const isForgotPasswordActive = ref(false);
+
+const handleForgotPassword = () => {
+  const container = document.getElementById('container');
+  if (container) {
+    container.classList.remove("right-panel-active");
+    container.classList.add("forgot-panel-active");
+    isForgotPasswordActive.value = true;
+    errorMessage.value = '';
+    signUpErrorMessage.value = '';
+  }
+};
+
+const handleBackToLogin = () => {
+  const container = document.getElementById('container');
+  if (container) {
+    container.classList.remove("forgot-panel-active");
+    isForgotPasswordActive.value = false;
+    forgotPasswordData.email = '';
+    forgotPasswordData.code = '';
+    forgotPasswordData.password = '';
+    forgotPasswordData.password_confirm = '';
+    forgotPasswordError.value = '';
+  }
+};
+
+const handleResetPassword = async () => {
+  const { email, code, password, password_confirm } = forgotPasswordData;
   
-  const { email } = signUpData;
-  if (!email) {
-    showCodeError('请输入邮箱地址');
+  //console.log(email, code, password, password_confirm);
+  if (!email || !code || !password || !password_confirm) {
+    forgotPasswordError.value = '请填写所有必填项';
+    return;
+  }
+
+  if (password !== password_confirm) {
+    forgotPasswordError.value = '两次输入的密码不一致';
     return;
   }
 
   try {
-    const response = await fetch('http://localhost:8000/api/v1/user/emailsendcode/', {
+    const response = await fetch('http://localhost:8000/api/v1/user/resetpassword/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -395,33 +474,50 @@ const handleGetSignUpCode = async () => {
       },
       body: JSON.stringify({
         email: email,
-        usage: 'Register'
+        code: code,
+        password: password,
+        password_confirm: password_confirm
       })
     });
 
     const data = await response.json();
-    if (data.success) {
-      // 开始倒计时
-      canGetCode.value = false;
-      codeCountdown.value = 60;
-      const timer = setInterval(() => {
-        codeCountdown.value--;
-        if (codeCountdown.value <= 0) {
-          clearInterval(timer);
-          canGetCode.value = true;
+    
+    if (!response.ok) {
+      if (data.errors) {
+        if (data.errors.ValidationError) {
+          forgotPasswordError.value = data.errors.ValidationError[0];
+        } else if (data.errors.email) {
+          forgotPasswordError.value = `邮箱错误: ${data.errors.email}`;
+        } else if (data.errors.code) {
+          forgotPasswordError.value = `验证码错误: ${data.errors.code}`;
+        } else if (data.errors.password) {
+          forgotPasswordError.value = `密码错误: ${data.errors.password}`;
+        } else {
+          forgotPasswordError.value = data.message || '密码重置失败';
         }
-      }, 1000);
-    } else {
-      showCodeError(data.message);
+      } else {
+        forgotPasswordError.value = data.message || '密码重置失败';
+      }
+      return;
+    }
+
+    if (data.success) {
+      forgotPasswordError.value = '';
+      const successMessage = '密码重置成功！2秒后将自动返回登录页面';
+      showResetPasswordSuccess(successMessage);
+      
+      setTimeout(() => {
+        handleBackToLogin();
+        forgotPasswordData.email = '';
+        forgotPasswordData.code = '';
+        forgotPasswordData.password = '';
+        forgotPasswordData.password_confirm = '';
+      }, 2000);
     }
   } catch (error) {
-    console.error('验证码请求失败:', error);
-    showCodeError('验证码请求失败，请检查网络连接');
+    console.error('密码重置请求失败:', error);
+    forgotPasswordError.value = '网络错误，请检查连接后重试';
   }
-};
-
-const handleForgotPassword = () => {
-  // 忘记密码逻辑
 };
 
 const showError = (message: string) => {
@@ -429,6 +525,22 @@ const showError = (message: string) => {
     // 5秒后自动清除错误信息
     setTimeout(() => {
         errorMessage.value = '';
+    }, 5000);
+};
+
+const showResetPasswordSuccess = (message: string) => {
+    forgotPasswordError.value = message;
+    // 修改样式为成功提示
+    const errorEl = document.querySelector('.forgot-password-container .error-message');
+    if (errorEl) {
+        errorEl.classList.add('success-message');
+    }
+    // 5秒后自动清除
+    setTimeout(() => {
+        forgotPasswordError.value = '';
+        if (errorEl) {
+            errorEl.classList.remove('success-message');
+        }
     }, 5000);
 };
 
@@ -440,13 +552,6 @@ const showSignUpError = (message: string) => {
     }, 5000);
 };
 
-const showCodeError = (message: string) => {
-    codeErrorMessage.value = message;
-    // 5秒后自动清除错误信息
-    setTimeout(() => {
-        codeErrorMessage.value = '';
-    }, 5000);
-};
 
 const startCountdown = () => {
   const interval = setInterval(() => {
@@ -706,6 +811,21 @@ input {
 .container.right-panel-active .sign-in-container {
     /* 向右平移 100% */
     transform: translateX(100%);
+}
+
+/* 忘记密码表单容器样式 */
+.forgot-password-container {
+  right: 0;
+  width: 50%;
+  opacity: 0;
+  z-index: 1;
+}
+
+.container.forgot-panel-active .forgot-password-container {
+  transform: translateX(-100%);
+  opacity: 1;
+  z-index: 5;
+  animation: show 0.6s;
 }
 
 /* 注册表单容器样式 */
@@ -1017,6 +1137,19 @@ input {
     padding: 10px;
     background-color: #ffe6e6;
     border: 1px solid red;
+    border-radius: 5px;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.success-message {
+    color: #28a745;
+    font-size: 14px;
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #e6ffe6;
+    border: 1px solid #28a745;
     border-radius: 5px;
     text-align: center;
     width: 100%;
