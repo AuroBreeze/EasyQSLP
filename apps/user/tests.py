@@ -1,3 +1,5 @@
+from http.client import responses
+
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
@@ -70,15 +72,37 @@ class UserLoginTestCase(TestCase):
         response = self.client.post(self.login_url, invalid_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_user_jwt_token(self):
+    def test_valid_jwt_token(self):
         valid_payload = {
             'email': 'test@example.com',
             'password': 'testpassword'
         }
-        response = self.client.post(self.login_url, valid_payload, format='json')
+        response = self.client.post(self.jwt_token_url, valid_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('access', response.data)
-        self.assertIn('refresh', response.data)
+        self.assertIn('access', response.json())
+        self.assertIn('refresh', response.json())
+
+        response_refresh = self.client.post(self.jwt_token_refresh_url, {'refresh': response.json()['refresh']}, format='json')
+        self.assertEqual(response_refresh.status_code, status.HTTP_200_OK)
+        self.assertIn('access', response_refresh.json())
+        self.assertIn('refresh', response_refresh.json())
+
+        response_verify = self.client.post(self.jwt_token_verify_url, {'token': response.json()['access']}, format='json')
+        self.assertEqual(response_verify.status_code, status.HTTP_200_OK)
+        self.assertNotIn('error',response_verify.json())
+
+
+    def test_invalid_jwt_token(self):
+        invalid_payload = {
+            'email': 'test@example.com',
+            'password': 'wrongpassword'
+        }
+        response = self.client.post(self.jwt_token_url, invalid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertNotIn('access', response.json())
+        self.assertNotIn('refresh', response.json())
+
+
 
 class UserResetPasswordTestCase(TestCase):
     def setUp(self):

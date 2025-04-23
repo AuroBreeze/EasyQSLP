@@ -3,9 +3,10 @@ from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
 from ..models import *
 from django.utils import timezone
-from rest_framework_simplejwt.serializers import TokenObtainSerializer
+from rest_framework_simplejwt.serializers import TokenObtainSerializer, TokenObtainPairSerializer
 
-class UserTokenObtainPairSerializer(TokenObtainSerializer):
+
+class UserTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
