@@ -169,7 +169,7 @@ class UserEmailCodeSendTestCase(TestCase):
     def test_valid_user_email_code_send_ResetPassword(self):
         response = self.client.post(self.email_code_send_url,self.valid_payload,format='json')
         print(response.json())
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(response.json()['success'])
         self.assertEqual(response.json()['message'], 'Email code sent successfully!')
 
