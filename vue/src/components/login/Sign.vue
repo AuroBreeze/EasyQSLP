@@ -502,9 +502,16 @@ const handleResetPassword = async () => {
     }
 
     if (data.success) {
-      forgotPasswordError.value = '密码重置成功，正在跳转到登录页面...';
+      forgotPasswordError.value = '';
+      const successMessage = '密码重置成功！2秒后将自动返回登录页面';
+      showResetPasswordSuccess(successMessage);
+      
       setTimeout(() => {
         handleBackToLogin();
+        forgotPasswordData.email = '';
+        forgotPasswordData.code = '';
+        forgotPasswordData.password = '';
+        forgotPasswordData.password_confirm = '';
       }, 2000);
     }
   } catch (error) {
@@ -518,6 +525,22 @@ const showError = (message: string) => {
     // 5秒后自动清除错误信息
     setTimeout(() => {
         errorMessage.value = '';
+    }, 5000);
+};
+
+const showResetPasswordSuccess = (message: string) => {
+    forgotPasswordError.value = message;
+    // 修改样式为成功提示
+    const errorEl = document.querySelector('.forgot-password-container .error-message');
+    if (errorEl) {
+        errorEl.classList.add('success-message');
+    }
+    // 5秒后自动清除
+    setTimeout(() => {
+        forgotPasswordError.value = '';
+        if (errorEl) {
+            errorEl.classList.remove('success-message');
+        }
     }, 5000);
 };
 
@@ -1114,6 +1137,19 @@ input {
     padding: 10px;
     background-color: #ffe6e6;
     border: 1px solid red;
+    border-radius: 5px;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.success-message {
+    color: #28a745;
+    font-size: 14px;
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #e6ffe6;
+    border: 1px solid #28a745;
     border-radius: 5px;
     text-align: center;
     width: 100%;
