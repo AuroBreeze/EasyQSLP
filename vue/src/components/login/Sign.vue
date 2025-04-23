@@ -14,6 +14,10 @@
           <!-- 注册表单标题 -->
           <span>使用邮箱注册</span>
           <!-- 提示用户使用邮箱注册 -->
+          <!-- 错误提示区域 -->
+          <div v-if="signUpErrorMessage" class="error-message">
+            {{ signUpErrorMessage }}
+          </div>
           <!-- 姓名输入框 -->
           <div class="input-group">
             <input type="text" placeholder="姓名" id="nameInput" v-model="signUpData.name" />
@@ -29,6 +33,10 @@
             <button type="button" id="signupGetCode" @click="handleGetSignUpCode">获取验证码</button>
           </div>
           
+          <!-- 验证码错误提示区域 -->
+          <div v-if="codeErrorMessage" class="error-message">
+            {{ codeErrorMessage }}
+          </div>
           <!-- 验证码输入框 -->
           <div class="input-group">
             <input type="text" placeholder="验证码" id="signupCode" v-model="signUpData.code" />
@@ -136,6 +144,8 @@ const signInData = reactive({
 const isLoginSuccess = ref(false);
 const countdown = ref(3);
 const errorMessage = ref('');
+const signUpErrorMessage = ref('');
+const codeErrorMessage = ref('');
 
 const togglePanel = (isRightPanelActive:boolean) => {
   const container = document.getElementById('container');
@@ -290,7 +300,7 @@ const verifyToken = async (token: string) => {
 const handleSignUp = async () => {
   const { name, email, code, password } = signUpData;
   if (!name || !email || !code || !password) {
-    showError('请填写所有必填项');
+    showSignUpError('请填写所有必填项');
     return;
   }
 
@@ -309,25 +319,43 @@ const handleSignUp = async () => {
         usage: 'Register'
       })
     });
-    
+
     const data = await response.json();
     
+    if (!response.ok) {
+      // 处理400/401错误
+      if (data.errors) {
+        if (data.errors.ValidationError) {
+          showError(data.errors.ValidationError);
+        } else if (data.errors.email) {
+          showError(`邮箱错误: ${data.errors.email}`);
+        } else if (data.errors.password) {
+          showError(`密码错误: ${data.errors.password}`);
+        } else if (data.errors.code) {
+          showError(`验证码错误: ${data.errors.code}`);
+        } else {
+          showError(data.message || '注册失败');
+        }
+      } else {
+        showError(data.message || '注册失败');
+      }
+      return;
+    }
+
     if (data.success) {
       alert('注册成功，请登录');
       location.reload();
-    } else {
-      showError(data.message);
     }
   } catch (error) {
     console.error('注册请求失败:', error);
-    showError('注册请求失败，请检查网络连接');
+    showError('网络错误，请检查连接后重试');
   }
 };
 
 const handleGetSignUpCode = async () => {
   const { email } = signUpData;
   if (!email) {
-    showError('请输入邮箱地址');
+    showCodeError('请输入邮箱地址');
     return;
   }
 
@@ -348,11 +376,11 @@ const handleGetSignUpCode = async () => {
     if (data.success) {
       alert('验证码已发送到您的邮箱');
     } else {
-      showError(data.message);
+      showCodeError(data.message);
     }
   } catch (error) {
     console.error('验证码请求失败:', error);
-    showError('验证码请求失败，请检查网络连接');
+    showCodeError('验证码请求失败，请检查网络连接');
   }
 };
 
@@ -361,12 +389,27 @@ const handleForgotPassword = () => {
 };
 
 const showError = (message: string) => {
-
     errorMessage.value = message;
-  // 5秒后自动清除错误信息
-  setTimeout(() => {
-    errorMessage.value = '';
-  }, 5000);
+    // 5秒后自动清除错误信息
+    setTimeout(() => {
+        errorMessage.value = '';
+    }, 5000);
+};
+
+const showSignUpError = (message: string) => {
+    signUpErrorMessage.value = message;
+    // 5秒后自动清除错误信息
+    setTimeout(() => {
+        signUpErrorMessage.value = '';
+    }, 5000);
+};
+
+const showCodeError = (message: string) => {
+    codeErrorMessage.value = message;
+    // 5秒后自动清除错误信息
+    setTimeout(() => {
+        codeErrorMessage.value = '';
+    }, 5000);
 };
 
 const startCountdown = () => {
