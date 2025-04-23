@@ -1,4 +1,4 @@
-# EasyQFLP 🚀
+# EasyQSLP 🚀
 
 ## 简介 🌟
 
@@ -20,9 +20,9 @@
 
 | 指标 | 统计                                                                          |
 |------|-----------------------------------------------------------------------------|
-| 总提交数 | ![总提交](https://img.shields.io/github/commit-activity/t/AuroBreeze/EasyQFLP) |
-| 本周活跃 | ![周提交](https://img.shields.io/github/commit-activity/w/AuroBreeze/EasyQFLP) |
-| 开放问题 | ![问题数](https://img.shields.io/github/issues/AuroBreeze/EasyQFLP)            |
+| 总提交数 | ![总提交](https://img.shields.io/github/commit-activity/t/AuroBreeze/EasyQSLP) |
+| 本周活跃 | ![周提交](https://img.shields.io/github/commit-activity/w/AuroBreeze/EasyQSLP) |
+| 开放问题 | ![问题数](https://img.shields.io/github/issues/AuroBreeze/EasyQSLP)            |
 
 
 
