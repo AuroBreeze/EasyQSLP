@@ -3,7 +3,7 @@
     <!-- 波浪背景容器 -->
     <WaveBackground />
     <div class="content-wrapper">
-      <h2>欢迎来到EasyQFLP</h2>
+      <h2>欢迎来到EasyQSLP</h2>
       <div class="container" id="container">
       <!-- 容器，包含注册和登录表单及切换面板 -->
       <!-- 注册表单部分 -->
