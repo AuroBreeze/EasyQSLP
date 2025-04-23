@@ -87,7 +87,9 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         model = User_Login
         fields = ['email','password','username','code',"usage"]
 
+
 # 重置密码序列化器
+
 class ResetPasswordSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(max_length=50,required=True)
     code = serializers.CharField(min_length=6,max_length=6,required=True,write_only=True)
