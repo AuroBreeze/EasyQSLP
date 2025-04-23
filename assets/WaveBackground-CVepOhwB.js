@@ -1,1 +1,0 @@
-import{d as n,c as s,o as r}from"./index-DoHoPr3b.js";const _={class:"wave-background"},p=n({__name:"WaveBackground",setup(e){return(c,o)=>(r(),s("div",_))}}),d=(e,c)=>{const o=e.__vccOpts||e;for(const[t,a]of c)o[t]=a;return o},v=d(p,[["__scopeId","data-v-e777cfc2"]]);export{v as W,d as _};
