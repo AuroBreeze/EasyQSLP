@@ -2,6 +2,28 @@ from django.db import models
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
+class Project(models.Model):
+    class Status(models.TextChoices):
+        DRAFT = 'draft','草稿'
+        PUBLISHED = 'published','已发布'
+        UNDER_REVIEW = 'under_review','审核中'
+
+    title = models.CharField(max_length=50,unique=True,verbose_name='项目名称')
+    owner = models.ForeignKey(User,on_delete=models.SET_NULL,null=True,blank=True,related_name='projects',verbose_name='项目管理者')
+    collaborator = models.ManyToManyField(User,related_name='collaborated_projects',verbose_name='项目协作者')
+    version = models.OneToOneField("ProjectVersion",on_delete=models.SET_NULL,null=True,blank=True,related_name='project_versions',verbose_name='项目版本')
+    create_time = models.DateTimeField(auto_now_add=True,verbose_name='创建时间')
+    update_time = models.DateTimeField(auto_now=True,verbose_name='更新时间')
+    cover_image = models.ImageField(upload_to='project_cover_image',verbose_name='项目封面图')
+
+    class Meta:
+        db_table = "project"
+        verbose_name = '项目'
+        verbose_name_plural = '项目'
+
+
+class ProjectVersion(models.Model):
+    pass
 
 class Article_category(models.Model):
     name = models.CharField(max_length=50,verbose_name='分类名称')
