@@ -344,6 +344,7 @@ const verifyToken = async (token: string) => {
 
 const handleSignUp = async () => {
   const { name, email, code, password } = signUpData;
+  //console.log(name, email, code, password);
   if (!name || !email || !code || !password) {
     showSignUpError('请填写所有必填项');
     return;
@@ -447,6 +448,7 @@ const handleBackToLogin = () => {
 const handleResetPassword = async () => {
   const { email, code, password, password_confirm } = forgotPasswordData;
   
+  //console.log(email, code, password, password_confirm);
   if (!email || !code || !password || !password_confirm) {
     forgotPasswordError.value = '请填写所有必填项';
     return;
@@ -784,14 +786,14 @@ input {
 
 /* 忘记密码表单容器样式 */
 .forgot-password-container {
-  left: 0;
+  right: 0;
   width: 50%;
   opacity: 0;
   z-index: 1;
 }
 
 .container.forgot-panel-active .forgot-password-container {
-  transform: translateX(100%);
+  transform: translateX(-100%);
   opacity: 1;
   z-index: 5;
   animation: show 0.6s;
