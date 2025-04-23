@@ -25,12 +25,19 @@
           </div>
           
           <!-- 邮箱输入框 -->
-          <div style="display: flex; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 10px;">
             <div class="input-group" style="flex-grow: 1;">
               <input type="email" placeholder="邮箱" id="signupEmail" v-model="signUpData.email" />
               <label for="signupEmail">邮箱</label>
             </div>
-            <button type="button" id="signupGetCode" @click="handleGetSignUpCode">获取验证码</button>
+            <button 
+              type="button" 
+              id="signupGetCode" 
+              @click="handleGetSignUpCode"
+              :disabled="!canGetCode"
+            >
+              {{ canGetCode ? '获取验证码' : `${codeCountdown}秒后重试` }}
+            </button>
           </div>
           
           <!-- 验证码错误提示区域 -->
@@ -146,6 +153,8 @@ const countdown = ref(3);
 const errorMessage = ref('');
 const signUpErrorMessage = ref('');
 const codeErrorMessage = ref('');
+const codeCountdown = ref(0);
+const canGetCode = ref(true);
 
 const togglePanel = (isRightPanelActive:boolean) => {
   const container = document.getElementById('container');
@@ -321,6 +330,7 @@ const handleSignUp = async () => {
     });
 
     const data = await response.json();
+    console.log(data);
     
     if (!response.ok) {
       // 处理400/401错误
@@ -353,6 +363,8 @@ const handleSignUp = async () => {
 };
 
 const handleGetSignUpCode = async () => {
+  if (!canGetCode.value) return;
+  
   const { email } = signUpData;
   if (!email) {
     showCodeError('请输入邮箱地址');
@@ -374,7 +386,16 @@ const handleGetSignUpCode = async () => {
 
     const data = await response.json();
     if (data.success) {
-      alert('验证码已发送到您的邮箱');
+      // 开始倒计时
+      canGetCode.value = false;
+      codeCountdown.value = 60;
+      const timer = setInterval(() => {
+        codeCountdown.value--;
+        if (codeCountdown.value <= 0) {
+          clearInterval(timer);
+          canGetCode.value = true;
+        }
+      }, 1000);
     } else {
       showCodeError(data.message);
     }
