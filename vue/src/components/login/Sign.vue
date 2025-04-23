@@ -143,7 +143,7 @@ const errorMessage = ref('');
 const signUpErrorMessage = ref('');
 const handleCodeSent = (success: boolean) => {
   if (!success) {
-    signUpErrorMessage.value = '验证码发送失败';
+    showSignUpError("验证码发送失败");
   }
 };
 
