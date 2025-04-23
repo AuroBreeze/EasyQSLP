@@ -52,6 +52,11 @@
           <!-- 登录表单标题 -->
           <span>账户密码登录</span>
           <!-- 提示用户使用账户密码登录 -->
+          <!-- 错误提示区域 -->
+          <div v-if="errorMessage" class="error-message">
+            {{ errorMessage }}
+          </div>
+          
           <!-- 邮箱输入框 -->
           <div class="input-group">
             <input type="email" placeholder="邮箱" id="signinEmail" v-model="signInData.email" />
@@ -130,6 +135,7 @@ const signInData = reactive({
 
 const isLoginSuccess = ref(false);
 const countdown = ref(3);
+const errorMessage = ref('');
 
 const togglePanel = (isRightPanelActive:boolean) => {
   const container = document.getElementById('container');
@@ -178,6 +184,24 @@ const handleSignIn = async () => {
 
     const loginData = await loginResponse.json();
     
+    if (!loginResponse.ok) {
+      // 处理400/401错误
+      if (loginData.errors) {
+        if (loginData.errors.ValidationError) {
+          showError(loginData.errors.ValidationError);
+        } else if (loginData.errors.email) {
+          showError(`邮箱错误: ${loginData.errors.email}`);
+        } else if (loginData.errors.password) {
+          showError(`密码错误: ${loginData.errors.password}`);
+        } else {
+          showError(loginData.message || '登录失败');
+        }
+      } else {
+        showError(loginData.message || '登录失败');
+      }
+      return;
+    }
+
     if (loginData.success) {
       // 2. 登录成功后再获取JWT token
       const tokenResponse = await fetch('http://localhost:8000/api/v1/user/token/', {
@@ -206,12 +230,10 @@ const handleSignIn = async () => {
       } else {
         showError(tokenData.detail || '获取token失败');
       }
-    } else {
-      showError(loginData.message || '登录失败', loginData.errors);
     }
   } catch (error) {
     console.error('登录请求失败:', error);
-    showError('登录请求失败，请检查网络连接');
+    showError('网络错误，请检查连接后重试');
   }
 };
 
@@ -338,17 +360,13 @@ const handleForgotPassword = () => {
   // 忘记密码逻辑
 };
 
-const showError = (message: string, errors?: Record<string, string[]>) => {
-  if (errors) {
-    // 显示具体错误信息
-    let errorMsg = message + '\n\n';
-    for (const [field, fieldErrors] of Object.entries(errors)) {
-      errorMsg += `${field}: ${fieldErrors.join(', ')}\n`;
-    }
-    alert(errorMsg);
-  } else {
-    alert(message);
-  }
+const showError = (message: string) => {
+
+    errorMessage.value = message;
+  // 5秒后自动清除错误信息
+  setTimeout(() => {
+    errorMessage.value = '';
+  }, 5000);
 };
 
 const startCountdown = () => {
