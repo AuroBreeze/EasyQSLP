@@ -192,6 +192,12 @@ const handleCodeSent = (success: boolean) => {
 const togglePanel = (isRightPanelActive:boolean) => {
   const container = document.getElementById('container');
   if (container) {
+    // 如果当前是忘记密码面板且要切换到注册面板
+    if (isForgotPasswordActive.value && isRightPanelActive) {
+      container.classList.remove("forgot-panel-active");
+      isForgotPasswordActive.value = false;
+    }
+    
     if (isRightPanelActive) {
       container.classList.add("right-panel-active");
     } else {
