@@ -159,12 +159,16 @@ const canGetCode = ref(true);
 const togglePanel = (isRightPanelActive:boolean) => {
   const container = document.getElementById('container');
   if (container) {
-  if (isRightPanelActive) {
-    container.classList.add("right-panel-active");
-  } else {
-    container.classList.remove("right-panel-active");
+    if (isRightPanelActive) {
+      container.classList.add("right-panel-active");
+    } else {
+      container.classList.remove("right-panel-active");
+    }
+    // 切换面板时清除所有提示信息
+    signUpErrorMessage.value = '';
+    errorMessage.value = '';
+    codeErrorMessage.value = '';
   }
-}
 };
 
 const handleSignIn = async () => {
@@ -365,6 +369,7 @@ const handleSignUp = async () => {
         signUpData.password = '';
         signUpErrorMessage.value = '注册成功，请登录';
       }, 2000);
+
     }
   } catch (error) {
     console.error('注册请求失败:', error);
