@@ -2,7 +2,7 @@
   <div>
   <WaveBackground />
   <div class="content-wrapper">
-    <h1 class="site-title">EasyQFLP</h1>
+    <h1 class="site-title">EasyQSLP</h1>
     <p class="site-description">
       EasyQSLP 是一个基于项目的知识分享型网站，致力于打破信息差，提供更多的其他领域的<strong>从零开始</strong>的学习项目，让更多的人可以接触到更多的知识，以便寻找到属于自己的方向。🌍
     </p>
