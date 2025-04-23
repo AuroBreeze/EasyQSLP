@@ -25,9 +25,13 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
 const props = defineProps({
+  modelValue: {
+    type: String,
+    default: ''
+  },
   placeholder: {
     type: String,
     default: '邮箱'
@@ -56,7 +60,16 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'codeSent']);
 
-const email = ref('');
+const email = ref(props.modelValue);
+
+watch(email, (newVal: string) => {
+  //console.log('EmailCode emitting update:', newVal);
+  emit('update:modelValue', newVal);
+});
+
+watch(() => props.modelValue, (newVal: string) => {
+  email.value = newVal;
+});
 const errorMessage = ref('');
 const countdown = ref(0);
 const canGetCode = ref(true);
