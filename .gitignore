@@ -128,7 +128,7 @@ celerybeat.pid
 # Environments
 .env
 .venv
-.toml
+config_env.toml
 env/
 venv/
 ENV/
@@ -167,3 +167,5 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
+config_env.toml
+config_env.toml
