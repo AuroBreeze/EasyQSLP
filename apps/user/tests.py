@@ -82,15 +82,14 @@ class UserLoginTestCase(TestCase):
         self.assertIn('access', response.json())
         self.assertIn('refresh', response.json())
 
-        response_refresh = self.client.post(self.jwt_token_refresh_url, {'refresh': response.json()['refresh']}, format='json')
-        self.assertEqual(response_refresh.status_code, status.HTTP_200_OK)
-        self.assertIn('access', response_refresh.json())
-        self.assertIn('refresh', response_refresh.json())
+        response_refresh_vaile = self.client.post(self.jwt_token_refresh_url, {'refresh': response.json()['refresh']}, format='json')
+        self.assertEqual(response_refresh_vaile.status_code, status.HTTP_200_OK)
+        self.assertIn('access', response_refresh_vaile.json())
+        self.assertIn('refresh', response_refresh_vaile.json())
 
-        response_verify = self.client.post(self.jwt_token_verify_url, {'token': response.json()['access']}, format='json')
-        self.assertEqual(response_verify.status_code, status.HTTP_200_OK)
-        self.assertNotIn('error',response_verify.json())
-
+        response_verify_vaile = self.client.post(self.jwt_token_verify_url, {'token': response.json()['access']}, format='json')
+        self.assertEqual(response_verify_vaile.status_code, status.HTTP_200_OK)
+        self.assertNotIn('error',response_verify_vaile.json())
 
     def test_invalid_jwt_token(self):
         invalid_payload = {
@@ -98,9 +97,29 @@ class UserLoginTestCase(TestCase):
             'password': 'wrongpassword'
         }
         response = self.client.post(self.jwt_token_url, invalid_payload, format='json')
+        #print(response.json())
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertNotIn('access', response.json())
         self.assertNotIn('refresh', response.json())
+
+    def test_invalid_jwt_token_verify(self):
+        invalid_payload = {
+            'token': 'testtoken'
+        }
+        response = self.client.post(self.jwt_token_verify_url, invalid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertIn('detail',response.json())
+        self.assertIn('code',response.json())
+
+    def test_invalid_jwt_token_refresh(self):
+        invalid_payload = {
+            'refresh': 'testtoken'
+        }
+        response = self.client.post(self.jwt_token_refresh_url, invalid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        #print(response.json())
+        self.assertIn('detail', response.json())
+        self.assertIn('code', response.json())
 
 
 
