@@ -355,9 +355,8 @@ const handleSignUp = async () => {
     if (data.success) {
       // 显示成功消息
       signUpErrorMessage.value = '注册成功，正在跳转到登录页面...';
-      signUpErrorMessage.value = '';
       
-      // 2秒后平滑切换到登录界面
+      // 2秒后平滑切换到登录界面并保留成功提示
       setTimeout(() => {
         togglePanel(false);
         signUpData.name = '';
