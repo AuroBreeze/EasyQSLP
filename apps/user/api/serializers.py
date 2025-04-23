@@ -43,9 +43,9 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(max_length=50,required=True)
     password = serializers.CharField(max_length=255,required=True,write_only=True)
     username = serializers.CharField(max_length=20,validators=[MinLengthValidator(2)],required=True)
-    code = serializers.CharField(max_length=6,min_length=6,required=True,write_only=True)
+    code = serializers.CharField(max_length=6,min_length=6,required=True,write_only=True,error_messages={"required":"验证码不能为空","min_length":"验证码长度为6位","max_length":"验证码长度为6位"})
     # 验证码用途，防止一码多用(注册和重置密码)
-    usage = serializers.CharField(max_length=25,required=False,write_only=True)
+    usage = serializers.CharField(max_length=25,required=False,write_only=True,error_messages={"required":"用途不能为空"})
 
     def validate(self, data):
         email = data.get('email')
@@ -92,9 +92,9 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
 class ResetPasswordSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(max_length=50,required=True)
-    code = serializers.CharField(min_length=6,max_length=6,required=True,write_only=True)
-    password = serializers.CharField(min_length=8,max_length=255,required=True,write_only=True)
-    password_confirm = serializers.CharField(min_length=8,max_length=255,required=True,write_only=True)
+    code = serializers.CharField(min_length=6,max_length=6,required=True,write_only=True,error_messages={"min_length":"验证码长度为6位","max_length":"验证码长度为6位"})
+    password = serializers.CharField(min_length=8,max_length=255,required=True,write_only=True,error_messages={"required":"密码不能为空","min_length":"密码长度不能小于8位","max_length":"密码长度不能大于255位"})
+    password_confirm = serializers.CharField(min_length=8,max_length=255,required=True,write_only=True,error_messages={"required":"密码不能为空","min_length":"密码长度不能小于8位","max_length":"密码长度不能大于255位"})
     
     class Meta:
         model = Email_Verify_Code
