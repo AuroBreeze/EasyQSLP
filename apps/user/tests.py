@@ -1,5 +1,3 @@
-from http.client import responses
-
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
@@ -83,11 +81,13 @@ class UserLoginTestCase(TestCase):
         self.assertIn('refresh', response.json())
 
         response_refresh_vaile = self.client.post(self.jwt_token_refresh_url, {'refresh': response.json()['refresh']}, format='json')
+        #print(response_refresh_vaile.json())
         self.assertEqual(response_refresh_vaile.status_code, status.HTTP_200_OK)
         self.assertIn('access', response_refresh_vaile.json())
         self.assertIn('refresh', response_refresh_vaile.json())
 
         response_verify_vaile = self.client.post(self.jwt_token_verify_url, {'token': response.json()['access']}, format='json')
+        #print(response_verify_vaile.json())
         self.assertEqual(response_verify_vaile.status_code, status.HTTP_200_OK)
         self.assertNotIn('error',response_verify_vaile.json())
 
@@ -107,6 +107,7 @@ class UserLoginTestCase(TestCase):
             'token': 'testtoken'
         }
         response = self.client.post(self.jwt_token_verify_url, invalid_payload, format='json')
+        #print(response.json())
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertIn('detail',response.json())
         self.assertIn('code',response.json())
@@ -155,3 +156,45 @@ class UserResetPasswordTestCase(TestCase):
         invalid_payload['code'] = '654321'
         response = self.client.post(self.reset_pwd_url, invalid_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+class UserEmailCodeSendTestCase(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.email_code_send_url = reverse('user:emailsendcode')
+        self.user = User_Login.objects.create_user(email='test@example.com', username='testuser',
+                                                   password='testpassword')
+        self.valid_payload = {
+            'email': 'test@example.com',
+            'usage': 'ResetPassword'
+        }
+    def test_valid_user_email_code_send_ResetPassword(self):
+        response = self.client.post(self.email_code_send_url,self.valid_payload,format='json')
+        print(response.json())
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.json()['success'])
+        self.assertEqual(response.json()['message'], 'Email code sent successfully!')
+
+    def test_valid_user_email_code_send_Register(self):
+        invalid_payload = self.valid_payload.copy()
+        invalid_payload['usage'] = 'Register'
+        invalid_payload['email'] = 'test123@example.com'
+        response = self.client.post(self.email_code_send_url, invalid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(response.json()['success'])
+        self.assertEqual(response.json()['message'], 'Email code sent successfully!')
+
+    def test_invalid_user_email_code_send_ResetPassword(self):
+        invalid_payload = self.valid_payload.copy()
+        invalid_payload['email'] = 'test123@example.com'
+        response = self.client.post(self.email_code_send_url, invalid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(response.json()['success'])
+        self.assertIn('message', response.json())
+
+    def test_invalid_user_email_code_send_Register(self):
+        invalid_payload = self.valid_payload.copy()
+        invalid_payload['usage'] = 'Register'
+        response = self.client.post(self.email_code_send_url, invalid_payload, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(response.json()['success'])
+        self.assertIn('message', response.json())
+
