@@ -13,7 +13,7 @@
 ## 项目实现 🛠️
 
 - 后端:使用[Django](https://www.djangoproject.com/)作为后端框架，使用[Django-Rest-Framework](https://www.django-rest-framework.org/)作为后端API框架. 🐍
-- 前端:使用[HTML](https://www.w3.org/html/)/[CSS](https://www.w3.org/Style/CSS/Overview.en.html)/[JavaScript](https://www.javascript.com/)作为前端框架. 🎨
+- 前端:使用[vue](https://cn.vuejs.org/)作为前端框架. 🎨
 - 数据库:使用[PostgreSQL](https://www.postgresql.org/)作为数据库. 🗄️
 
 ## 项目更新进度
@@ -28,6 +28,7 @@
 
 ## 项目进展 📅
 
+- ✅ **2025-04-23** : 前端登录界面美化，用户资料管理 🎉
 - ✅ **2025-04-20** : 前端登录界面更换为VUE框架，并编写start界面. 🎨
 - ✅ **2025-04-19** : 前端登录界面api对接全部完成. 🎉
 - ✅ **2025-04-17** : 后端登录接口，注册接口，邮箱发送接口，忘记密码接口编写完成. 🎉
@@ -38,9 +39,9 @@
 
 ## 项目最近更新计划 📝
 
-- 🔄 **用户资料管理**. 🛠️
-- 🔧 **前端登录界面美化**. 🎨
-- 📧 **用户搜索功能**. 📨
+- 🔄 **项目管理后端设计**. 🛠️
+- 🔧 **项目发布界面**. 🎨
+- 📧 **markdown文件处理和渲染**. 📨
 
 ## 项目贡献者 👥
 
