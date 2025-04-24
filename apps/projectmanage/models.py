@@ -104,6 +104,7 @@ class Article(models.Model):
     content_md = models.TextField(verbose_name='项目内容markdown') #存储原始markdown
     content_html = models.TextField(verbose_name='项目内容html',editable=False)  # 自动生成的 HTML #存储渲染后的html
     content_hash = models.CharField(max_length=32, editable=False)  # 用于缓存校验
+    create_time = models.DateTimeField(auto_now_add=True,verbose_name='创建时间')
     update_time = models.DateTimeField(auto_now=True,verbose_name='更新时间')
 
     def __str__(self):
