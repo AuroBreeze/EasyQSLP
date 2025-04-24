@@ -232,6 +232,18 @@ class UserProfileTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertFalse(response.json()['success'])
         self.assertIn('errors',response.json())
+    def test_get_user_profile(self):
+        User_Profile.objects.update_or_create(user_Login=self.user,defaults={
+            'birthday': '2000-01-01',
+            'introduction': 'test introduction',
+        })
+
+        response = self.client.get(self.profile_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.json()['success'])
+        self.assertEqual(response.json()['data']['user_Login'],self.user.id)
+        #self.assertEqual(response.json()['data']['birthday'],'2000-01-01')
+        self.assertEqual(response.json()['data']['introduction'],'test introduction')
 
 
 
