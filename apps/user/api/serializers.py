@@ -136,11 +136,11 @@ class UserProfileSerializer(serializers.ModelSerializer):
     sex = serializers.CharField(max_length=6)
     introduction = serializers.CharField(max_length=60,required=False)
     avater = serializers.ImageField(required=False)
-    def validate_sex(self):
-        if self.data['sex'] not in ['MALE','FEMALE','OTHER']:
+    def validate_sex(self,data):
+        if data not in ['MALE','FEMALE','OTHER']:
             raise ValidationError({"ValidationError":"性别设置错误"})
         else:
-            return self.data['sex']
+            return data
 
     def validate_avater(self, value):
         # 图片类型

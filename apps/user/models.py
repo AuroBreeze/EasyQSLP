@@ -148,7 +148,7 @@ class User_Profile(models.Model):
     #学校
     school = models.CharField(max_length=50,null=True,blank=True,default='',verbose_name='学校')
 
-    user_Login = models.ForeignKey('User_Login',on_delete=models.CASCADE,related_name='profile',default=0) #外键关联到User_Login表
+    user_Login = models.ForeignKey('User_Login',on_delete=models.CASCADE,related_name='profile') #外键关联到User_Login表
 
     class Meta:
         db_table = 'user_profile'
