@@ -1,10 +1,18 @@
 from rest_framework.generics import get_object_or_404
 
-from .serializers import ArticleSerializer
-from ..models import Article
+from .serializers import ArticleSerializer,ProjectSerializer
+from ..models import Article,Project
 from django.core.cache import cache
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+
+class ProjectView(APIView):
+    def get(self,request,*args,**kwargs):
+        project_id = kwargs.get('pk')
+        project = get_object_or_404(Project,pk=project_id)
+        serializer = ProjectSerializer(project)
+        return Response(serializer.data)
 
 class ArticleView(APIView):
     def get(self,request,*args,**kwargs):
@@ -22,4 +30,5 @@ class ArticleView(APIView):
             serializer.save()
             return Response(serializer.data,status=201)
         return Response(serializer.errors,status=400)
+
 
