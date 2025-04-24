@@ -1,6 +1,36 @@
-from ..models import Article
+from ..models import Article,Project
 from rest_framework import serializers
 import markdown
+
+class ProjectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Project
+        fields = ['id', 'title', 'cover_image', 'introduction', 'status', 'create_time', 'update_time', 'owner',
+                  'collaborator', 'replications', 'likes', 'stars', 'short_term_score', 'long_term_score', 'views']
+        extra_kwargs = {
+            'owner': {
+                'read_only': True
+            },
+            'collaborator': {
+                'read_only': True
+            },
+            'replications': {
+                'read_only': True
+            },
+            'likes': {
+                'read_only': True
+            },
+            'stars': {
+                'read_only': True
+            },
+            'short_term_score': {
+                'read_only': True
+            },
+            'long_term_score': {
+                'read_only': True
+            }
+        }
+
 
 class ArticleSerializer(serializers.ModelSerializer):
     toc = serializers.SerializerMethodField()
@@ -8,11 +38,19 @@ class ArticleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Article
-        fields = ['id', 'title', 'content_md', 'content_html', 'toc', 'word_count','update_time']
+        fields = ['id', 'title', 'content_md', 'content_html', 'toc', 'word_count','create_time','update_time','adminer','project']
 
         extra_kwargs = {
             'content_md': {
                 'write_only': True
+            },'adminer':{
+                'read_only':True
+            },'project':{
+                'read_only':True
+            },'create_time':{
+                'read_only':True
+            },'update_time':{
+                'read_only':True
             }
         }
 
