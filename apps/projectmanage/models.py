@@ -105,8 +105,11 @@ class Article(models.Model):
     content_html = models.TextField(editable=False)  # 自动生成的 HTML #存储渲染后的html
     content_hash = models.CharField(max_length=32, editable=False)  # 用于缓存校验
     update_time = models.DateTimeField(auto_now=True,verbose_name='更新时间')
+
     def __str__(self):
-        return f"文章管理者{self.adminer.username}，文章标题{self.title}"
+        admin_name = self.adminer.username if self.adminer else '无'
+        return f"文章管理者{admin_name}，文章标题{self.title},文章内容md{self.content_md},文章内容html{self.content_html}"
+
     class Meta:
         db_table = "project_article"
         verbose_name = '项目文章'
