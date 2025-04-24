@@ -34,7 +34,7 @@ class Project(models.Model):
     short_term_score = models.FloatField(default=0.0,verbose_name='短期热度分数')
     long_term_score = models.FloatField(default=0.0,verbose_name='长期热度分数')
 
-    status = models.CharField(max_length=10,choices=Status.choices,default=Status.UNPUBLISHED,verbose_name='项目状态')
+    status = models.CharField(max_length=20,choices=Status.choices,default=Status.UNPUBLISHED,verbose_name='项目状态')
 
     class Meta:
         db_table = "project"
