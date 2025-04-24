@@ -87,6 +87,21 @@ class ResetPasswordAPI(APIView):
             return Response({"success": True,"message": "Password reset successful!"},status=status.HTTP_200_OK)
         else:
             return Response({"success": False,"message": "Invalid data", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+class UserProfileAPI(APIView):
+    def get(self, request):
+        user = request.user
+        profile = User_Profile.objects.get(user_Login=user)
+        serializer = UserProfileSerializer(profile)
+        return Response({"success": True,"message": "Get profile successfully!","data":serializer.data})
+
+    def post(self,request):
+        serializer = UserProfileSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"success": True,"message": "Profile updated successfully!"},status=status.HTTP_200_OK)
+        else:
+            return Response({"success": False,"message": "Invalid data", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 #
 #
 # class DeletAPI(APIView):

@@ -3,9 +3,11 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
 from .models import User_Login, Email_Verify_Code,User_Profile
+from django.contrib.auth import get_user_model
 from django.utils import timezone
+import datetime
 
-
+User = get_user_model()
 class UserRegistrationTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
@@ -168,7 +170,7 @@ class UserEmailCodeSendTestCase(TestCase):
         }
     def test_valid_user_email_code_send_ResetPassword(self):
         response = self.client.post(self.email_code_send_url,self.valid_payload,format='json')
-        print(response.json())
+        #print(response.json())
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertTrue(response.json()['success'])
         self.assertEqual(response.json()['message'], 'Email code sent successfully!')
@@ -197,4 +199,51 @@ class UserEmailCodeSendTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertFalse(response.json()['success'])
         self.assertIn('message', response.json())
+class UserProfileTestCase(TestCase):
+    def setUp(self):
+        self.client:APIClient = APIClient()
+        self.user = User_Login.objects.create_user(email='test@example.com', username='testuser',
+                                                   password='testpassword')
+        self.profile_url = reverse('user:profile')
+
+        self.client.force_authenticate(user=self.user)
+        self.valid_payload = {
+            'user_Login':self.user.id,
+            'birthday': '2000-01-01',
+            'introduction': 'test introduction',
+            'sex': "MALE",
+        }
+    def test_valid_update_user_profile(self):
+        response = self.client.post(self.profile_url,self.valid_payload,format='json')
+        #print(response.json())
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.json()['success'])
+        self.assertEqual(
+            User_Profile.objects.filter(user_Login=self.user).first().birthday,
+            datetime.date.fromisoformat(self.valid_payload['birthday'])
+        )
+        self.assertEqual(User_Profile.objects.filter(user_Login=self.user).first().introduction,self.valid_payload['introduction'])
+        self.assertEqual(User_Profile.objects.filter(user_Login=self.user).first().sex,self.valid_payload['sex'])
+
+    def test_invalid_update_user_profile(self):
+        invalid_payload = self.valid_payload.copy()
+        invalid_payload['sex'] = "male"
+        response = self.client.post(self.profile_url,invalid_payload,format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(response.json()['success'])
+        self.assertIn('errors',response.json())
+    def test_get_user_profile(self):
+        User_Profile.objects.update_or_create(user_Login=self.user,defaults={
+            'birthday': '2000-01-01',
+            'introduction': 'test introduction',
+        })
+
+        response = self.client.get(self.profile_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(response.json()['success'])
+        self.assertEqual(response.json()['data']['user_Login'],self.user.id)
+        #self.assertEqual(response.json()['data']['birthday'],'2000-01-01')
+        self.assertEqual(response.json()['data']['introduction'],'test introduction')
+
+
 

@@ -1,9 +1,11 @@
+import imghdr # 验证图片格式
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
 from ..models import *
+from PIL import Image
 from django.utils import timezone
-from rest_framework_simplejwt.serializers import TokenObtainSerializer, TokenObtainPairSerializer
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 
 class UserTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -129,6 +131,36 @@ class ResetPasswordSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    sex = serializers.CharField(max_length=6)
+    introduction = serializers.CharField(max_length=60,required=False)
+    avater = serializers.ImageField(required=False)
+    def validate_sex(self,data):
+        if data not in ['MALE','FEMALE','OTHER']:
+            raise ValidationError({"ValidationError":"性别设置错误"})
+        else:
+            return data
+
+    def validate_avater(self, value):
+        # 图片类型
+        image_type = imghdr.what(value)
+        if image_type not in ['jpeg','png','jpg']:
+            raise serializers.ValidationError("仅支持 JPEG , JPG 和 PNG 格式图片")
+        # 图片大小
+        if value.size > 4 * 1024 * 1024:
+            raise serializers.ValidationError("图片大小不能超过 4MB")
+
+        # 图片尺寸
+        image = Image.open(value)
+        width, height = image.size
+        if width > 1024 or height > 1024:
+            raise serializers.ValidationError("图片尺寸不能超过 1024x1024 像素")
+        return value
+
+    class Meta:
+        model = User_Profile
+        fields = ['avater','birthday','introduction','school','sex','user_Login']
 
         
         
