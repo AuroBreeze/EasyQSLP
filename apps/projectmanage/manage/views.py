@@ -14,6 +14,13 @@ class ProjectView(APIView):
         serializer = ProjectSerializer(project)
         return Response(serializer.data)
 
+    def post(self,requests):
+        serializer = ProjectSerializer(data=requests.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=201)
+        return Response(serializer.errors,status=400)
+
 class ArticleView(APIView):
     def get(self,request,*args,**kwargs):
         article_id = kwargs.get('pk')

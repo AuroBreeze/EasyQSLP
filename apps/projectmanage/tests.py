@@ -22,11 +22,25 @@ class ProjectTestCase(TestCase):
         self.valided_data = {
             'title': 'Test Project',
             'introduction': 'This is a test project.',
-            'cover_image': '',
             'owner': self.user.id,
             #'creat_time':timezone.now()
             #'id':self.user.id
         }
+
+    def test_create_project(self):
+        response = self.client.post(self.projectpost_url, self.valided_data, format='json')
+        print(response.data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Project.objects.count(), 1)
+        self.assertEqual(Project.objects.get(title='Test Project').title, 'Test Project')
+        self.assertEqual(Project.objects.get(title='Test Project').owner, self.user)
+
+    def test_read_project_valid_data(self):
+        response = self.client.post(self.projectpost_url, self.valided_data, format='json')
+        #print(response.data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Project.objects.count(), 1)
+        self.assertEqual(Project.objects.get().title, 'Test Project')
 
 class ArticleTestCase(TestCase):
     def setUp(self):
@@ -44,7 +58,6 @@ class ArticleTestCase(TestCase):
         self.valided_data = {
             'title': 'Test Article',
             'content_md': "'''This is a test article123.'''",
-
             'category': self.category.id,
             'project': self.project.id,
             'adminer': self.user.id,
