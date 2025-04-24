@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+from django.utils.html import strip_tags
 import math
 User = get_user_model()
 
@@ -18,7 +19,7 @@ class Project(models.Model):
     title = models.CharField(max_length=50,unique=True,verbose_name='项目名称')
     owner = models.ForeignKey(User,on_delete=models.SET_NULL,null=True,blank=True,related_name='projects',verbose_name='项目管理者')
     collaborator = models.ManyToManyField(User,related_name='collaborated_projects',verbose_name='项目协作者')
-    version = models.OneToOneField("ProjectVersion",on_delete=models.SET_NULL,null=True,blank=True,related_name='project_versions',verbose_name='项目版本')
+    # version = models.OneToOneField("ProjectVersion",on_delete=models.SET_NULL,null=True,blank=True,related_name='project_versions',verbose_name='项目版本')
     introduction = models.TextField(max_length=50,default="暂无介绍",verbose_name='项目简介')
     create_time = models.DateTimeField(auto_now_add=True,verbose_name='创建时间')
     update_time = models.DateTimeField(auto_now=True,verbose_name='更新时间')
@@ -76,9 +77,9 @@ class Project(models.Model):
             "short_term_score": self.short_term_score,
             "long_term_score": self.long_term_score,
         }
-class ProjectVersion(models.Model):
-    pass
-
+# class ProjectVersion(models.Model):
+#     pass
+#
 class Article_category(models.Model):
     name = models.CharField(max_length=50,verbose_name='分类名称')
     def __str__(self):
@@ -99,8 +100,8 @@ class Article(models.Model):
                                  related_name='articles', verbose_name='文章分类')
 
     content_md = models.TextField(verbose_name='项目内容markdown') #存储原始markdown
-    content_html = models.TextField(verbose_name='项目内容html') #存储渲染后的html
-
+    content_html = models.TextField(editable=False)  # 自动生成的 HTML #存储渲染后的html
+    content_hash = models.CharField(max_length=32, editable=False)  # 用于缓存校验
     update_time = models.DateTimeField(auto_now=True,verbose_name='更新时间')
     def __str__(self):
         return f"文章管理者{self.adminer.username}，文章标题{self.title}"
@@ -108,6 +109,57 @@ class Article(models.Model):
         db_table = "project_article"
         verbose_name = '项目文章'
         verbose_name_plural = '项目文章'
+
+    def save(self, *args, **kwargs):
+        if not self.content_hash or self.has_content_changed():
+            self.html_content = self.generate_safe_html()
+            self.content_hash = self.calculate_hash()
+        super().save(*args, **kwargs)
+
+    def has_content_changed(self):
+        if not self.pk:
+            return True
+        old = Article.objects.get(pk=self.pk)
+        return self.content_md != old.content_md
+
+    def generate_safe_html(self):
+        from markdown import markdown
+        from bleach.sanitizer import Cleaner
+
+        # 生成基础 HTML
+        html = markdown(
+            self.content_md,
+            extensions=[
+                'markdown.extensions.extra',
+                'markdown.extensions.codehilite',
+                'markdown.extensions.toc',
+                'mdx_math'  # 需要安装 python-markdown-math
+            ]
+        )
+
+        # 安全清理
+        cleaner = Cleaner(
+            tags=[
+                'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                'ul', 'ol', 'li', 'p', 'br',
+                'strong', 'em', 'code', 'pre', 'blockquote',
+                'table', 'thead', 'tbody', 'tr', 'th', 'td',
+                'a', 'img', 'span', 'div'
+            ],
+            attributes={
+                'a': ['href', 'title'],
+                'img': ['src', 'alt', 'title'],
+                'code': ['class'],
+                'span': ['class'],
+                'div': ['class']
+            },
+            protocols=['http', 'https', 'mailto', 'data']
+        )
+        return cleaner.clean(html)
+
+    def calculate_hash(self):
+        import hashlib
+        return hashlib.md5(self.content_md.encode('utf-8')).hexdigest()
 class Article_Revision(models.Model):
     class Status(models.TextChoices):
         PENDING = 'pending', '待审核'
