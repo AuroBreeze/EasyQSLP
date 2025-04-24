@@ -8,7 +8,7 @@ class ArticleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Article
-        fields = '__all__'
+        fields = ['id', 'title', 'content_md', 'content_html', 'toc', 'word_count','update_time']
 
         extra_kwargs = {
             'content_md': {

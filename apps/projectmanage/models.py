@@ -91,8 +91,10 @@ class Article_category(models.Model):
 
 # Create your models here.
 class Article(models.Model):
-    project = models.ForeignKey('Project', on_delete=models.CASCADE, related_name='articles', verbose_name='所属项目')
-    title = models.CharField(max_length=50,verbose_name='文章标题')
+
+    title = models.CharField(max_length=50,unique=True,verbose_name='文章标题')
+    project = models.ForeignKey('Project', on_delete=models.CASCADE, related_name='articles', null=True, blank=True,
+                                verbose_name='所属项目')
 
     adminer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='articles',
                                 verbose_name='文章管理者')
