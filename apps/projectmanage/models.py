@@ -102,11 +102,15 @@ class Article(models.Model):
                                  related_name='articles', verbose_name='文章分类')
 
     content_md = models.TextField(verbose_name='项目内容markdown') #存储原始markdown
-    content_html = models.TextField(editable=False)  # 自动生成的 HTML #存储渲染后的html
+    content_html = models.TextField(verbose_name='项目内容html',editable=False)  # 自动生成的 HTML #存储渲染后的html
     content_hash = models.CharField(max_length=32, editable=False)  # 用于缓存校验
+    create_time = models.DateTimeField(auto_now_add=True,verbose_name='创建时间')
     update_time = models.DateTimeField(auto_now=True,verbose_name='更新时间')
+
     def __str__(self):
-        return f"文章管理者{self.adminer.username}，文章标题{self.title}"
+        admin_name = self.adminer.username if self.adminer else '无'
+        return f"文章管理者{admin_name}，文章标题{self.title},文章内容md{self.content_md},文章内容html{self.content_html}"
+
     class Meta:
         db_table = "project_article"
         verbose_name = '项目文章'
@@ -114,7 +118,7 @@ class Article(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.content_hash or self.has_content_changed():
-            self.html_content = self.generate_safe_html()
+            self.content_html = self.generate_safe_html()
             self.content_hash = self.calculate_hash()
         super().save(*args, **kwargs)
 
@@ -139,6 +143,7 @@ class Article(models.Model):
             ]
         )
 
+
         # 安全清理
         cleaner = Cleaner(
             tags=[
@@ -157,7 +162,8 @@ class Article(models.Model):
             },
             protocols=['http', 'https', 'mailto', 'data']
         )
-        return cleaner.clean(html)
+        html = cleaner.clean(html)
+        return html
 
     def calculate_hash(self):
         import hashlib
@@ -191,5 +197,3 @@ class Article_comment(models.Model):
         db_table = "project_article_comment"
         verbose_name = '文章评论'
         verbose_name_plural = '文章评论'
-    
-    
