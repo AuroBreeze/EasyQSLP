@@ -55,6 +55,29 @@ CORS_ORIGIN_WHITELIST = (
     'http://127.0.0.1:20000'
 )  # 允许跨域请求的域名
 
+# Markdown 扩展
+MARKDOWN_EXTENSIONS = [
+    'markdown.extensions.extra',
+    'markdown.extensions.codehilite',
+    'markdown.extensions.toc',
+    'mdx_math'
+]
+
+# 缓存配置
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
+
+# 代码高亮样式
+PYGMENTS_STYLE = 'monokai'
+
+
 #celery配置
 CELERY_BROKER_URL = 'redis://localhost:6379/0'#broker地址
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'#结果存储地址
@@ -87,6 +110,27 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': crontab(minute='*/30'),
     },
 }
+
+
+from bleach.sanitizer import Cleaner
+
+cleaner = Cleaner(
+    tags=[
+        'a', 'abbr', 'acronym', 'b', 'blockquote', 'code', 'em', 'i', 'li', 'ol',
+        'strong', 'ul', 'pre', 'p', 'br', 'hr', 'img', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+        'table', 'thead', 'tbody', 'tr', 'th', 'td', 'span', 'div', 'kbd', 'samp', 'sub', 'sup'
+    ],
+    attributes={
+        '*': ['class', 'id', 'title', 'align', 'style'],
+        'a': ['href', 'title', 'rel'],
+        'img': ['src', 'alt', 'title', 'width', 'height'],
+        'th': ['colspan', 'rowspan'],
+        'td': ['colspan', 'rowspan'],
+    },
+    protocols=['http', 'https', 'mailto', 'data'],
+    strip=True,
+    strip_comments=True
+)
 
 
 # 邮箱配置
