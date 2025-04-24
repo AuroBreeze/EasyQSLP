@@ -19,6 +19,8 @@ from django.urls import path,include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    #path('user/',include("apps.user.api.urls")), #此处加"/"后在api/urls.py中写路由就不再需要加"/"
-    path('api/v1/',include("apps.api.urls"))
+    path('api/v1/', include("apps.api.urls")),
+    # path('user/',include("apps.user.api.urls")), #测试专用
+    # path('project/',include("apps.projectmanage.manage.urls")),
+
 ]
