@@ -11,6 +11,7 @@ redis # Redis database driver
 toml # configuration file support
 django-redis # Redis cache support
 Pillow # image processing support
-markdown # markdown support
+markdown # Markdown support
 bleach # HTML sanitization support
 djangorestframework-simplejwt # JWT support
+python-markdown-math # Markdown math support
