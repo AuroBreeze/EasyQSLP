@@ -134,15 +134,19 @@ class Email_Verify_Code(models.Model):
 
     
 class User_Profile(models.Model):
+    class SexChoices(models.TextChoices):
+        MALE = 'MALE', '男'
+        FEMALE = 'FEMALE', '女'
+        OTHER = 'OTHER', '其他'
     #自我介绍
     introduction = models.TextField(max_length=60,null=True,default='',verbose_name='自我介绍')
     avater = models.ImageField(upload_to='avater/',null=True,default='avater/default.png',verbose_name='头像')
     #性别
-    sex = models.CharField(max_length=10,null=True,default='',verbose_name='性别')
+    sex = models.CharField(max_length=6,choices=SexChoices.choices,default=SexChoices.OTHER,verbose_name='性别')
     #生日
-    birthday = models.DateField(null=True,verbose_name='生日')
+    birthday = models.DateField(null=True,blank=True,verbose_name='生日')
     #学校
-    school = models.CharField(max_length=50,null=True,default='',verbose_name='学校')
+    school = models.CharField(max_length=50,null=True,blank=True,default='',verbose_name='学校')
 
     user_Login = models.ForeignKey('User_Login',on_delete=models.CASCADE,related_name='profile',default=0) #外键关联到User_Login表
 
@@ -151,7 +155,7 @@ class User_Profile(models.Model):
         verbose_name = '用户信息'
         verbose_name_plural = '用户信息'
     def __str__(self):
-        return f"{self.user_id.username} - {self.introduction}"
+        return f"{self.user_Login.username} - {self.introduction}"
 
 # class Article(models.Model): #一对多关系
 #     title = models.CharField(max_length=100)
