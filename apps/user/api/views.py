@@ -93,7 +93,7 @@ class UserProfileAPI(APIView):
         user = request.user
         profile = User_Profile.objects.get(user_Login=user)
         serializer = UserProfileSerializer(profile)
-        return Response(serializer.data)
+        return Response({"success": True,"message": "Get profile successfully!","data":serializer.data})
 
     def post(self,request):
         serializer = UserProfileSerializer(data=request.data)
