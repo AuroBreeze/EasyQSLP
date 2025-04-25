@@ -218,7 +218,6 @@ class UserProfileTestCase(TestCase):
         self.token_url = reverse('user:token')
 
         self.valid_payload = {
-            'user_Login':self.user.id,
             'birthday': '2000-01-01',
             'introduction': 'test introduction',
             'sex': "MALE",
@@ -240,6 +239,20 @@ class UserProfileTestCase(TestCase):
         self.assertEqual(User_Profile.objects.filter(user_Login=self.user).first().introduction,self.valid_payload['introduction'])
         self.assertEqual(User_Profile.objects.filter(user_Login=self.user).first().sex,self.valid_payload['sex'])
 
+    def test_invalid_update_user_profile(self):
+        self.client.force_authenticate(user=self.user)
+        User_Profile.objects.update_or_create(user_Login=self.user,defaults={
+            'birthday': '2000-01-01',
+            'introduction': 'test introduction',
+        })
+        invalid_payload = self.valid_payload.copy()
+        invalid_payload['birthday'] = '2000-01-01'
+        invalid_payload['introduction'] = 'test introduction'
+        invalid_payload['sex'] = "male"
+        response = self.client.post(self.profile_url,invalid_payload,format='json')
+        #print(response.json())
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(response.json()['success'])
     def test_valid_unauthorized_update_user_profile(self):
         response = self.client.post(self.profile_url,self.valid_payload,format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -253,6 +266,7 @@ class UserProfileTestCase(TestCase):
         })
 
         response = self.client.get(self.get_profile_url,args=[self.user.pk])
+        print(response.json())
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(response.json()['success'])
         #self.assertEqual(response.json()['data']['birthday'],'2000-01-01')
