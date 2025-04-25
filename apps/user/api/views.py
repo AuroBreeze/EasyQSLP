@@ -9,6 +9,8 @@ from django_ratelimit.decorators import ratelimit # 导入限流装饰器
 import random
 from django.utils import timezone
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework_simplejwt.authentication import JWTAuthentication
 # Create your views here.
 
 # 用户登录 JWT认证模块
@@ -89,6 +91,12 @@ class ResetPasswordAPI(APIView):
             return Response({"success": False,"message": "Invalid data", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 class UserProfileAPI(APIView):
+    permission_classes = [AllowAny]  # 默认 AllowAny，下面重写 get_permissions 更灵活
+
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [AllowAny()]
+        return [IsAuthenticated()]
     def get(self, request):
         user = request.user
         profile = User_Profile.objects.get(user_Login=user)

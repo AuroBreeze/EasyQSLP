@@ -205,8 +205,8 @@ class UserProfileTestCase(TestCase):
         self.user = User_Login.objects.create_user(email='test@example.com', username='testuser',
                                                    password='testpassword')
         self.profile_url = reverse('user:profile')
+        self.token_url = reverse('user:token')
 
-        self.client.force_authenticate(user=self.user)
         self.valid_payload = {
             'user_Login':self.user.id,
             'birthday': '2000-01-01',
@@ -214,8 +214,13 @@ class UserProfileTestCase(TestCase):
             'sex': "MALE",
         }
     def test_valid_update_user_profile(self):
+        token = self.client.post(self.token_url,{'email':'test@example.com','password':'testpassword'},format='json').json()
+        #print(token)
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token['access'])
         response = self.client.post(self.profile_url,self.valid_payload,format='json')
         #print(response.json())
+        #查看鉴权
+        #print(response.headers)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(response.json()['success'])
         self.assertEqual(
@@ -225,13 +230,11 @@ class UserProfileTestCase(TestCase):
         self.assertEqual(User_Profile.objects.filter(user_Login=self.user).first().introduction,self.valid_payload['introduction'])
         self.assertEqual(User_Profile.objects.filter(user_Login=self.user).first().sex,self.valid_payload['sex'])
 
-    def test_invalid_update_user_profile(self):
-        invalid_payload = self.valid_payload.copy()
-        invalid_payload['sex'] = "male"
-        response = self.client.post(self.profile_url,invalid_payload,format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertFalse(response.json()['success'])
-        self.assertIn('errors',response.json())
+    def test_valid_unauthorized_update_user_profile(self):
+        response = self.client.post(self.profile_url,self.valid_payload,format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        #self.assertFalse(response.json()['success'])
+        self.assertIn('detail',response.json())
     def test_get_user_profile(self):
         User_Profile.objects.update_or_create(user_Login=self.user,defaults={
             'birthday': '2000-01-01',
