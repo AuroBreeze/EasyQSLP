@@ -107,7 +107,9 @@ class UserProfileAPI(APIView):
         return Response({"success": True,"message": "User profile retrieved successfully!","data": serializer.data})
 
     def post(self,request):
-        serializer = UserProfileSerializer(data=request.data)
+        data = request.data
+        data['user_Login'] = request.user.id
+        serializer = UserProfileSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response({"success": True,"message": "Profile updated successfully!"},status=status.HTTP_200_OK)
