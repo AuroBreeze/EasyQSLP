@@ -20,6 +20,7 @@ urlpatterns = [
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"), # JWT认证刷新
     path("token/verify/", TokenVerifyView.as_view(), name="token_verify"), # JWT认证验证
 
-    path("profile/", UserProfileAPI.as_view(), name="profile"),
+    path("profile/revise", UserProfileAPI.as_view(), name="revise-profile"),
+    path("profile/<int:pk>", UserProfileAPI.as_view(), name="user-profile")
 
 ]

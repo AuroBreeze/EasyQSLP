@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
 from rest_framework import status
 from rest_framework.views import APIView
@@ -97,11 +98,13 @@ class UserProfileAPI(APIView):
         if self.request.method == 'GET':
             return [AllowAny()]
         return [IsAuthenticated()]
-    def get(self, request):
-        user = request.user
-        profile = User_Profile.objects.get(user_Login=user)
+    def get(self, request, pk):
+        """
+        所有人都能GET用户资料
+        """
+        profile = get_object_or_404(User_Profile, pk=pk)
         serializer = UserProfileSerializer(profile)
-        return Response({"success": True,"message": "Get profile successfully!","data":serializer.data})
+        return Response({"success": True,"message": "User profile retrieved successfully!","data": serializer.data})
 
     def post(self,request):
         serializer = UserProfileSerializer(data=request.data)
@@ -110,21 +113,7 @@ class UserProfileAPI(APIView):
             return Response({"success": True,"message": "Profile updated successfully!"},status=status.HTTP_200_OK)
         else:
             return Response({"success": False,"message": "Invalid data", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-#
-#
-# class DeletAPI(APIView):
-#     def post(self, request):
-#         user = User_Login.objects.get(username="123456")
-#         user.delete()
-#         return Response({"message": "User deleted successfully!"})
-# class ChangeAPI(APIView):
-#     def post(self, request):
-#         user = User_Login.objects.get(username="123456")
-#         user.password = "9876543210"
-#         user.save()
-#         return Response({"message": "User password changed successfully!"})
-#
-#
+
 # class Querr(APIView):
 #     def post(self, request):
 #         users = User_Login.objects.all()

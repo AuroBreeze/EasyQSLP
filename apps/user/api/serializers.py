@@ -162,4 +162,3 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User_Profile
         fields = ['avater','birthday','introduction','school','sex','user_Login']
-        read_only_fields = ['user_Login']
