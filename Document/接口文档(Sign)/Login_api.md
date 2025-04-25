@@ -74,10 +74,10 @@ tags: [Login, API]
 失败响应参数：
 
 | 字段              | 类型 | 说明 | 存在情况 |
-|-----------------| ---- | ---- | ---- |
+|-----------------|  | ---- | ---- |
 | success         | bool | 状态码 | 总是 |
 | message         | string | 状态信息 | 总是 |
-| errors          | string | 错误信息 | 邮箱错误、密码错误、验证错误 |
+| errors          | dict | 错误信息 | 邮箱错误、密码错误、验证错误 |
 | email           | string | 邮箱错误 | 邮箱未填写或邮箱格式错误 |
 | password        | string | 密码错误 | 密码未填写 |
 | ValidationError | string | 验证错误 | 邮箱或密码错误 |
@@ -321,6 +321,8 @@ tags: [Login, API]
 |-----------------| ---- | ---- | ---- |
 | success         | bool | 状态码 | 总是 |
 | message         | string | 状态信息 | 总是 |
+| errors | dict | 错误信息 | 触发验证错误时 |
+| ValidationError | string | 错误信息 | 触发验证错误时 |
 
 
 
@@ -394,10 +396,10 @@ tags: [Login, API]
 失败响应参数：
 
 | 字段              | 类型 | 说明 | 存在情况 |
-|-----------------| ---- | ---- | ---- |
+|-----------------|  | ---- | ---- |
 | success         | bool | 状态码 | 总是 |
 | message         | string | 状态信息 | 总是 |
-| errors          | string | 错误信息 | 邮箱错误、密码错误、验证码错误、用户名错误、验证错误 |
+| errors          | dict | 错误信息 | 邮箱错误、密码错误、验证码错误、用户名错误、验证错误 |
 | email           | string | 邮箱错误 | 邮箱未填写或邮箱格式错误 |
 | password        | string | 密码错误 | 密码未填写 |
 | code            | string | 验证码错误 | 验证码未填写或验证码错误 |
@@ -476,10 +478,10 @@ tags: [Login, API]
 失败响应参数：
 
 | 字段              | 类型 | 说明 | 存在情况 |
-|-----------------| ---- | ---- | ---- |
+|-----------------|  | ---- | ---- |
 | success         | bool | 状态码 | 总是 |
 | message         | string | 状态信息 | 总是 |
-| errors          | string | 错误信息 | 邮箱错误、验证码错误、密码错误、验证错误 |
+| errors          | dict | 错误信息 | 邮箱错误、验证码错误、密码错误、验证错误 |
 | email           | string | 邮箱错误 | 邮箱未填写或邮箱格式错误 |
 | code            | string | 验证码错误 | 验证码未填写或验证码错误 |
 | password        | string | 密码错误 | 密码未填写或密码格式错误 |
@@ -498,6 +500,122 @@ tags: [Login, API]
     }
 }
 ```
+
+## 更新用户信息接口 [GetUserInfo]
+
+### 接口基本信息
+| 属性 | 值                       |
+|------|-------------------------|
+| 接口名称 | 获取用户信息                  |
+| 请求方法 | POST                    |
+| 接口版本 | v1                      |
+| 接口路径 | `/api/v1/user/profile/revise` |
+| 更新时间 | 2025-04-24              |
+| 响应字符 | 200 或 400               |
+---
+
+### 请求参数说明
+| 字段名 | 类型 | 必填 | 描述 | 示例值                   |
+|--------|-------|-----|------|-----------------------|
+| avatar | string | 否 | 用户头像 | https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png |
+| birthday | string | 否 | 用户生日 | 2025-04-24            |
+| introduction | string | 否 | 用户简介 | AuroBree110           |
+| sex | string | 否 | 用户性别 | MALE 或 FEMALE 或 OTHER |
+| school | string | 否 | 用户学校 | 清华大学                 |
+---
+
+### 响应参数
+| 字段 | 类型 | 说明 | 存在情况  |
+| ---- |  | ---- |-------|
+| success | bool | 状态码 | 总是    |
+| message | string | 状态信息 | 总是    |
+| errors | dict | 错误信息 | 存在错误时 |
+| sex | list | 用户性别 |  性别参数错误时   |
+| school | list | 用户学校 |  学校参数错误时   |
+| avatar | list | 用户头像 |  头像参数错误时   |
+| birthday | list | 用户生日 |  生日参数错误时   |
+| introduction | list | 用户简介 |  简介参数错误时   |
+
+---
+
+### 请求示例
+```json
+{
+  'birthday': '2000-01-01',
+  'introduction': 'test introduction',
+  'sex': "MALE",
+}
+```
+
+### 响应示例
+
+成功响应示例：
+```json
+{
+  'success': True, 
+  'message': 'Profile updated successfully!'
+}
+```
+
+失败响应示例：
+```json
+{
+  'success': False, 
+  'message': 'Invalid data', 
+  'errors': 
+    {
+      'sex': ['性别设置错误']
+    }
+}
+```
+
+## 获取用户信息接口 [GetUserInfo]
+### 接口基本信息
+| 属性 | 值                               |
+|------|---------------------------------|
+| 接口名称 | 获取用户信息                          |
+| 请求方法 | GET                             |
+| 接口版本 | v1                              |
+| 接口路径 | `/api/v1/user/profile/<int:pk>` |
+| 更新时间 | 2025-04-25                      |
+| 响应字符 | 200 或 404                       |
+---
+
+### 响应参数
+| 字段 | 类型  | 说明 | 存在情况  |
+| ---- |-----| ---- |-------|
+| success | bool | 状态码 | 总是    |
+| message | string | 状态信息 | 总是    |
+| data | dict | 用户信息 | 总是    |
+| avatar | string | 用户头像 | 总是    |
+| birthday | string | 用户生日 | 总是    |
+| introduction | string | 用户简介 | 总是    |
+| sex | string | 用户性别 | 总是    |
+| school | string | 用户学校 | 总是    |
+---
+
+### 响应示例
+
+成功响应示例：
+```json
+{
+  'success': True, 
+  'message': 'User profile retrieved successfully!', 
+  'data': 
+    {
+      'avater': '/avater/default.png', 
+      'birthday': '2000-01-01', 
+      'introduction': 'test introduction', 
+      'school': '', 
+      'sex': 'OTHER', 
+      'user_Login': 1
+    }
+}
+```
+
+
+
+
 
 
 
