@@ -119,30 +119,40 @@ const handleLogout = () => {
 
 .search-input {
   flex: 1;
-  padding: 8px 15px;
+  padding: 10px 20px;
   border: none;
-  border-radius: 20px 0 0 20px;
+  border-radius: 25px 0 0 25px;
   outline: none;
   font-size: 14px;
+  transition: all 0.3s ease;
 }
 
 .search-button {
-  background: white;
+  background: rgba(255, 255, 255, 0.2);
   border: none;
-  border-radius: 0 20px 20px 0;
-  padding: 8px 15px;
+  border-radius: 0 25px 25px 0;
+  padding: 10px 20px;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .search-button:hover {
-  background: #f0f0f0;
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
 }
 
 .search-icon {
-  width: 20px;
-  height: 20px;
-  fill: #FF4B2B;
+  width: 18px;
+  height: 18px;
+  fill: white;
+  transition: transform 0.3s ease;
+}
+
+.search-button:hover .search-icon {
+  transform: scale(1.1);
 }
 
 .user-menu {
