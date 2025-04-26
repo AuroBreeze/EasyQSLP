@@ -41,6 +41,9 @@ class UserLoginSerializer(serializers.Serializer):
         else:
             raise ValidationError({"ValidationError":"邮箱或密码不能为空"})
         return data
+    class Meta:
+        model = User_Login
+        fields = ['email','join_date','username']
 
 # 用户注册序列化器
 class UserRegisterSerializer(serializers.ModelSerializer):
