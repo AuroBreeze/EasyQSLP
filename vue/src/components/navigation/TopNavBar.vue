@@ -61,7 +61,7 @@ const toggleUserMenu = () => {
 
 // 用户头像 - 从store或props获取
 const userAvatar = computed(() => {
-  return '/public/avatar/default.png' // 默认头像路径
+  return '/avatar/default.png' // 默认头像路径
 })
 
 // 当前位置
