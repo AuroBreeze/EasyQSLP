@@ -155,7 +155,7 @@ const loadUserData = async () => {
   try {
     //console.log('开始加载用户数据...')
     const token = localStorage.getItem('access_token')
-    console.log('获取到的token:', token)
+    //console.log('获取到的token:', token)
     
     if (!token) {
       //console.warn('未找到access_token，跳转到登录页')
@@ -178,7 +178,7 @@ const loadUserData = async () => {
 
     if (response.ok) {
       const data = await response.json()
-      console.log(data)
+      //console.log(data)
       Object.assign(user, data.data)
     } else {
       // 处理未授权等情况
