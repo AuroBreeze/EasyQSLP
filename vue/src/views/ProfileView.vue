@@ -1,8 +1,10 @@
 <template>
   <div class="page-container">
+    <!-- 顶部导航栏 -->
+    <TopNavBar />
     <!-- 波浪背景容器 -->
     <WaveBackground />
-    <div class="content-wrapper">
+    <div class="content-wrapper" style="padding-top: 80px;">
       <h2>个人资料管理</h2>
       <div class="profile-container">
         <!-- 头像区域 -->
@@ -20,7 +22,7 @@
           </div>
           <div class="info-item">
             <span class="info-label">注册时间:</span>
-            <span class="info-value">{{ formatDate(user.created_at) }}</span>
+            <span class="info-value">{{ formatDate(user.join_date) }}</span>
           </div>
           <div class="info-item">
             <span class="info-label">性别:</span>
@@ -115,11 +117,12 @@
 
 <script lang="ts" setup>
 import { ref, reactive, onMounted } from 'vue'
+import TopNavBar from '@/components/navigation/TopNavBar.vue'
 import { useRouter, useRoute } from 'vue-router'
 import WaveBackground from '@/components/background/WaveBackground.vue'
 import AvatarUpload from '@/components/profile/AvatarUpload.vue'
 import ProfileForm from '@/components/profile/ProfileForm.vue'
-import { parseJWT } from '@/utils/jwt'
+//import { parseJWT } from '@/utils/jwt'
 
 const router = useRouter()
 const route = useRoute()
@@ -127,14 +130,15 @@ const userId = ref(Number(route.params.id) || 0)
 
 // 用户数据
 const user = reactive({
-  username: localStorage.getItem('access_token') ? parseJWT(localStorage.getItem('access_token') || '').username || '' : '',
-  email: localStorage.getItem('access_token') ? parseJWT(localStorage.getItem('access_token') || '').email || '' : '',
+  username: '',
+  email: '',
   avatar: '',
-  created_at: '',
+  join_date: '',
   birthday: '',
   introduction: '',
   school:'',
   sex:'',
+  user_Login: ''
 })
 
 // 密码修改数据
@@ -152,19 +156,19 @@ const successMessage = ref('')
 // 初始化加载用户数据
 const loadUserData = async () => {
   try {
-    console.log('开始加载用户数据...')
+    //console.log('开始加载用户数据...')
     const token = localStorage.getItem('access_token')
-    console.log('获取到的token:', token)
+    //console.log('获取到的token:', token)
     
     if (!token) {
-      console.warn('未找到access_token，跳转到登录页')
+      //console.warn('未找到access_token，跳转到登录页')
       router.push('/login')
       return
     }
     
     // 解析token获取用户信息
-    const payload = parseJWT(token)
-    console.log('解析的token payload:', payload)
+   // const payload = parseJWT(token)
+    //console.log('解析的token payload:', payload)
     
     const response = await fetch(`http://localhost:8000/api/v1/user/profile/${userId.value}/`, {
       method: 'GET',
@@ -173,12 +177,12 @@ const loadUserData = async () => {
         'Content-Type': 'application/json'
       }
     })
-    console.log('API响应状态:', response.status)
+    //console.log('API响应状态:', response.status)
 
     if (response.ok) {
       const data = await response.json()
       console.log(data)
-      Object.assign(user, data)
+      Object.assign(user, data.data)
     } else {
       // 处理未授权等情况
       if (response.status === 401) {
@@ -243,6 +247,7 @@ const handleProfileUpdate = async (updatedData: any) => {
     if (response.ok) {
       const data = await response.json()
       Object.assign(user, data)
+      console.log('用户资料更新成功:', data)
       showEdit.value = false
       showSuccess('资料更新成功')
     } else {
@@ -296,25 +301,13 @@ const showSuccess = (message: string) => {
   }, 3000)
 }
 
-// 组件挂载时加载用户数据
+//组件挂载时加载用户数据
 onMounted(async () => {
   console.log('ProfileView组件挂载')
   try {
     await loadUserData()
     console.log('用户数据加载完成:', user)
-    
     // 如果API没有返回username/email，从token中获取
-    if (!user.username || !user.email) {
-      const token = localStorage.getItem('access_token')
-      if (token) {
-        const payload = parseJWT(token)
-        console.log('从token获取用户信息:', payload)
-        if (payload) {
-          user.username = payload.username || user.username
-          user.email = payload.email || user.email
-        }
-      }
-    }
   } catch (error) {
     console.error('加载用户数据出错:', error)
   }
@@ -322,15 +315,49 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.page-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-top: 60px;
+}
+
+.content-wrapper {
+  flex: 1;
+  padding: 20px 0;
+}
+
 .profile-container {
   background-color: #fff;
   border-radius: 10px;
   box-shadow: 0 14px 28px rgba(0, 0, 0, 0.1),
     0 10px 10px rgba(0, 0, 0, 0.08);
   padding: 30px;
-  width: 100%;
-  max-width: 800px;
-  margin: 20px auto;
+  width: 90%;
+  margin: 0 auto;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+}
+
+/* 美化滚动条 - 更精致样式 */
+.profile-container::-webkit-scrollbar {
+  width: 6px;
+  transition: all 0.3s ease;
+}
+
+.profile-container::-webkit-scrollbar-track {
+  background: rgba(241, 241, 241, 0.5);
+  border-radius: 3px;
+}
+
+.profile-container::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #FF4B2B, #FF416C);
+  border-radius: 3px;
+  transition: all 0.3s ease;
+}
+
+.profile-container::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #FF416C, #FF4B2B);
 }
 
 .info-card {
@@ -417,9 +444,9 @@ button:active {
   box-shadow: 0 14px 28px rgba(0, 0, 0, 0.1),
     0 10px 10px rgba(0, 0, 0, 0.08);
   padding: 30px;
-  width: 100%;
-  max-width: 500px;
+  width: 90%;
   margin: 30px auto;
+  max-width: 500px;
 }
 
 .password-form-container h3 {
