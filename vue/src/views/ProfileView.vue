@@ -20,7 +20,7 @@
           </div>
           <div class="info-item">
             <span class="info-label">注册时间:</span>
-            <span class="info-value">{{ formatDate(user.created_at) }}</span>
+            <span class="info-value">{{ formatDate(user.join_date) }}</span>
           </div>
           <div class="info-item">
             <span class="info-label">性别:</span>
