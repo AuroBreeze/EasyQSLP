@@ -178,7 +178,7 @@ const loadUserData = async () => {
 
     if (response.ok) {
       const data = await response.json()
-      //console.log(data)
+      console.log(data)
       Object.assign(user, data.data)
     } else {
       // 处理未授权等情况
@@ -244,6 +244,7 @@ const handleProfileUpdate = async (updatedData: any) => {
     if (response.ok) {
       const data = await response.json()
       Object.assign(user, data)
+      console.log('用户资料更新成功:', data)
       showEdit.value = false
       showSuccess('资料更新成功')
     } else {
@@ -311,15 +312,46 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.page-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.content-wrapper {
+  flex: 1;
+  padding: 20px 0;
+}
+
 .profile-container {
   background-color: #fff;
   border-radius: 10px;
   box-shadow: 0 14px 28px rgba(0, 0, 0, 0.1),
     0 10px 10px rgba(0, 0, 0, 0.08);
   padding: 30px;
-  width: 100%;
-  max-width: 800px;
-  margin: 20px auto;
+  width: 90%;
+  margin: 0 auto;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+}
+
+/* 美化滚动条 */
+.profile-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.profile-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.profile-container::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.profile-container::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
 
 .info-card {
@@ -406,9 +438,9 @@ button:active {
   box-shadow: 0 14px 28px rgba(0, 0, 0, 0.1),
     0 10px 10px rgba(0, 0, 0, 0.08);
   padding: 30px;
-  width: 100%;
-  max-width: 500px;
+  width: 90%;
   margin: 30px auto;
+  max-width: 500px;
 }
 
 .password-form-container h3 {
