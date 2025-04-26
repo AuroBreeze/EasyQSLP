@@ -335,23 +335,25 @@ onMounted(async () => {
   overflow-y: auto;
 }
 
-/* 美化滚动条 */
+/* 美化滚动条 - 更精致样式 */
 .profile-container::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
+  transition: all 0.3s ease;
 }
 
 .profile-container::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
+  background: rgba(241, 241, 241, 0.5);
+  border-radius: 3px;
 }
 
 .profile-container::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 4px;
+  background: linear-gradient(to bottom, #FF4B2B, #FF416C);
+  border-radius: 3px;
+  transition: all 0.3s ease;
 }
 
 .profile-container::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: linear-gradient(to bottom, #FF416C, #FF4B2B);
 }
 
 .info-card {
