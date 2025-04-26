@@ -100,7 +100,7 @@ const uploadAvatar = async () => {
 
   try {
     const token = localStorage.getItem('access_token')
-    const response = await axios.post('http://localhost:8000/api/v1/user/profile/revise', formData, {
+    const response = await axios.post('http://localhost:8000/api/v1/user/profile/revise/', formData, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'multipart/form-data'
