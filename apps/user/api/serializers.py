@@ -147,7 +147,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         else:
             return data
 
-    def validate_avater(self, value):
+    def validate_avatar(self, value):
         # 图片类型
         image_type = imghdr.what(value)
         if image_type not in ['jpeg','png','jpg']:
