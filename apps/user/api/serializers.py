@@ -140,14 +140,14 @@ class ResetPasswordSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(serializers.ModelSerializer):
     sex = serializers.CharField(max_length=6)
     introduction = serializers.CharField(max_length=60,required=False)
-    avater = serializers.ImageField(required=False)
+    avatar = serializers.ImageField(required=False)
     def validate_sex(self,data):
         if data not in ['MALE','FEMALE','OTHER']:
             raise ValidationError("性别设置错误")
         else:
             return data
 
-    def validate_avater(self, value):
+    def validate_avatar(self, value):
         # 图片类型
         image_type = imghdr.what(value)
         if image_type not in ['jpeg','png','jpg']:
@@ -165,4 +165,4 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User_Profile
-        fields = ['avater','birthday','introduction','school','sex','user_Login']
+        fields = ['avatar','birthday','introduction','school','sex','user_Login']
