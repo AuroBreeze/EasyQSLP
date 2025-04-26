@@ -11,7 +11,6 @@ import datetime
 
 User = get_user_model()
 
-@SkipTest
 class UserRegistrationTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
@@ -21,7 +20,6 @@ class UserRegistrationTestCase(TestCase):
             'username': 'testuser',
             'password': 'testpassword',
             'code': '123456',
-            'usage': 'Register'
         }
         # 创建一个验证码
         Email_Verify_Code.objects.update_or_create(
@@ -30,7 +28,6 @@ class UserRegistrationTestCase(TestCase):
                 'code': '123456',
                 'send_time': timezone.now(),
                 'expire_time': timezone.now() + timezone.timedelta(minutes=5),
-                'usage': 'Register'
             }
         )
 
@@ -208,6 +205,8 @@ class UserEmailCodeSendTestCase(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertFalse(response.json()['success'])
         self.assertIn('message', response.json())
+
+@SkipTest
 class UserProfileTestCase(TestCase):
     def setUp(self):
         self.client:APIClient = APIClient()

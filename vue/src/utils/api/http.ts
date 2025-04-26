@@ -1,4 +1,4 @@
-const BASE_URL = 'localhost:8000'
+const BASE_URL = 'http://localhost:8000'
 
 interface ApiError extends Error {
   response?: Response;

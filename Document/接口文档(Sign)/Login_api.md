@@ -349,7 +349,7 @@ tags: [Login, API]
 | 请求方法 | POST                     |
 | 接口版本 | v1                       |
 | 接口路径 | `/api/v1/user/register/` |
-| 更新时间 | 2025-04-16               |
+| 更新时间 | 2025-04-26               |
 | 响应字符 | 200 或 400                |
 
 ---
@@ -364,7 +364,6 @@ tags: [Login, API]
 | password | string | 是 | 用户密码 | 123456 |
 | username | string | 是 | 用户昵称 | AuroBree110 |
 | code | string | 是 | 验证码 | 495261 |
-| usage | string | 是 | 用途 | Register |
 
 ---
 
@@ -376,7 +375,6 @@ tags: [Login, API]
     "password": "123123123",
     "username": "AuroBree110",
     "code": "495261",
-    "usage": "Register"
 }
 ```
 ---
