@@ -1,4 +1,4 @@
-const BASE_URL = process.env.VUE_APP_API_BASE_URL
+const BASE_URL = 'localhost:8000'
 
 interface ApiError extends Error {
   response?: Response;
