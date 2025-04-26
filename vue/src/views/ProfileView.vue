@@ -1,8 +1,10 @@
 <template>
   <div class="page-container">
+    <!-- 顶部导航栏 -->
+    <TopNavBar />
     <!-- 波浪背景容器 -->
     <WaveBackground />
-    <div class="content-wrapper">
+    <div class="content-wrapper" style="padding-top: 80px;">
       <h2>个人资料管理</h2>
       <div class="profile-container">
         <!-- 头像区域 -->
@@ -115,6 +117,7 @@
 
 <script lang="ts" setup>
 import { ref, reactive, onMounted } from 'vue'
+import TopNavBar from '@/components/navigation/TopNavBar.vue'
 import { useRouter, useRoute } from 'vue-router'
 import WaveBackground from '@/components/background/WaveBackground.vue'
 import AvatarUpload from '@/components/profile/AvatarUpload.vue'
@@ -316,6 +319,7 @@ onMounted(async () => {
   height: 100vh;
   display: flex;
   flex-direction: column;
+  padding-top: 60px;
 }
 
 .content-wrapper {
