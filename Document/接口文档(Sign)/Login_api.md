@@ -594,6 +594,9 @@ tags: [Login, API]
 | introduction | string | 用户简介 | 总是    |
 | sex | string | 用户性别 | 总是    |
 | school | string | 用户学校 | 总是    |
+| username | string | 用户昵称 | 总是    |
+| email | string | 用户邮箱 | 总是    |
+| join_time | datetime | 用户注册时间 | 总是    |
 ---
 
 ### 响应示例
@@ -602,25 +605,18 @@ tags: [Login, API]
 ```json
 {
   'success': True, 
-  'message': 'User profile retrieved successfully!', 
-  'data': 
+  'message': 'User profile retrieved successfully!', 'data': 
     {
       'avater': '/avater/default.png', 
       'birthday': '2000-01-01', 
       'introduction': 'test introduction', 
       'school': '', 
       'sex': 'OTHER', 
-      'user_Login': 1
+      'user_Login': 1, 
+      'username': 'testuser', 
+      'email': 'test@example.com', 
+      'join_date': '2025-04-26T10:39:01.287572'
     }
 }
 ```
-
-
-
-
-
-
-
-
-
 

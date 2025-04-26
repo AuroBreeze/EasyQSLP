@@ -103,8 +103,14 @@ class UserProfileAPI(APIView):
         所有人都能GET用户资料
         """
         profile = get_object_or_404(User_Profile, pk=pk)
+        user_login = profile.user_Login  # 假设字段名是小写的 user_login
         serializer = UserProfileSerializer(profile)
-        return Response({"success": True,"message": "User profile retrieved successfully!","data": serializer.data})
+        data = serializer.data.copy()  # 创建 serializer.data 的一个副本
+        data['username'] = user_login.username
+        data['email'] = user_login.email
+        data['join_date'] = user_login.join_date
+
+        return Response({"success": True,"message": "User profile retrieved successfully!","data": data})
 
     def post(self,request):
         data = request.data
