@@ -25,27 +25,35 @@ register_data = {
 }
 
 email_data = {
-    "email": "123123123@qq.com",
+    "email": "test@example.com",
 
-    "usage": "ResetPassword"#Register or ResetPassword
+    "usage": "Register"#Register or ResetPassword
 }
 
-
-#res = requests.post(url_register, json=register_data).json()
-
-#res = requests.post(url_login, json=login_data1).json()
-code_data = requests.post(url_codesend, json=email_data).json()
-print(code_data)
-#code = code_data["code"]
+# code_data = requests.post(url_codesend, json=email_data).json()
+# print(code_data)
+# code = code_data["code"]
 
 # print(code)
-# resetpwd_data = {
-#     "email": "123123@qq.com",
-#     "code": "896281",
-#     "password": "123456789",
-#     "password_confirm": "123456789"
-# }
-# res = requests.post(url_resetpwd, json=resetpwd_data).json()
+# res = requests.post(url_, json=resetpwd_data).json()
 
-print(res)
+# print(res)
+
+class RegisterTest:
+    
+    def test_register(self):
+        code_data = requests.post(url_codesend, json=email_data).json()
+        #print(code_data)
+        code = code_data["code"]
+        #print(code)
+        register_data["code"]=code
+        register_data["email"] = "test@example.com"
+        register_data["password"] = "123456789"
+        print(register_data)
+        res = requests.post(url_register, json=register_data).json()
+
+if __name__ == '__main__':
+    test = RegisterTest()
+    test.test_register()
+    
 
