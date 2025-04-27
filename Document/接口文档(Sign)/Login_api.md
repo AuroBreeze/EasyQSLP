@@ -24,7 +24,7 @@ tags: [Login, API]
 | 请求方法 | POST                  |
 | 接口版本 | v1                    |
 | 接口路径 | `/api/v1/user/login/` |
-| 更新时间 | 2025-04-12            |
+| 更新时间 | 2025-04-27            |
 | 响应字符 | 200 或 400             |
 
 ---
@@ -58,6 +58,7 @@ tags: [Login, API]
 | success  | bool   | 状态码  | 总是 |
 | message  | string | 状态信息 | 总是 |
 | username | string | 用户名称 | 总是 |
+| user_id | int | 用户ID | 总是 |
 
 
 
@@ -67,7 +68,8 @@ tags: [Login, API]
 {
     "success": True, 
     "message": "Login successful", 
-    "username": "test"
+    "username": "test",
+    "user_id": 1
 }
 ```
 
