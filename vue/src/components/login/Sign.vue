@@ -164,6 +164,7 @@ import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import WaveBackground from '@/components/background/WaveBackground.vue';
 import EmailCode from '@/components/login/EmailCode.vue';
+import signService from '@/utils/api/signService';
 
 const router = useRouter();
 
@@ -230,40 +231,19 @@ const handleSignIn = async () => {
   }
 
   try {
-    // 1. 先调用登录接口
-    const loginResponse = await fetch('http://localhost:8000/api/v1/user/login/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        email: email,
-        password: password
-      })
-    });
-
-    const loginData = await loginResponse.json();
+    const result = await signService.Login(email, password);
     
-    if (!loginResponse.ok) {
-      // 处理400/401错误
-      if (loginData.errors) {
-        if (loginData.errors.ValidationError) {
-          showError(loginData.errors.ValidationError);
-        } else if (loginData.errors.email) {
-          showError(`邮箱错误: ${loginData.errors.email}`);
-        } else if (loginData.errors.password) {
-          showError(`密码错误: ${loginData.errors.password}`);
-        } else {
-          showError(loginData.message || '登录失败');
-        }
-      } else {
-        showError(loginData.message || '登录失败');
-      }
+    if (!result.success) {
+      // 处理错误
+      const fieldErrors = result.errors ? Object.entries(result.errors)
+        .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(', ') : messages}`)
+        .join('; ') : '';
+      showError(fieldErrors || result.message);
       return;
     }
-
-    if (loginData.success) {
+    if (result.success && 'user_id' in result && 'username' in result) {
+      localStorage.setItem('user_id', result.user_id.toString());
+      localStorage.setItem('username', result.username);
       // 2. 登录成功后再获取JWT token
       const tokenResponse = await fetch('http://localhost:8000/api/v1/user/token/', {
         method: 'POST',
@@ -283,8 +263,7 @@ const handleSignIn = async () => {
         // 存储token和用户信息
         localStorage.setItem('access_token', tokenData.access);
         localStorage.setItem('refresh_token', tokenData.refresh);
-        localStorage.setItem('user_id', loginData.user_id);
-        localStorage.setItem('username', loginData.username);
+
         
         isLoginSuccess.value = true;
         startCountdown();
@@ -368,7 +347,6 @@ const handleSignUp = async () => {
         password: password,
         username: name,
         code: code,
-        usage: 'Register'
       })
     });
 
