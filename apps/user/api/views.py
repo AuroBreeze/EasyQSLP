@@ -38,7 +38,7 @@ class LoginAPI(APIView):
         if serializer.is_valid():
             user = serializer.validated_data['user']
             # 这里可以添加生成 token 或 session 的逻辑
-            return Response({"success": True,"message": "Login successful","username": user.username}, status=status.HTTP_200_OK)
+            return Response({"success": True,"message": "Login successful","username": user.username,"user_id":user.id}, status=status.HTTP_200_OK)
         else:
             errors = serializer.errors
             error_dict = {}
