@@ -5,6 +5,7 @@ interface LoginResponse {
     success: boolean
     message: string
     username?: string
+    user_id?: number
     errors?: any
 
 }
@@ -16,6 +17,7 @@ async function Login(email: string, password: string): Promise<LoginResponse> {
             success: response.success,
             message: response.message,
             username: response.username,
+            user_id: response.user_id
         }
     }catch(error: any){
         return {
