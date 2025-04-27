@@ -5,6 +5,7 @@ interface LoginResponse {
     success: boolean
     message: string
     username?: string
+    user_id?: number
     errors?: any
 
 }
@@ -16,6 +17,7 @@ async function Login(email: string, password: string): Promise<LoginResponse> {
             success: response.success,
             message: response.message,
             username: response.username,
+            user_id: response.user_id
         }
     }catch(error: any){
         return {
@@ -58,7 +60,7 @@ interface ResetPasswordResponse {
 async function ResetPassword(email: string, code: string, password: string,password_confirm: string): Promise<ResetPasswordResponse> {
     const valid = { email, code, password, password_confirm }
     try{
-        const response = await request.post('/api/v1/user/reset_password/', valid)
+        const response = await request.post('/api/v1/user/resetpassword/', valid)
         return {
             success: response.success,
             message: response.message,
