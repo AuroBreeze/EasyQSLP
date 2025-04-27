@@ -30,6 +30,7 @@ async function request(url: string, options: RequestInit = {}): Promise<any> {
       let errorData;
       try {
         errorData = await response.json();
+        console.error('API', errorData); // 错误地点，待修改
       } catch {
         errorData = { message: `HTTP错误: ${response.status}` };
       }
