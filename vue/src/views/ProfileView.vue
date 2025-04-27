@@ -4,8 +4,7 @@
     <TopNavBar />
     <!-- 波浪背景容器 -->
     <WaveBackground />
-    <div class="content-wrapper" style="padding-top: 80px;">
-      <h2>个人资料管理</h2>
+    <div class="content-wrapper">
       <div class="profile-container">
         <!-- 头像区域 -->
         <AvatarUpload :avatar="user.avatar" @update="handleAvatarUpdate" />
@@ -316,25 +315,30 @@ onMounted(async () => {
 
 <style scoped>
 .page-container {
-  height: 100vh;
+  height: calc(100vh - 60px);
   display: flex;
   flex-direction: column;
-  padding-top: 60px;
+  margin-top: 60px;
 }
 
 .content-wrapper {
   flex: 1;
-  padding: 20px 0;
+  padding: 20px;
+  overflow: hidden;
+  display: flex;
+  justify-content: flex-start;
 }
 
 .profile-container {
   background-color: #fff;
-  border-radius: 10px;
+  border-radius: 0 10px 10px 0;
   box-shadow: 0 14px 28px rgba(0, 0, 0, 0.1),
     0 10px 10px rgba(0, 0, 0, 0.08);
   padding: 30px;
-  width: 90%;
-  margin: 0 auto;
+  width: 400px;
+  position: absolute;
+  left: 20px;
+  top: 80px;
   max-height: calc(100vh - 100px);
   overflow-y: auto;
 }
