@@ -21,9 +21,6 @@ async function Login(email: string, password: string): Promise<LoginResponse | E
         }
         return response
     } catch (error: any) {
-        if(error.response.status === 400){
-        return error
-    }
         return {
             success: false,
             message: "未知错误",
@@ -46,9 +43,7 @@ async function Register(email: string, password: string, username: string, code:
         }
         return response
     } catch (error: any) {
-        if(error.response.status === 400){
-        return error
-    }
+
         return {
             success: false,
             message: "未知错误",
@@ -69,9 +64,7 @@ async function ResetPassword(email: string, code: string, password: string, pass
             return response}
         return response
     } catch (error: any) {
-        if(error.response.status === 400){
-        return error
-    }
+
         return {
             success: false,
             message: "未知错误",
