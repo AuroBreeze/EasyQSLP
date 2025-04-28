@@ -16,27 +16,20 @@ async function Login(email: string, password: string): Promise<LoginResponse | E
     const valid = { email, password }
     try {
         const response = await request.post('/api/v1/user/login/', valid)
-        console.log("API123123"+response)
         if (!response.success) {
-            return {
-                success: false,
-                message: response.message,
-                errors: response.errors
-            }
+            return response
         }
-        return {
-            success: true,
-            message: response.message,
-            username: response.username,
-            user_id: response.user_id
-        }
+        return response
     } catch (error: any) {
+        if(error.response.status === 400){
+        return error
+    }
         return {
             success: false,
-            message: error,
-            errors: error
-        }
+            message: "未知错误",
+            errors: {ValidationError: "未知错误"}
     }
+}
 }
 
 
@@ -49,24 +42,19 @@ async function Register(email: string, password: string, username: string, code:
     try {
         const response = await request.post('/api/v1/user/register/', valid)
         if (!response.success) {
-            return {
-                success: false,
-                message: response.message || '注册失败',
-                errors: response.errors || {}
-            }
+            return response
         }
-        return {
-            success: true,
-            message: response.message || '注册成功',
-            errors: {}
-        }
+        return response
     } catch (error: any) {
+        if(error.response.status === 400){
+        return error
+    }
         return {
             success: false,
-            message: error.response?.data?.message || error.message || '网络错误',
-            errors: error.response?.data?.errors || {}
-        }
+            message: "未知错误",
+            errors: {ValidationError: "未知错误"}
     }
+}
 }
 
 interface ResetPasswordResponse {
@@ -78,24 +66,19 @@ async function ResetPassword(email: string, code: string, password: string, pass
     try {
         const response = await request.post('/api/v1/user/resetpassword/', valid)
         if (!response.success) {
-            return {
-                success: false,
-                message: response.message || '密码重置失败',
-                errors: response.errors || {}
-            }
-        }
-        return {
-            success: true,
-            message: response.message || '密码重置成功',
-            errors: {}
-        }
+            return response}
+        return response
     } catch (error: any) {
+        if(error.response.status === 400){
+        return error
+    }
         return {
             success: false,
-            message: error.response?.data?.message || error.message || '网络错误',
-            errors: error.response?.data?.errors || {}
+            message: "未知错误",
+            errors: {ValidationError: "未知错误"}
         }
-    }
+
+}
 }
 
 export default {

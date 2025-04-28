@@ -41,11 +41,11 @@ async function request(url: string, options: RequestInit = {}): Promise<any> {
     }
     
     return await response.json();
-  } catch (error: unknown) {
+  } catch (error) {
     clearTimeout(timeoutId);
     
     // 处理AbortError (超时)
-    if (error instanceof Error && error.name === 'AbortError') {
+    if (error instanceof DOMException && error.name === 'AbortError') {
       console.error('请求超时');
       throw new Error('请求超时');
     }
@@ -57,12 +57,10 @@ async function request(url: string, options: RequestInit = {}): Promise<any> {
         // 跳转到登录页的逻辑
       }
       
-      console.error('API Error:', error);
+      //console.error('API Error:', error);
       throw error;
     }
-    
-    // 处理未知错误
-    //console.error('未知错误1231231:', error);
+    //console.error('未知错误1231231:'+ error);
     throw error
     
   }
