@@ -143,7 +143,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     avatar = serializers.ImageField(required=False)
     def validate_sex(self,data):
         if data not in ['MALE','FEMALE','OTHER']:
-            raise ValidationError("性别设置错误")
+            raise ValidationError({"ValidationError":"性别设置错误"})
         else:
             return data
 
@@ -151,16 +151,16 @@ class UserProfileSerializer(serializers.ModelSerializer):
         # 图片类型
         image_type = imghdr.what(value)
         if image_type not in ['jpeg','png','jpg']:
-            raise ValidationError("仅支持 JPEG , JPG 和 PNG 格式图片")
+            raise ValidationError({"ValidationError":"图片格式错误,仅允许 jpeg,png,jpg"})
         # 图片大小
         if value.size > 4 * 1024 * 1024:
-            raise ValidationError("图片大小不能超过 4MB")
+            raise ValidationError({"ValidationError":"图片大小不能超过 4M"})
 
         # 图片尺寸
         image = Image.open(value)
         width, height = image.size
         if width > 1024 or height > 1024:
-            raise ValidationError("图片尺寸不能超过 1024x1024 像素")
+            raise ValidationError({"ValidationError":"图片尺寸不能超过 1024x1024"})
         return value
 
     class Meta:
