@@ -27,11 +27,12 @@ class RegisterAPI(APIView):
             serialize.save()
             return Response({"success": True,"message": "User registered successfully!"},status=status.HTTP_201_CREATED)
         else:
+            print(serialize.errors)
             return Response({"success": False,"message": "Invalid data", "errors": serialize.errors}, status=status.HTTP_400_BAD_REQUEST)
         #return Response({"message": "User registered successfully!"})
 
 class LoginAPI(APIView):
-    @method_decorator(ratelimit(key='ip', rate='3/hour'))  # 同一 IP 每小时最多登录5次
+    #@method_decorator(ratelimit(key='ip', rate='3/hour'))  # 同一 IP 每小时最多登录5次
     def post(self, request):
         serializer = UserLoginSerializer(data=request.data)
 
@@ -41,15 +42,17 @@ class LoginAPI(APIView):
             return Response({"success": True,"message": "Login successful","username": user.username}, status=status.HTTP_200_OK)
         else:
             errors = serializer.errors
+            #print(errors)
             error_dict = {}
             # 提取错误信息并转换为字符串
             for field, error_list in errors.items():
                 if error_list:
                     error_dict[field] = error_list[0]  # 取第一个错误
+            print(error_dict)
             return Response({
                 "success": False,
                 "message": "Invalid credentials",
-                "errors": error_dict  # 仅包含有错误的字段
+                "errors": errors  # 仅包含有错误的字段
             }, status=status.HTTP_400_BAD_REQUEST)
 class EmailCodeSendAPI(APIView):
     @method_decorator(ratelimit(key="ip", rate='3/minute'))

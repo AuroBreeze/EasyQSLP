@@ -10,7 +10,6 @@ from django.utils import timezone
 import datetime
 
 User = get_user_model()
-
 @SkipTest
 class UserRegistrationTestCase(TestCase):
     def setUp(self):
@@ -50,7 +49,7 @@ class UserRegistrationTestCase(TestCase):
         response = self.client.post(self.register_url, invalid_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-@SkipTest
+#@SkipTest
 class UserLoginTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
