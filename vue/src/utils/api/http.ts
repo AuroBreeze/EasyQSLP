@@ -1,9 +1,10 @@
 const BASE_URL = 'http://localhost:8000'
 
-interface ApiError extends Error {
-  response?: Response;
+interface ApiError {
+  success: boolean;
+  message: string;
+  error?: any;
 }
-
 async function request(url: string, options: RequestInit = {}): Promise<any> {
   // 设置请求头
   const headers = new Headers(options.headers || {});
@@ -30,11 +31,12 @@ async function request(url: string, options: RequestInit = {}): Promise<any> {
       let errorData;
       try {
         errorData = await response.json();
+        //console.error('API', errorData); // 错误地点，待修改
       } catch {
         errorData = { message: `HTTP错误: ${response.status}` };
       }
-      const error: ApiError = new Error(errorData.message || '请求失败');
-      error.response = response;
+      const error: ApiError = errorData;
+      //console.error('API Error:', error);
       throw error;
     }
     
@@ -60,8 +62,9 @@ async function request(url: string, options: RequestInit = {}): Promise<any> {
     }
     
     // 处理未知错误
-    console.error('未知错误:', error);
-    throw new Error('未知错误');
+    //console.error('未知错误1231231:', error);
+    throw error
+    
   }
 }
 

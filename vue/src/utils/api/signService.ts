@@ -1,29 +1,40 @@
-import { Interface } from 'readline'
 import request from './http'
 
-interface LoginResponse {
+interface BaseResponse {
     success: boolean
     message: string
-    username?: string
-    user_id?: number
     errors?: any
-
 }
-async function Login(email: string, password: string): Promise<LoginResponse> {
+
+interface LoginResponse extends BaseResponse {
+    username: string
+    user_id: number
+}
+
+interface Error extends BaseResponse {}
+async function Login(email: string, password: string): Promise<LoginResponse | Error> {
     const valid = { email, password }
-    try{
+    try {
         const response = await request.post('/api/v1/user/login/', valid)
+        console.log("API123123"+response)
+        if (!response.success) {
+            return {
+                success: false,
+                message: response.message,
+                errors: response.errors
+            }
+        }
         return {
-            success: response.success,
+            success: true,
             message: response.message,
             username: response.username,
             user_id: response.user_id
         }
-    }catch(error: any){
+    } catch (error: any) {
         return {
-            success: error.success,
-            message: error.message,
-            errors: error.errors,
+            success: false,
+            message: error,
+            errors: error
         }
     }
 }
@@ -32,22 +43,28 @@ async function Login(email: string, password: string): Promise<LoginResponse> {
 interface RegisterResponse {
     success: boolean
     message: string
-    errors?: any
-    
 }
-async function Register(email: string, password: string, username: string ,code: string): Promise<RegisterResponse> {
+async function Register(email: string, password: string, username: string, code: string): Promise<RegisterResponse | Error> {
     const valid = { email, password, username, code }
-    try{
+    try {
         const response = await request.post('/api/v1/user/register/', valid)
-        return {
-            success: response.success,
-            message: response.message,
+        if (!response.success) {
+            return {
+                success: false,
+                message: response.message || '注册失败',
+                errors: response.errors || {}
+            }
         }
-    }catch(error: any){
         return {
-            success: error.success,
-            message: error.message,
-            errors: error.errors,
+            success: true,
+            message: response.message || '注册成功',
+            errors: {}
+        }
+    } catch (error: any) {
+        return {
+            success: false,
+            message: error.response?.data?.message || error.message || '网络错误',
+            errors: error.response?.data?.errors || {}
         }
     }
 }
@@ -55,21 +72,28 @@ async function Register(email: string, password: string, username: string ,code:
 interface ResetPasswordResponse {
     success: boolean
     message: string
-    errors?: any
 }
-async function ResetPassword(email: string, code: string, password: string,password_confirm: string): Promise<ResetPasswordResponse> {
+async function ResetPassword(email: string, code: string, password: string, password_confirm: string): Promise<ResetPasswordResponse | Error> {
     const valid = { email, code, password, password_confirm }
-    try{
+    try {
         const response = await request.post('/api/v1/user/resetpassword/', valid)
-        return {
-            success: response.success,
-            message: response.message,
+        if (!response.success) {
+            return {
+                success: false,
+                message: response.message || '密码重置失败',
+                errors: response.errors || {}
+            }
         }
-    }catch(error: any){
         return {
-            success: error.success,
-            message: error.message,
-            errors: error.errors,
+            success: true,
+            message: response.message || '密码重置成功',
+            errors: {}
+        }
+    } catch (error: any) {
+        return {
+            success: false,
+            message: error.response?.data?.message || error.message || '网络错误',
+            errors: error.response?.data?.errors || {}
         }
     }
 }
@@ -85,4 +109,3 @@ export default {
         return ResetPassword(email, code, password,password_confirm)
     }
 }
-
