@@ -232,6 +232,7 @@ const handleSignIn = async () => {
 
   try {
     const result = await signService.Login(email, password);
+    console.log("API123123 response:",result.errors.data);
     
     if (!result.success) {
       // 处理错误

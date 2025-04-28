@@ -62,8 +62,9 @@ async function request(url: string, options: RequestInit = {}): Promise<any> {
     }
     
     // 处理未知错误
-    console.error('未知错误:', error);
-    throw new Error('未知错误');
+    //console.error('未知错误1231231:', error);
+    throw error
+    
   }
 }
 

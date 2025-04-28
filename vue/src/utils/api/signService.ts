@@ -16,24 +16,25 @@ async function Login(email: string, password: string): Promise<LoginResponse | E
     const valid = { email, password }
     try {
         const response = await request.post('/api/v1/user/login/', valid)
+        console.log("API123123"+response)
         if (!response.success) {
             return {
                 success: false,
-                message: response.message || '登录失败',
-                errors: response.errors || {}
+                message: response.message,
+                errors: response.errors
             }
         }
         return {
             success: true,
-            message: response.message || '登录成功',
+            message: response.message,
             username: response.username,
             user_id: response.user_id
         }
     } catch (error: any) {
         return {
             success: false,
-            message: error.response?.data?.message || error.message || '网络错误',
-            errors: error.response?.data?.errors || {}
+            message: error,
+            errors: error
         }
     }
 }
