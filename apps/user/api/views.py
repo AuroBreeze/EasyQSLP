@@ -12,6 +12,7 @@ from django.utils import timezone
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from apps.utils.ErrorExtract import ExtractError
 # Create your views here.
 
 # 用户登录 JWT认证模块
@@ -27,8 +28,9 @@ class RegisterAPI(APIView):
             serialize.save()
             return Response({"success": True,"message": "User registered successfully!"},status=status.HTTP_201_CREATED)
         else:
-            print(serialize.errors)
-            return Response({"success": False,"message": "Invalid data", "errors": serialize.errors}, status=status.HTTP_400_BAD_REQUEST)
+            #print(serialize.errors)
+            errors = ExtractError(serialize.errors).extract_error()
+            return Response({"success": False,"message": "Invalid data", "errors": errors}, status=status.HTTP_400_BAD_REQUEST)
         #return Response({"message": "User registered successfully!"})
 
 class LoginAPI(APIView):
@@ -41,14 +43,7 @@ class LoginAPI(APIView):
             # 这里可以添加生成 token 或 session 的逻辑
             return Response({"success": True,"message": "Login successful","username": user.username,"user_id":user.id}, status=status.HTTP_200_OK)
         else:
-            errors = serializer.errors
-            #print(errors)
-            error_dict = {}
-            # 提取错误信息并转换为字符串
-            for field, error_list in errors.items():
-                if error_list:
-                    error_dict[field] = error_list[0]  # 取第一个错误
-            print(error_dict)
+            errors = ExtractError(serializer.errors).extract_error()
             return Response({
                 "success": False,
                 "message": "Invalid credentials",
@@ -82,6 +77,14 @@ class EmailCodeSendAPI(APIView):
                                                                    "expire_time": timezone.now() + timezone.timedelta(minutes=5),
                                                                    "send_time": timezone.now(),
                                                                     "usage": usage})
+        
+        """
+        
+        开发完成后，下面的返回值要修改，不能返回code
+
+        Returns:
+            _type_: _description_
+        """
         return Response({"success": True, "message": "Email code sent successfully!","code":code},status=status.HTTP_201_CREATED)
 
 class ResetPasswordAPI(APIView):
@@ -92,7 +95,8 @@ class ResetPasswordAPI(APIView):
             serializer.save()
             return Response({"success": True,"message": "Password reset successful!"},status=status.HTTP_200_OK)
         else:
-            return Response({"success": False,"message": "Invalid data", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            errors = ExtractError(serializer.errors).extract_error()
+            return Response({"success": False,"message": "Invalid data", "errors": errors}, status=status.HTTP_400_BAD_REQUEST)
 
 class UserProfileAPI(APIView):
     permission_classes = [AllowAny]  # 默认 AllowAny，下面重写 get_permissions 更灵活
@@ -123,7 +127,8 @@ class UserProfileAPI(APIView):
             serializer.save()
             return Response({"success": True,"message": "Profile updated successfully!"},status=status.HTTP_200_OK)
         else:
-            return Response({"success": False,"message": "Invalid data", "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            errors = ExtractError(serializer.errors).extract_error()
+            return Response({"success": False,"message": "Invalid data", "errors": errors}, status=status.HTTP_400_BAD_REQUEST)
 
 # class Querr(APIView):
 #     def post(self, request):
