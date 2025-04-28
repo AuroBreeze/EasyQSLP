@@ -2,7 +2,7 @@
   <div class="avatar-upload-container">
     <div class="avatar-preview">
       <img 
-        :src="avatar || defaultAvatar" 
+        :src="avatar" 
         alt="用户头像"
         class="avatar-image"
       />
@@ -46,13 +46,12 @@ import type { AxiosProgressEvent } from 'axios'
 const props = defineProps({
   avatar: {
     type: String,
-    default: '/src/assets/avatars/default.png'
+    default: ''
   }
 })
 
 const emit = defineEmits(['update'])
 
-const defaultAvatar = '/media/avatars/default.png'
 const selectedFile = ref<File | null>(null)
 const uploading = ref(false)
 const progress = ref(0)
@@ -101,7 +100,7 @@ const uploadAvatar = async () => {
 
   try {
     const token = localStorage.getItem('access_token')
-    const response = await axios.post('http://localhost:8000/api/v1/user/profile/revise', formData, {
+    const response = await axios.post('http://localhost:8000/api/v1/user/profile/revise/', formData, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'multipart/form-data'

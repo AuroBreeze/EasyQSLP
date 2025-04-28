@@ -17,7 +17,7 @@ class User_LoginAdmin(admin.ModelAdmin):
 
 @admin.register(User_Profile)
 class User_ProfileAdmin(admin.ModelAdmin):
-    list_display = ('user_Login', 'avater', 'birthday', 'introduction', 'school', 'sex') # 显示字段
+    list_display = ('user_Login', 'avatar', 'birthday', 'introduction', 'school', 'sex') # 显示字段
     list_filter = ('user_Login',) # 过滤器
     search_fields = ('user_Login','school', 'sex') # 搜索字段
     ordering = ('user_Login',) # 排序字段

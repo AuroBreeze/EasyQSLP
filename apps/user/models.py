@@ -140,7 +140,7 @@ class User_Profile(models.Model):
         OTHER = 'OTHER', '其他'
     #自我介绍
     introduction = models.TextField(max_length=60,null=True,default='',verbose_name='自我介绍')
-    avater = models.ImageField(upload_to='avater/',null=True,default='avater/default.png',verbose_name='头像')
+    avatar = models.ImageField(upload_to='avatar/',null=True,default='avatar/default.png',verbose_name='头像')
     #性别
     sex = models.CharField(max_length=6,choices=SexChoices.choices,default=SexChoices.OTHER,verbose_name='性别')
     #生日

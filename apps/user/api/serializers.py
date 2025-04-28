@@ -52,16 +52,16 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     username = serializers.CharField(max_length=20,validators=[MinLengthValidator(2)],required=True)
     code = serializers.CharField(max_length=6,min_length=6,required=True,write_only=True,error_messages={"required":"验证码不能为空","min_length":"验证码长度为6位","max_length":"验证码长度为6位"})
     # 验证码用途，防止一码多用(注册和重置密码)
-    usage = serializers.CharField(max_length=25,required=False,write_only=True,error_messages={"required":"用途不能为空"})
+    #usage = serializers.CharField(max_length=25,required=False,write_only=True,error_messages={"required":"用途不能为空"})
 
     def validate(self, data):
         email = data.get('email')
         password = data.get('password')
         username = data.get('username')
         code = data.get('code')
-        usage = data.get('usage')
-        if usage != "Register": # 注册方式错误
-            raise ValidationError({"ValidationError":"注册方式错误"})
+        #usage = data.get('usage')
+        #if usage != "Register": # 注册方式错误
+            #raise ValidationError({"ValidationError":"注册方式错误"})
         if email and password and username and code: # 验证数据
             if User_Login.objects.filter(email=email).exists(): # 邮箱已被注册
                 raise ValidationError({"ValidationError":"邮箱已被注册"})
@@ -92,7 +92,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User_Login
-        fields = ['email','password','username','code',"usage"]
+        fields = ['email','password','username','code']
 
 
 # 重置密码序列化器
@@ -140,14 +140,14 @@ class ResetPasswordSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(serializers.ModelSerializer):
     sex = serializers.CharField(max_length=6)
     introduction = serializers.CharField(max_length=60,required=False)
-    avater = serializers.ImageField(required=False)
+    avatar = serializers.ImageField(required=False)
     def validate_sex(self,data):
         if data not in ['MALE','FEMALE','OTHER']:
             raise ValidationError("性别设置错误")
         else:
             return data
 
-    def validate_avater(self, value):
+    def validate_avatar(self, value):
         # 图片类型
         image_type = imghdr.what(value)
         if image_type not in ['jpeg','png','jpg']:
@@ -165,4 +165,4 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User_Profile
-        fields = ['avater','birthday','introduction','school','sex','user_Login']
+        fields = ['avatar','birthday','introduction','school','sex','user_Login']

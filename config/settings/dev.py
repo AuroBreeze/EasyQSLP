@@ -95,7 +95,7 @@ from django.utils import timezone
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timezone.timedelta(minutes=30),  # 访问令牌有效期（示例：30分钟）
-    'REFRESH_TOKEN_LIFETIME': timezone.timedelta(days=7),     # 刷新令牌有效期（示例：7天）
+    'REFRESH_TOKEN_LIFETIME': timezone.timedelta(minutes=60),     # 刷新令牌有效期（示例：1小时）
     'ROTATE_REFRESH_TOKENS': True,                   # 刷新令牌后是否生成新令牌
     'BLACKLIST_AFTER_ROTATION': True,                # 旧刷新令牌是否加入黑名单
     'ALGORITHM': 'HS256',                            # 加密算法
