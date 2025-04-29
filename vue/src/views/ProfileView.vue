@@ -8,7 +8,7 @@
       <!-- 左侧个人资料卡片 -->
       <div class="profile-container">
         <!-- 头像区域 -->
-        <AvatarUpload :avatar="user.avatar" @update="handleAvatarUpdate" />
+        <!-- <AvatarUpload :avatar="user.avatar" @update="handleAvatarUpdate" /> -->
         
         <!-- 基本信息展示 -->
         <div class="info-card">
