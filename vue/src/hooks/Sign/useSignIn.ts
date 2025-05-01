@@ -7,9 +7,9 @@ const signInData = reactive({
   password: ''
 });
 
-const errorMessage = ref('');
-const isLoginSuccess = ref(false);
-const countdown = ref(3);
+const errorMessage = ref(''); // 错误信息
+const isLoginSuccess = ref(false); // 是否登录成功
+const countdown = ref(3); // 倒计时
 const handleSignIn = async () => {
   const { email, password } = signInData;
   if (!email || !password) {
@@ -62,7 +62,6 @@ const handleSignIn = async () => {
         // 存储token和用户信息
         localStorage.setItem('access_token', tokenData.access);
         localStorage.setItem('refresh_token', tokenData.refresh);
-
 
         isLoginSuccess.value = true;
         startCountdown();

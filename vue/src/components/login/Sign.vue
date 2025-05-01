@@ -177,14 +177,6 @@ const signUpData = reactive({
   password: ''
 });
 
-// const signInData = reactive({
-//   email: '',
-//   password: ''
-// });
-
-// const isLoginSuccess = ref(false);
-// const countdown = ref(3);
-// const errorMessage = ref('');
 const signUpErrorMessage = ref('');
 const handleCodeSent = (success: boolean) => {
   if (!success) {
@@ -385,13 +377,6 @@ const handleResetPassword = async () => {
   }
 };
 
-// const showError = (message: string) => {
-//     errorMessage.value = message;
-//     // 5秒后自动清除错误信息
-//     setTimeout(() => {
-//         errorMessage.value = '';
-//     }, 5000);
-// };
 
 const showResetPasswordSuccess = (message: string) => {
     forgotPasswordError.value = message;
@@ -416,17 +401,6 @@ const showSignUpError = (message: string) => {
         signUpErrorMessage.value = '';
     }, 5000);
 };
-
-
-// const startCountdown = () => {
-//   const interval = setInterval(() => {
-//     countdown.value--;
-//     if (countdown.value <= 0) {
-//       clearInterval(interval);
-//       router.push('/start/');
-//     }
-//   }, 1000);
-// };
 
 const goToSupport = () => {
   router.push('/support');
