@@ -121,6 +121,5 @@ export default function useResetpwd(emit?:(event: 'handleBackToLogin')=>void) {
         isForgotPasswordActive,
         handleResetPassword,
         handleForgotPassword,
-        showResetPasswordSuccess
     };
 }

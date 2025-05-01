@@ -175,7 +175,7 @@ const {signUpData,signUpErrorMessage,handleSignUp,handleCodeSent} = useSignUp((e
   }
 });
 
-const {forgotPasswordData,forgotPasswordError,isForgotPasswordActive,handleResetPassword,handleForgotPassword,showResetPasswordSuccess} = useResetpwd(() => {
+const {forgotPasswordData,forgotPasswordError,isForgotPasswordActive,handleResetPassword,handleForgotPassword} = useResetpwd(() => {
   handleBackToLogin();
 });
 
