@@ -28,10 +28,10 @@
           <img :src="userAvatar" alt="用户头像" class="avatar-image">
         </div>
         <div v-if="showUserMenu" class="dropdown-menu">
-          <router-link to="/profile" class="dropdown-item">个人中心</router-link>
+          <router-link :to="userprofile_url" class="dropdown-item">个人中心</router-link>
           <router-link to="/settings" class="dropdown-item">设置</router-link>
           <div class="dropdown-divider"></div>
-          <button @click="handleLogout" class="dropdown-item logout">退出登录</button>
+          <a href="#" @click.prevent="handleLogout" class="dropdown-item">退出登录</a>
         </div>
       </div>
     </div>
@@ -44,6 +44,17 @@ import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
 const router = useRouter()
+
+// 获取用户信息
+const userprofile_url = computed(() => {
+  const user_id = localStorage.getItem('user_id')
+  if (!user_id) {
+    console.error('未找到user_id，请先登录')
+    return '/login'
+  }
+  return `/profile/${user_id}`
+})
+
 
 // 搜索功能
 const searchQuery = ref('')
@@ -204,7 +215,4 @@ const handleLogout = () => {
   margin: 5px 0;
 }
 
-.logout {
-  color: #ff4b2b;
-}
 </style>
