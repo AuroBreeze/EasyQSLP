@@ -164,31 +164,23 @@ import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import WaveBackground from '@/components/background/WaveBackground.vue';
 import EmailCode from '@/components/login/EmailCode.vue';
-import signService from '@/utils/api/signService';
+import useSignIn from "@/hooks/Sign/useSignIn"
+import useSignUp from "@/hooks/Sign/useSignUp"
+import useResetpwd from "@/hooks/Sign/useResetpwd"
+
+const {signInData,errorMessage,isLoginSuccess,countdown,handleSignIn,goToSupport} = useSignIn();
+const {signUpData,signUpErrorMessage,handleSignUp,handleCodeSent} = useSignUp((event, isRightPanelActive) => {
+  if (event === 'toggle-panel') {
+    togglePanel(isRightPanelActive);
+  }
+});
+
+const {forgotPasswordData,forgotPasswordError,isForgotPasswordActive,handleResetPassword,handleForgotPassword} = useResetpwd(() => {
+  handleBackToLogin();
+});
 
 const router = useRouter();
 
-const signUpData = reactive({
-  name: '',
-  email: '',
-  code: '',
-  password: ''
-});
-
-const signInData = reactive({
-  email: '',
-  password: ''
-});
-
-const isLoginSuccess = ref(false);
-const countdown = ref(3);
-const errorMessage = ref('');
-const signUpErrorMessage = ref('');
-const handleCodeSent = (success: boolean) => {
-  if (!success) {
-    showSignUpError("验证码发送失败");
-  }
-};
 
 const togglePanel = (isRightPanelActive:boolean) => {
   const container = document.getElementById('container');
@@ -210,212 +202,26 @@ const togglePanel = (isRightPanelActive:boolean) => {
   }
 };
 
-const handleSignIn = async () => {
-  const { email, password } = signInData;
-  if (!email || !password) {
-    showError('邮箱和密码不能为空');
-    return;
-  }
 
-  // 检查URL参数是否有mock=true
-  const urlParams = new URLSearchParams(window.location.search);
-  const mockMode = urlParams.get('mock') === 'true';
+// const forgotPasswordData = reactive({
+//   email: '',
+//   code: '',
+//   password: '',
+//   password_confirm: ''
+// });
+// const forgotPasswordError = ref('');
+// const isForgotPasswordActive = ref(false);
 
-  if (mockMode) {
-    // Mock模式 - 直接模拟成功登录
-    console.log('Running in mock mode - simulating successful login');
-    isLoginSuccess.value = true;
-    localStorage.setItem('user_id', 'mock-user-123');
-    startCountdown();
-    return;
-  }
-
-  try {
-    const result = await signService.Login(email, password);
-    console.log("API123123 response:",result.errors.data);
-    
-    if (!result.success) {
-      // 处理错误
-      const fieldErrors = result.errors ? Object.entries(result.errors)
-        .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(', ') : messages}`)
-        .join('; ') : '';
-      showError(fieldErrors || result.message);
-      return;
-    }
-    if (result.success && 'user_id' in result && 'username' in result) {
-      localStorage.setItem('user_id', result.user_id.toString());
-      localStorage.setItem('username', result.username);
-      // 2. 登录成功后再获取JWT token
-      const tokenResponse = await fetch('http://localhost:8000/api/v1/user/token/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          email: email,
-          password: password
-        })
-      });
-
-      const tokenData = await tokenResponse.json();
-      
-      if (tokenData.access) {
-        // 存储token和用户信息
-        localStorage.setItem('access_token', tokenData.access);
-        localStorage.setItem('refresh_token', tokenData.refresh);
-
-        
-        isLoginSuccess.value = true;
-        startCountdown();
-      } else {
-        showError(tokenData.detail || '获取token失败');
-      }
-    }
-  } catch (error) {
-    console.error('登录请求失败:', error);
-    showError('网络错误，请检查连接后重试');
-  }
-};
-
-// 刷新token方法
-const refreshToken = async () => {
-  const refreshToken = localStorage.getItem('refresh_token');
-  if (!refreshToken) return null;
-
-  try {
-    const response = await fetch('http://localhost:8000/api/v1/user/token/refresh/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        refresh: refreshToken
-      })
-    });
-
-    const data = await response.json();
-    if (data.access) {
-      localStorage.setItem('access_token', data.access);
-      return data.access;
-    }
-    return null;
-  } catch (error) {
-    console.error('刷新token失败:', error);
-    return null;
-  }
-};
-
-// 验证token方法
-const verifyToken = async (token: string) => {
-  try {
-    const response = await fetch('http://localhost:8000/api/v1/user/token/verify/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        token: token
-      })
-    });
-
-    return response.ok;
-  } catch (error) {
-    console.error('验证token失败:', error);
-    return false;
-  }
-};
-
-const handleSignUp = async () => {
-  const { name, email, code, password } = signUpData;
-  //console.log(name, email, code, password);
-  if (!name || !email || !code || !password) {
-    showSignUpError('请填写所有必填项');
-    return;
-  }
-
-  try {
-    const response = await fetch('http://localhost:8000/api/v1/user/register/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        email: email,
-        password: password,
-        username: name,
-        code: code,
-      })
-    });
-
-    const data = await response.json();
-    console.log(data);
-    
-    if (!response.ok) {
-      // 处理400/401错误
-      if (data.errors) {
-        if (data.errors.ValidationError) {
-          showSignUpError(data.errors.ValidationError[0]);
-        } else if (data.errors.email) {
-          showSignUpError(`邮箱错误: ${data.errors.email}`);
-        } else if (data.errors.password) {
-          showSignUpError(`密码错误: ${data.errors.password}`);
-        } else if (data.errors.code) {
-          showSignUpError(`验证码错误: ${data.errors.code}`);
-        } else {
-          showSignUpError(data.message || '注册失败');
-        }
-      } else {
-        showSignUpError(data.message || '注册失败');
-      }
-      return;
-    }
-
-    if (data.success) {
-      // 显示成功消息
-      signUpErrorMessage.value = '注册成功，正在跳转到登录页面...';
-      
-      // 2秒后平滑切换到登录界面并保留成功提示
-      setTimeout(() => {
-        togglePanel(false);
-        signUpData.name = '';
-        signUpData.email = '';
-        signUpData.code = '';
-        signUpData.password = '';
-        signUpErrorMessage.value = '注册成功，请登录';
-      }, 2000);
-
-    }
-  } catch (error) {
-    console.error('注册请求失败:', error);
-    showSignUpError('网络错误，请检查连接后重试');
-  }
-};
-
-
-
-const forgotPasswordData = reactive({
-  email: '',
-  code: '',
-  password: '',
-  password_confirm: ''
-});
-const forgotPasswordError = ref('');
-const isForgotPasswordActive = ref(false);
-
-const handleForgotPassword = () => {
-  const container = document.getElementById('container');
-  if (container) {
-    container.classList.remove("right-panel-active");
-    container.classList.add("forgot-panel-active");
-    isForgotPasswordActive.value = true;
-    errorMessage.value = '';
-    signUpErrorMessage.value = '';
-  }
-};
+// const handleForgotPassword = () => {
+//   const container = document.getElementById('container');
+//   if (container) {
+//     container.classList.remove("right-panel-active");
+//     container.classList.add("forgot-panel-active");
+//     isForgotPasswordActive.value = true;
+//     errorMessage.value = '';
+//     signUpErrorMessage.value = '';
+//   }
+// };
 
 const handleBackToLogin = () => {
   const container = document.getElementById('container');
@@ -430,121 +236,92 @@ const handleBackToLogin = () => {
   }
 };
 
-const handleResetPassword = async () => {
-  const { email, code, password, password_confirm } = forgotPasswordData;
+// const handleResetPassword = async () => {
+//   const { email, code, password, password_confirm } = forgotPasswordData;
   
-  //console.log(email, code, password, password_confirm);
-  if (!email || !code || !password || !password_confirm) {
-    forgotPasswordError.value = '请填写所有必填项';
-    return;
-  }
+//   //console.log(email, code, password, password_confirm);
+//   if (!email || !code || !password || !password_confirm) {
+//     forgotPasswordError.value = '请填写所有必填项';
+//     return;
+//   }
 
-  if (password !== password_confirm) {
-    forgotPasswordError.value = '两次输入的密码不一致';
-    return;
-  }
+//   if (password !== password_confirm) {
+//     forgotPasswordError.value = '两次输入的密码不一致';
+//     return;
+//   }
 
-  try {
-    const response = await fetch('http://localhost:8000/api/v1/user/resetpassword/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        email: email,
-        code: code,
-        password: password,
-        password_confirm: password_confirm
-      })
-    });
+//   try {
+//     const response = await fetch('http://localhost:8000/api/v1/user/resetpassword/', {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//         'Accept': 'application/json'
+//       },
+//       body: JSON.stringify({
+//         email: email,
+//         code: code,
+//         password: password,
+//         password_confirm: password_confirm
+//       })
+//     });
 
-    const data = await response.json();
+//     const data = await response.json();
     
-    if (!response.ok) {
-      if (data.errors) {
-        if (data.errors.ValidationError) {
-          forgotPasswordError.value = data.errors.ValidationError[0];
-        } else if (data.errors.email) {
-          forgotPasswordError.value = `邮箱错误: ${data.errors.email}`;
-        } else if (data.errors.code) {
-          forgotPasswordError.value = `验证码错误: ${data.errors.code}`;
-        } else if (data.errors.password) {
-          forgotPasswordError.value = `密码错误: ${data.errors.password}`;
-        } else {
-          forgotPasswordError.value = data.message || '密码重置失败';
-        }
-      } else {
-        forgotPasswordError.value = data.message || '密码重置失败';
-      }
-      return;
-    }
+//     if (!response.ok) {
+//       if (data.errors) {
+//         if (data.errors.ValidationError) {
+//           forgotPasswordError.value = data.errors.ValidationError[0];
+//         } else if (data.errors.email) {
+//           forgotPasswordError.value = `邮箱错误: ${data.errors.email}`;
+//         } else if (data.errors.code) {
+//           forgotPasswordError.value = `验证码错误: ${data.errors.code}`;
+//         } else if (data.errors.password) {
+//           forgotPasswordError.value = `密码错误: ${data.errors.password}`;
+//         } else {
+//           forgotPasswordError.value = data.message || '密码重置失败';
+//         }
+//       } else {
+//         forgotPasswordError.value = data.message || '密码重置失败';
+//       }
+//       return;
+//     }
 
-    if (data.success) {
-      forgotPasswordError.value = '';
-      const successMessage = '密码重置成功！2秒后将自动返回登录页面';
-      showResetPasswordSuccess(successMessage);
+//     if (data.success) {
+//       forgotPasswordError.value = '';
+//       const successMessage = '密码重置成功！2秒后将自动返回登录页面';
+//       showResetPasswordSuccess(successMessage);
       
-      setTimeout(() => {
-        handleBackToLogin();
-        forgotPasswordData.email = '';
-        forgotPasswordData.code = '';
-        forgotPasswordData.password = '';
-        forgotPasswordData.password_confirm = '';
-      }, 2000);
-    }
-  } catch (error) {
-    console.error('密码重置请求失败:', error);
-    forgotPasswordError.value = '网络错误，请检查连接后重试';
-  }
-};
-
-const showError = (message: string) => {
-    errorMessage.value = message;
-    // 5秒后自动清除错误信息
-    setTimeout(() => {
-        errorMessage.value = '';
-    }, 5000);
-};
-
-const showResetPasswordSuccess = (message: string) => {
-    forgotPasswordError.value = message;
-    // 修改样式为成功提示
-    const errorEl = document.querySelector('.forgot-password-container .error-message');
-    if (errorEl) {
-        errorEl.classList.add('success-message');
-    }
-    // 5秒后自动清除
-    setTimeout(() => {
-        forgotPasswordError.value = '';
-        if (errorEl) {
-            errorEl.classList.remove('success-message');
-        }
-    }, 5000);
-};
-
-const showSignUpError = (message: string) => {
-    signUpErrorMessage.value = message;
-    // 5秒后自动清除错误信息
-    setTimeout(() => {
-        signUpErrorMessage.value = '';
-    }, 5000);
-};
+//       setTimeout(() => {
+//         handleBackToLogin();
+//         forgotPasswordData.email = '';
+//         forgotPasswordData.code = '';
+//         forgotPasswordData.password = '';
+//         forgotPasswordData.password_confirm = '';
+//       }, 2000);
+//     }
+//   } catch (error) {
+//     console.error('密码重置请求失败:', error);
+//     forgotPasswordError.value = '网络错误，请检查连接后重试';
+//   }
+// };
 
 
-const startCountdown = () => {
-  const interval = setInterval(() => {
-    countdown.value--;
-    if (countdown.value <= 0) {
-      clearInterval(interval);
-      router.push('/start/');
-    }
-  }, 1000);
-};
+// const showResetPasswordSuccess = (message: string) => {
+//     forgotPasswordError.value = message;
+//     // 修改样式为成功提示
+//     const errorEl = document.querySelector('.forgot-password-container .error-message');
+//     if (errorEl) {
+//         errorEl.classList.add('success-message');
+//     }
+//     // 5秒后自动清除
+//     setTimeout(() => {
+//         forgotPasswordError.value = '';
+//         if (errorEl) {
+//             errorEl.classList.remove('success-message');
+//         }
+//     }, 5000);
+// };
 
-const goToSupport = () => {
-  router.push('/support');
-};
 </script>
 
 <style scoped>
