@@ -1,5 +1,0 @@
-[EMAIL]
-USER = "email@gmail.com"
-PASSWORD = "password"
-PORT = 465
-HOST = "smtp.gmail.com"
