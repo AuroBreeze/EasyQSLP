@@ -1,35 +1,36 @@
 import { ref, reactive } from 'vue';
 
+const signUpData = reactive({
+    name: '',
+    email: '',
+    code: '',
+    password: ''
+});
+
+const signUpErrorMessage = ref('');
+
+
+const showSignUpError = (message: string) => {
+    signUpErrorMessage.value = message;
+    // 5秒后自动清除错误信息
+    setTimeout(() => {
+        signUpErrorMessage.value = '';
+    }, 5000);
+};
+
+const handleCodeSent = (success: boolean) => {
+    if (!success) {
+        showSignUpError("验证码发送失败");
+    }
+};
+
+
 export default function useSignUp(emit?: (event: 'toggle-panel', isRightPanelActive: boolean) => void) {
-    const signUpData = reactive({
-        name: '',
-        email: '',
-        code: '',
-        password: ''
-    });
-
-    const signUpErrorMessage = ref('');
-
     const togglePanel = (isRightPanelActive: boolean) => {
         if (emit) {
             emit('toggle-panel', isRightPanelActive);
         }
     };
-
-    const showSignUpError = (message: string) => {
-        signUpErrorMessage.value = message;
-        // 5秒后自动清除错误信息
-        setTimeout(() => {
-            signUpErrorMessage.value = '';
-        }, 5000);
-    };
-
-    const handleCodeSent = (success: boolean) => {
-        if (!success) {
-            showSignUpError("验证码发送失败");
-        }
-    };
-
     const handleSignUp = async () => {
         const { name, email, code, password } = signUpData;
         if (!name || !email || !code || !password) {
