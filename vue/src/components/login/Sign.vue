@@ -232,14 +232,12 @@ const handleSignIn = async () => {
 
   try {
     const result = await signService.Login(email, password);
-    console.log("API123123 response:",result.errors.data);
+    //console.log("API123123 response:",result);
     
     if (!result.success) {
       // 处理错误
-      const fieldErrors = result.errors ? Object.entries(result.errors)
-        .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(', ') : messages}`)
-        .join('; ') : '';
-      showError(fieldErrors || result.message);
+      console.log("API798 response:",result.errors);
+      showError(result.errors.ValidationError || result.errors.email || '登录失败');
       return;
     }
     if (result.success && 'user_id' in result && 'username' in result) {
@@ -275,56 +273,6 @@ const handleSignIn = async () => {
   } catch (error) {
     console.error('登录请求失败:', error);
     showError('网络错误，请检查连接后重试');
-  }
-};
-
-// 刷新token方法
-const refreshToken = async () => {
-  const refreshToken = localStorage.getItem('refresh_token');
-  if (!refreshToken) return null;
-
-  try {
-    const response = await fetch('http://localhost:8000/api/v1/user/token/refresh/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        refresh: refreshToken
-      })
-    });
-
-    const data = await response.json();
-    if (data.access) {
-      localStorage.setItem('access_token', data.access);
-      return data.access;
-    }
-    return null;
-  } catch (error) {
-    console.error('刷新token失败:', error);
-    return null;
-  }
-};
-
-// 验证token方法
-const verifyToken = async (token: string) => {
-  try {
-    const response = await fetch('http://localhost:8000/api/v1/user/token/verify/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        token: token
-      })
-    });
-
-    return response.ok;
-  } catch (error) {
-    console.error('验证token失败:', error);
-    return false;
   }
 };
 
