@@ -40,8 +40,6 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import axios from 'axios'
-import type { AxiosProgressEvent } from 'axios'
 
 const props = defineProps({
   avatar: {
@@ -100,22 +98,36 @@ const uploadAvatar = async () => {
 
   try {
     const token = localStorage.getItem('access_token')
-    const response = await axios.post('http://localhost:8000/api/v1/user/profile/revise/', formData, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'multipart/form-data'
-      },
-      onUploadProgress: (progressEvent: AxiosProgressEvent) => {
-        if (progressEvent.total) {
-          progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-        }
+    const xhr = new XMLHttpRequest()
+    
+    xhr.upload.addEventListener('progress', (event) => {
+      if (event.lengthComputable) {
+        progress.value = Math.round((event.loaded * 100) / event.total)
       }
     })
 
-    if (response.status === 200) {
-      emit('update', response.data.avatar)
+    const response = await new Promise((resolve, reject) => {
+      xhr.open('POST', 'http://localhost:8000/api/v1/user/profile/revise/')
+      xhr.setRequestHeader('Authorization', `Bearer ${token}`)
+      
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve(xhr)
+        } else {
+          reject(new Error(xhr.statusText))
+        }
+      }
+      
+      xhr.onerror = () => reject(new Error('网络错误'))
+      xhr.send(formData)
+    })
+
+    const data = JSON.parse(xhr.responseText)
+
+    if (data.avatar) {
+      emit('update', data.avatar)
     } else {
-      error.value = response.data?.message || '头像上传失败'
+      error.value = data.message || '头像上传失败'
     }
   } catch (err) {
     console.error('上传头像失败:', err)
