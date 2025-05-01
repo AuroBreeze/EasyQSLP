@@ -166,7 +166,7 @@ import WaveBackground from '@/components/background/WaveBackground.vue';
 import EmailCode from '@/components/login/EmailCode.vue';
 import useSignIn from "@/hooks/Sign/useSignIn"
 
-const {signInData,errorMessage,isLoginSuccess,countdown,handleSignIn,showError,startCountdown} = useSignIn();
+const {signInData,errorMessage,isLoginSuccess,countdown,handleSignIn,goToSupport} = useSignIn();
 
 const router = useRouter();
 
@@ -402,9 +402,7 @@ const showSignUpError = (message: string) => {
     }, 5000);
 };
 
-const goToSupport = () => {
-  router.push('/support');
-};
+
 </script>
 
 <style scoped>

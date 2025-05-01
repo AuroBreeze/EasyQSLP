@@ -1,5 +1,5 @@
 import signService from "@/utils/api/signService"
-import { reactive,ref } from "vue"
+import { reactive, ref } from "vue"
 import router from "@/router"
 
 const signInData = reactive({
@@ -87,9 +87,12 @@ const startCountdown = () => {
     countdown.value--;
     if (countdown.value <= 0) {
       clearInterval(interval);
-      router.push('/start/');
+      router.push('/start');
     }
   }, 1000);
+};
+const goToSupport = () => {
+  router.push('/support');
 };
 
 
@@ -100,8 +103,9 @@ export default function useSignIn() {
     isLoginSuccess,
     countdown,
     handleSignIn,
-    showError,
-    startCountdown
+    // showError,
+    // startCountdown,
+    goToSupport,
   };
 }
 
