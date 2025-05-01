@@ -165,24 +165,17 @@ import { useRouter } from 'vue-router';
 import WaveBackground from '@/components/background/WaveBackground.vue';
 import EmailCode from '@/components/login/EmailCode.vue';
 import useSignIn from "@/hooks/Sign/useSignIn"
+import useSignUp from "@/hooks/Sign/useSignUp"
 
 const {signInData,errorMessage,isLoginSuccess,countdown,handleSignIn,goToSupport} = useSignIn();
+const {signUpData,signUpErrorMessage,handleSignUp,handleCodeSent} = useSignUp((event, isRightPanelActive) => {
+  if (event === 'toggle-panel') {
+    togglePanel(isRightPanelActive);
+  }
+});
 
 const router = useRouter();
 
-const signUpData = reactive({
-  name: '',
-  email: '',
-  code: '',
-  password: ''
-});
-
-const signUpErrorMessage = ref('');
-const handleCodeSent = (success: boolean) => {
-  if (!success) {
-    showSignUpError("验证码发送失败");
-  }
-};
 
 const togglePanel = (isRightPanelActive:boolean) => {
   const container = document.getElementById('container');
@@ -203,76 +196,6 @@ const togglePanel = (isRightPanelActive:boolean) => {
     errorMessage.value = '';
   }
 };
-
-
-
-const handleSignUp = async () => {
-  const { name, email, code, password } = signUpData;
-  //console.log(name, email, code, password);
-  if (!name || !email || !code || !password) {
-    showSignUpError('请填写所有必填项');
-    return;
-  }
-
-  try {
-    const response = await fetch('http://localhost:8000/api/v1/user/register/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        email: email,
-        password: password,
-        username: name,
-        code: code,
-      })
-    });
-
-    const data = await response.json();
-    console.log(data);
-    
-    if (!response.ok) {
-      // 处理400/401错误
-      if (data.errors) {
-        if (data.errors.ValidationError) {
-          showSignUpError(data.errors.ValidationError[0]);
-        } else if (data.errors.email) {
-          showSignUpError(`邮箱错误: ${data.errors.email}`);
-        } else if (data.errors.password) {
-          showSignUpError(`密码错误: ${data.errors.password}`);
-        } else if (data.errors.code) {
-          showSignUpError(`验证码错误: ${data.errors.code}`);
-        } else {
-          showSignUpError(data.message || '注册失败');
-        }
-      } else {
-        showSignUpError(data.message || '注册失败');
-      }
-      return;
-    }
-
-    if (data.success) {
-      // 显示成功消息
-      signUpErrorMessage.value = '注册成功，正在跳转到登录页面...';
-      
-      // 2秒后平滑切换到登录界面并保留成功提示
-      setTimeout(() => {
-        togglePanel(false);
-        signUpData.name = '';
-        signUpData.email = '';
-        signUpData.code = '';
-        signUpData.password = '';
-        signUpErrorMessage.value = '注册成功，请登录';
-      }, 2000);
-
-    }
-  } catch (error) {
-    console.error('注册请求失败:', error);
-    showSignUpError('网络错误，请检查连接后重试');
-  }
-};
-
 
 
 const forgotPasswordData = reactive({
@@ -393,15 +316,6 @@ const showResetPasswordSuccess = (message: string) => {
         }
     }, 5000);
 };
-
-const showSignUpError = (message: string) => {
-    signUpErrorMessage.value = message;
-    // 5秒后自动清除错误信息
-    setTimeout(() => {
-        signUpErrorMessage.value = '';
-    }, 5000);
-};
-
 
 </script>
 
