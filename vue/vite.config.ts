@@ -10,7 +10,7 @@ export default defineConfig({
   server: {
     port: 7856,
   },
-  base: './',
+  base: '/',
   plugins: [
     vue(),
     vueJsx(),
