@@ -5,6 +5,7 @@
     <!-- 波浪背景容器 -->
     <WaveBackground />
     <div class="content-wrapper">
+      <!-- 左侧个人资料卡片 -->
       <div class="profile-container">
         <!-- 头像区域 -->
         <AvatarUpload :avatar="user.avatar" @update="handleAvatarUpdate" />
@@ -52,58 +53,37 @@
         </div>
       </div>
 
-      <!-- 编辑资料表单 -->
-      <ProfileForm 
-        v-if="showEdit"
-        :user="user"
-        @submit="handleProfileUpdate"
-        @cancel="hideEditForm"
-      />
-
-      <!-- 修改密码表单 -->
-      <div v-if="showPassword" class="password-form-container">
-        <form @submit.prevent="handlePasswordChange">
-          <h3>修改密码</h3>
-          
-          <div v-if="passwordError" class="error-message">
-            {{ passwordError }}
+      <!-- 右侧内容区域 -->
+      <div class="right-content">
+        <!-- 默认显示用户荣誉 -->
+        <div class="user-honors" v-if="!showEdit && !showPassword">
+          <h3>个人荣誉</h3>
+          <div class="honor-item" v-for="honor in user.honors" :key="honor.id">
+            <div class="honor-title">{{ honor.title }}</div>
+            <div class="honor-date">{{ formatDate(honor.date) }}</div>
+            <div class="honor-description">{{ honor.description }}</div>
           </div>
-
-          <div class="input-group">
-            <input 
-              type="password" 
-              placeholder="当前密码" 
-              id="currentPassword" 
-              v-model="passwordData.current_password" 
-            />
-            <label for="currentPassword">当前密码</label>
+          <div v-if="!user.honors || user.honors.length === 0" class="no-honors">
+            暂无荣誉记录
           </div>
+        </div>
 
-          <div class="input-group">
-            <input 
-              type="password" 
-              placeholder="新密码" 
-              id="newPassword" 
-              v-model="passwordData.new_password" 
-            />
-            <label for="newPassword">新密码</label>
-          </div>
+        <!-- 编辑资料表单 -->
+        <div class="form-container" v-if="showEdit">
+          <ProfileForm 
+            :user="user"
+            @submit="handleProfileUpdate"
+            @cancel="hideEditForm"
+          />
+        </div>
 
-          <div class="input-group">
-            <input 
-              type="password" 
-              placeholder="确认新密码" 
-              id="confirmPassword" 
-              v-model="passwordData.new_password_confirm" 
-            />
-            <label for="confirmPassword">确认新密码</label>
-          </div>
-
-          <div class="form-actions">
-            <button type="submit" class="submit-btn">确认修改</button>
-            <button type="button" class="cancel-btn" @click="hidePasswordForm">取消</button>
-          </div>
-        </form>
+        <!-- 修改密码表单 -->
+        <div class="form-container" v-if="showPassword">
+          <PasswordForm
+            @submit="handlePasswordChange"
+            @cancel="hidePasswordForm"
+          />
+        </div>
       </div>
 
       <!-- 操作成功提示 -->
@@ -121,11 +101,18 @@ import { useRouter, useRoute } from 'vue-router'
 import WaveBackground from '@/components/background/WaveBackground.vue'
 import AvatarUpload from '@/components/profile/AvatarUpload.vue'
 import ProfileForm from '@/components/profile/ProfileForm.vue'
-//import { parseJWT } from '@/utils/jwt'
+import PasswordForm from '@/components/profile/PasswordForm.vue'
 
 const router = useRouter()
 const route = useRoute()
 const userId = ref(Number(route.params.id) || 0)
+
+interface Honor {
+  id: number
+  title: string
+  date: string
+  description: string
+}
 
 // 用户数据
 const user = reactive({
@@ -137,37 +124,22 @@ const user = reactive({
   introduction: '',
   school:'',
   sex:'',
-  user_Login: ''
-})
-
-// 密码修改数据
-const passwordData = reactive({
-  current_password: '',
-  new_password: '',
-  new_password_confirm: ''
+  user_Login: '',
+  honors: [] as Honor[]
 })
 
 const showEdit = ref(false)
 const showPassword = ref(false)
-const passwordError = ref('')
 const successMessage = ref('')
 
 // 初始化加载用户数据
 const loadUserData = async () => {
   try {
-    //console.log('开始加载用户数据...')
     const token = localStorage.getItem('access_token')
-    //console.log('获取到的token:', token)
-    
     if (!token) {
-      //console.warn('未找到access_token，跳转到登录页')
       router.push('/login')
       return
     }
-    
-    // 解析token获取用户信息
-   // const payload = parseJWT(token)
-    //console.log('解析的token payload:', payload)
     
     const response = await fetch(`http://localhost:8000/api/v1/user/profile/${userId.value}/`, {
       method: 'GET',
@@ -176,17 +148,12 @@ const loadUserData = async () => {
         'Content-Type': 'application/json'
       }
     })
-    //console.log('API响应状态:', response.status)
 
     if (response.ok) {
       const data = await response.json()
-      console.log(data)
       Object.assign(user, data.data)
-    } else {
-      // 处理未授权等情况
-      if (response.status === 401) {
-        router.push('/login')
-      }
+    } else if (response.status === 401) {
+      router.push('/login')
     }
   } catch (error) {
     console.error('获取用户资料失败:', error)
@@ -214,10 +181,6 @@ const hideEditForm = () => {
 const showPasswordForm = () => {
   showPassword.value = true
   showEdit.value = false
-  passwordError.value = ''
-  passwordData.current_password = ''
-  passwordData.new_password = ''
-  passwordData.new_password_confirm = ''
 }
 
 const hidePasswordForm = () => {
@@ -246,12 +209,8 @@ const handleProfileUpdate = async (updatedData: any) => {
     if (response.ok) {
       const data = await response.json()
       Object.assign(user, data)
-      console.log('用户资料更新成功:', data)
       showEdit.value = false
       showSuccess('资料更新成功')
-    } else {
-      const errorData = await response.json()
-      // 处理错误响应
     }
   } catch (error) {
     console.error('更新用户资料失败:', error)
@@ -259,12 +218,7 @@ const handleProfileUpdate = async (updatedData: any) => {
 }
 
 // 处理密码修改
-const handlePasswordChange = async () => {
-  if (passwordData.new_password !== passwordData.new_password_confirm) {
-    passwordError.value = '两次输入的新密码不一致'
-    return
-  }
-
+const handlePasswordChange = async (passwordData: { old_password: string, new_password: string }) => {
   try {
     const token = localStorage.getItem('access_token')
     const response = await fetch('http://localhost:8000/api/v1/user/password/', {
@@ -273,10 +227,7 @@ const handlePasswordChange = async () => {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        old_password: passwordData.current_password,
-        new_password: passwordData.new_password
-      })
+      body: JSON.stringify(passwordData)
     })
 
     if (response.ok) {
@@ -284,11 +235,11 @@ const handlePasswordChange = async () => {
       showSuccess('密码修改成功')
     } else {
       const errorData = await response.json()
-      passwordError.value = errorData.message || '密码修改失败'
+      showSuccess(errorData.message || '密码修改失败')
     }
   } catch (error) {
     console.error('修改密码失败:', error)
-    passwordError.value = '网络错误，请稍后重试'
+    showSuccess('网络错误，请稍后重试')
   }
 }
 
@@ -300,16 +251,8 @@ const showSuccess = (message: string) => {
   }, 3000)
 }
 
-//组件挂载时加载用户数据
 onMounted(async () => {
-  console.log('ProfileView组件挂载')
-  try {
-    await loadUserData()
-    console.log('用户数据加载完成:', user)
-    // 如果API没有返回username/email，从token中获取
-  } catch (error) {
-    console.error('加载用户数据出错:', error)
-  }
+  await loadUserData()
 })
 </script>
 
@@ -319,6 +262,7 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   margin-top: 60px;
+  width: 100%;
 }
 
 .content-wrapper {
@@ -326,44 +270,74 @@ onMounted(async () => {
   padding: 20px;
   overflow: hidden;
   display: flex;
-  justify-content: flex-start;
+  gap: 20px;
+  min-width: 0;
+  width: 100%;
 }
 
 .profile-container {
   background-color: #fff;
-  border-radius: 0 10px 10px 0;
+  border-radius: 10px;
   box-shadow: 0 14px 28px rgba(0, 0, 0, 0.1),
     0 10px 10px rgba(0, 0, 0, 0.08);
   padding: 30px;
   width: 400px;
-  position: absolute;
-  left: 20px;
-  top: 80px;
   max-height: calc(100vh - 100px);
   overflow-y: auto;
+  flex-shrink: 0;
 }
 
-/* 美化滚动条 - 更精致样式 */
-.profile-container::-webkit-scrollbar {
-  width: 6px;
-  transition: all 0.3s ease;
+.right-content {
+  flex: 1;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.1),
+    0 10px 10px rgba(0, 0, 0, 0.08);
+  padding: 30px;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+  margin-left: 20px;
+  min-width: 0;
+  width: 100%;
 }
 
-.profile-container::-webkit-scrollbar-track {
-  background: rgba(241, 241, 241, 0.5);
-  border-radius: 3px;
+.user-honors {
+  padding: 20px;
 }
 
-.profile-container::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #FF4B2B, #FF416C);
-  border-radius: 3px;
-  transition: all 0.3s ease;
+.honor-item {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee;
 }
 
-.profile-container::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to bottom, #FF416C, #FF4B2B);
+.honor-title {
+  font-weight: bold;
+  font-size: 18px;
+  margin-bottom: 5px;
 }
 
+.honor-date {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.honor-description {
+  color: #333;
+}
+
+.no-honors {
+  color: #999;
+  text-align: center;
+  padding: 40px 0;
+}
+
+.form-container {
+  padding: 20px;
+}
+
+/* 其他样式保持不变... */
 .info-card {
   margin: 30px 0;
   padding: 20px;
@@ -442,57 +416,6 @@ button:active {
   background: linear-gradient(to right, #1565C0, #0D47A1);
 }
 
-.password-form-container {
-  background-color: #fff;
-  border-radius: 10px;
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.1),
-    0 10px 10px rgba(0, 0, 0, 0.08);
-  padding: 30px;
-  width: 90%;
-  margin: 30px auto;
-  max-width: 500px;
-}
-
-.password-form-container h3 {
-  text-align: center;
-  color: #333;
-  margin-bottom: 20px;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  margin-top: 25px;
-}
-
-.submit-btn {
-  background: linear-gradient(to right, #FF4B2B, #FF416C);
-}
-
-.cancel-btn {
-  background: #999;
-  border-color: #999;
-}
-
-.cancel-btn:hover {
-  background: #777;
-}
-
-/* 继承自Sign.vue的样式 */
-.error-message {
-  color: red;
-  font-size: 14px;
-  margin-bottom: 10px;
-  padding: 10px;
-  background-color: #ffe6e6;
-  border: 1px solid red;
-  border-radius: 5px;
-  text-align: center;
-  width: 100%;
-  box-sizing: border-box;
-}
-
 .success-message {
   color: #28a745;
   font-size: 14px;
@@ -504,57 +427,5 @@ button:active {
   text-align: center;
   width: 100%;
   box-sizing: border-box;
-}
-
-/* 输入框组样式 - 与Sign.vue保持一致 */
-.input-group {
-  position: relative;
-  width: 100%;
-  margin: 8px 0;
-}
-
-.input-group label {
-  position: absolute;
-  left: 15px;
-  top: 12px;
-  color: #999;
-  pointer-events: none;
-  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  font-size: 12px;
-  background-color: transparent;
-  padding: 0 5px;
-  transform-origin: left center;
-}
-
-.input-group input {
-  background-color: #eee;
-  border: none;
-  padding: 12px 15px;
-  margin: 0;
-  width: 100%;
-  transition: all 0.3s ease;
-}
-
-.input-group input:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(255, 75, 43, 0.2);
-}
-
-.input-group input:focus + label,
-.input-group input:not(:placeholder-shown) + label {
-  transform: translateY(-22px) scale(0.85);
-  color: #FF4B2B;
-  background-color: white;
-  padding: 0 5px;
-  left: 10px;
-}
-
-.input-group input::placeholder {
-  color: transparent;
-  transition: color 0.3s ease;
-}
-
-.input-group input:focus {
-  color: #999;
 }
 </style>
