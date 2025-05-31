@@ -6,6 +6,7 @@ from ..models import *
 from PIL import Image
 from django.utils import timezone
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+import markdown
 
 
 
@@ -138,16 +139,9 @@ class ResetPasswordSerializer(serializers.ModelSerializer):
         return user
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    sex = serializers.CharField(max_length=6,required = False)
-    introduction = serializers.CharField(max_length=60,required=False)
     avatar = serializers.ImageField(required=False)
-    def validate_sex(self,data):
-        if data not in ['MALE','FEMALE','OTHER']:
-            #raise ValidationError({"ValidationError":"性别设置错误"})
-            raise ValidationError({"ValidationError":"性别设置错误"})
-        else:
-            return data
-
+    toc = serializers.SerializerMethodField()
+    word_count = serializers.SerializerMethodField()
     def validate_avatar(self, value):
         # 图片类型
         image_type = imghdr.what(value)
@@ -163,7 +157,16 @@ class UserProfileSerializer(serializers.ModelSerializer):
         if width > 1024 or height > 1024:
             raise ValidationError({"ValidationError":"图片尺寸不能超过 1024x1024"})
         return value
+    def get_toc(self, obj):
+        """
+        生成目录
+        """
+        md = markdown.Markdown(extensions=['markdown.extensions.toc'])
+        md.convert(obj.content_md)
+        return md.toc
 
+    def get_word_count(self, obj):
+        return len(obj.content_md.split())
     class Meta:
         model = User_Profile
-        fields = ['avatar','birthday','introduction','school','sex','user_Login']
+        fields = ['avatar','userprofile_md','userprofile_html','content_hash','create_time','update_time','user_Login']
