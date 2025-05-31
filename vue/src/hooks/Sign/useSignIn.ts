@@ -1,4 +1,4 @@
-import signService from "@/utils/api/signService"
+import signService from "@/utils/Sign/signService"
 import { reactive, ref } from "vue"
 import router from "@/router"
 
