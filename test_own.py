@@ -39,8 +39,7 @@ email_data = {
 
 # print(res)
 
-class RegisterTest:
-    
+class RegisterTest: 
     def test_register(self):
         code_data = requests.post(url_codesend, json=email_data).json()
         #print(code_data)

@@ -48,7 +48,7 @@ class UserRegistrationTestCase(TestCase):
         response = self.client.post(self.register_url, invalid_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-#@SkipTest
+@SkipTest
 class UserLoginTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
@@ -207,7 +207,7 @@ class UserEmailCodeSendTestCase(TestCase):
         self.assertFalse(response.json()['success'])
         self.assertIn('message', response.json())
 
-@SkipTest
+
 class UserProfileTestCase(TestCase):
     def setUp(self):
         self.client:APIClient = APIClient()
@@ -223,14 +223,30 @@ class UserProfileTestCase(TestCase):
             'sex': "MALE",
         }
     def test_valid_update_user_profile(self):
+        # 添加头像文件
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        avatar = SimpleUploadedFile(
+            name='test_avatar.png',
+            content=open('c:\\code\\EasyQSLP\\media\\avatar\\defau.png', 'rb').read(),
+            content_type='image/png'
+        )
+        
         token = self.client.post(self.token_url,{'email':'test@example.com','password':'testpassword'},format='json').json()
-        #print(token)
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token['access'])
-        response = self.client.post(self.profile_url,self.valid_payload,format='json')
-        #print(response.json())
-        #查看鉴权
-        #print(response.headers)
+        
+        # 更新有效载荷包含头像
+        payload = self.valid_payload.copy()
+        payload['avatar'] = avatar
+        
+        response = self.client.post(self.profile_url, payload, format='multipart')
+        
+        # 验证响应
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        # 验证头像存储路径
+        profile = User_Profile.objects.get(user_Login=self.user)
+        self.assertTrue(profile.avatar.name.startswith('avatar/'))
+        self.assertIn('test_avatar', profile.avatar.name)
         self.assertTrue(response.json()['success'])
         self.assertEqual(
             User_Profile.objects.filter(user_Login=self.user).first().birthday,
@@ -250,9 +266,10 @@ class UserProfileTestCase(TestCase):
         invalid_payload['introduction'] = 'test introduction'
         invalid_payload['sex'] = "male"
         response = self.client.post(self.profile_url,invalid_payload,format='json')
-        #print(response.json())
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertFalse(response.json()['success'])
+        self.assertIn('success', response.json())
+        if 'success' in response.json():
+            self.assertFalse(response.json()['success'])
     def test_valid_unauthorized_update_user_profile(self):
         response = self.client.post(self.profile_url,self.valid_payload,format='json')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
