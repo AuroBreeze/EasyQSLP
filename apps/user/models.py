@@ -17,7 +17,7 @@ class UserRegisterManager(BaseUserManager):
     """
     自定义用户注册管理器
     """
-    def create(self,email,username,password):
+    def create(self,email,username,password):#type:ignore
         if not email:
             raise ValueError({"email":"邮箱不能为空"})
         if not username:
@@ -61,12 +61,12 @@ class UserRegisterManager(BaseUserManager):
         return self.create_user(email, username, password, **extra_fields)
         
 class EmailCodeSendManager(models.Manager):
-    def create(self,email):
+    def create(self,email): #type:ignore
         if not email:
             raise ValueError({"email":"邮箱不能为空"})
         code = "".join(random.choices('0123456789', k=6))
         send_time = timezone.now()
-        expire_time = send_time + timezone.timedelta(minutes=5)
+        expire_time = send_time + timezone.timedelta(minutes=5) #type:ignore
         usage = "Register"
         
         return self.model(
