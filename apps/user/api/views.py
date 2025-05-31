@@ -121,10 +121,11 @@ class UserProfileAPI(APIView):
 
     def post(self,request):
         data = request.data
-        data['user_Login'] = request.user.id
-        serializer = UserProfileSerializer(data=data)
+        data_copy = data.copy()
+        data_copy['user_Login'] = request.user.id
+        serializer = UserProfileSerializer(data=data_copy)
         if serializer.is_valid():
-            serializer.save()
+            User_Profile.objects.update_or_create(user_Login=request.user.id,defaults=data)
             return Response({"success": True,"message": "Profile updated successfully!"},status=status.HTTP_200_OK)
         else:
             errors = ExtractError(serializer.errors).extract_error()
