@@ -138,11 +138,12 @@ class ResetPasswordSerializer(serializers.ModelSerializer):
         return user
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    sex = serializers.CharField(max_length=6)
+    sex = serializers.CharField(max_length=6,required = False)
     introduction = serializers.CharField(max_length=60,required=False)
     avatar = serializers.ImageField(required=False)
     def validate_sex(self,data):
         if data not in ['MALE','FEMALE','OTHER']:
+            #raise ValidationError({"ValidationError":"性别设置错误"})
             raise ValidationError({"ValidationError":"性别设置错误"})
         else:
             return data
