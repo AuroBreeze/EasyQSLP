@@ -135,15 +135,7 @@ class Email_Verify_Code(models.Model):
     
 class User_Profile(models.Model):
 
-
     avatar = models.ImageField(upload_to='avatar/',null=True,default='avatar/default.png',verbose_name='头像')
-    
-    userprofile_md = models.TextField(verbose_name='个人资料markdown') #存储原始markdown
-    userprofile_html = models.TextField(verbose_name='个人资料html',editable=False)  # 自动生成的 HTML #存储渲染后的html
-    content_hash = models.CharField(max_length=32, editable=False)  # 用于缓存校验
-    create_time = models.DateTimeField(auto_now_add=True,verbose_name='创建时间')
-    update_time = models.DateTimeField(auto_now=True,verbose_name='更新时间')
-    
     
     userprofile_md = models.TextField(verbose_name='个人资料markdown') #存储原始markdown
     userprofile_html = models.TextField(verbose_name='个人资料html',editable=False)  # 自动生成的 HTML #存储渲染后的html
@@ -153,28 +145,8 @@ class User_Profile(models.Model):
     
     user_Login = models.ForeignKey('User_Login',on_delete=models.CASCADE,related_name='profile') #外键关联到User_Login表
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # 确保初始化时字段为字符串
-        
-        if not isinstance(self.userprofile_md, str) and self.userprofile_md is not None:
-            print(self.userprofile_md)
-            print(111)
-            self.userprofile_md = str(self.userprofile_md)
 
     def save(self, *args, **kwargs):
-        # 确保内容为字符串
-        if not isinstance(self.userprofile_md, str):
-            self.userprofile_md = str(self.userprofile_md) if self.userprofile_md is not None else ''
-            
-        # 强制确保 avatar 是文件对象
-        if hasattr(self.avatar, '_file') and isinstance(self.avatar._file, list):
-            # 从 FILES 中获取原始文件对象
-            if hasattr(self, '_original_avatar'):
-                self.avatar = self._original_avatar
-            else:
-                self.avatar = None
-        
         if not self.content_hash or self.has_content_changed():
             self.content_html = self.generate_safe_html()
             self.content_hash = self.calculate_hash()
@@ -184,23 +156,15 @@ class User_Profile(models.Model):
         if not self.pk:
             return True
         old = User_Profile.objects.get(pk=self.pk)
-        # 确保比较前为字符串
-        current_content = str(self.userprofile_md) if not isinstance(self.userprofile_md, str) else self.userprofile_md
-        old_content = str(old.userprofile_md) if not isinstance(old.userprofile_md, str) else old.userprofile_md
-        return current_content != old_content
+        return self.content_md != old.content_md
 
     def generate_safe_html(self):
         from markdown import markdown
         from bleach.sanitizer import Cleaner
 
-        # 确保内容是字符串
-        content = self.userprofile_md or ''
-        if isinstance(content, list):
-            content = ' '.join(str(item) for item in content)
-
         # 生成基础 HTML
         html = markdown(
-            content,
+            self.content_md,
             extensions=[
                 'markdown.extensions.extra',
                 'markdown.extensions.codehilite',
@@ -232,7 +196,7 @@ class User_Profile(models.Model):
 
     def calculate_hash(self):
         import hashlib
-        return hashlib.md5(self.userprofile_md.encode('utf-8')).hexdigest()
+        return hashlib.md5(self.content_md.encode('utf-8')).hexdigest()
     class Meta:
         db_table = 'user_profile'
         verbose_name = '用户信息'
