@@ -162,15 +162,16 @@ class UserProfileSerializer(serializers.ModelSerializer):
         生成目录
         """
         md = markdown.Markdown(extensions=['markdown.extensions.toc'])
-        md.convert(obj.userprofile_md)
+
+        md.convert(obj.content_md)
         return md.toc
 
     def get_word_count(self, obj):
-        return len(obj.userprofile_md.split())
-
+        return len(obj.content_md.split())
     class Meta:
         model = User_Profile
         fields = ['avatar','userprofile_md','userprofile_html','content_hash','create_time','update_time','user_Login','toc','word_count']
         extra_kwargs = {
             'user_Login': {'read_only': True},
         }
+
