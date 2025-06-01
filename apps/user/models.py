@@ -153,8 +153,28 @@ class User_Profile(models.Model):
     
     user_Login = models.ForeignKey('User_Login',on_delete=models.CASCADE,related_name='profile') #外键关联到User_Login表
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # 确保初始化时字段为字符串
+        
+        if not isinstance(self.userprofile_md, str) and self.userprofile_md is not None:
+            print(self.userprofile_md)
+            print(111)
+            self.userprofile_md = str(self.userprofile_md)
 
     def save(self, *args, **kwargs):
+        # 确保内容为字符串
+        if not isinstance(self.userprofile_md, str):
+            self.userprofile_md = str(self.userprofile_md) if self.userprofile_md is not None else ''
+            
+        # 强制确保 avatar 是文件对象
+        if hasattr(self.avatar, '_file') and isinstance(self.avatar._file, list):
+            # 从 FILES 中获取原始文件对象
+            if hasattr(self, '_original_avatar'):
+                self.avatar = self._original_avatar
+            else:
+                self.avatar = None
+        
         if not self.content_hash or self.has_content_changed():
             self.content_html = self.generate_safe_html()
             self.content_hash = self.calculate_hash()
@@ -164,15 +184,23 @@ class User_Profile(models.Model):
         if not self.pk:
             return True
         old = User_Profile.objects.get(pk=self.pk)
-        return self.content_md != old.content_md
+        # 确保比较前为字符串
+        current_content = str(self.userprofile_md) if not isinstance(self.userprofile_md, str) else self.userprofile_md
+        old_content = str(old.userprofile_md) if not isinstance(old.userprofile_md, str) else old.userprofile_md
+        return current_content != old_content
 
     def generate_safe_html(self):
         from markdown import markdown
         from bleach.sanitizer import Cleaner
 
+        # 确保内容是字符串
+        content = self.userprofile_md or ''
+        if isinstance(content, list):
+            content = ' '.join(str(item) for item in content)
+
         # 生成基础 HTML
         html = markdown(
-            self.content_md,
+            content,
             extensions=[
                 'markdown.extensions.extra',
                 'markdown.extensions.codehilite',
@@ -204,7 +232,7 @@ class User_Profile(models.Model):
 
     def calculate_hash(self):
         import hashlib
-        return hashlib.md5(self.content_md.encode('utf-8')).hexdigest()
+        return hashlib.md5(self.userprofile_md.encode('utf-8')).hexdigest()
     class Meta:
         db_table = 'user_profile'
         verbose_name = '用户信息'
