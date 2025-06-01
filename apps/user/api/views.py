@@ -92,7 +92,7 @@ class ResetPasswordAPI(APIView):
     def post(self,request):
         serializer = ResetPasswordSerializer(instance=request.data["email"], data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(user_Login=request.user)
             return Response({"success": True,"message": "Password reset successful!"},status=status.HTTP_200_OK)
         else:
             errors = ExtractError(serializer.errors).extract_error()
@@ -119,17 +119,29 @@ class UserProfileAPI(APIView):
 
         return Response({"success": True,"message": "User profile retrieved successfully!","data": data})
 
-    def post(self,request):
-        data = request.data
-        data_copy = data.copy()
-        data_copy['user_Login'] = request.user.id
-        serializer = UserProfileSerializer(data=data_copy)
+    def post(self, request):
+        serializer = UserProfileSerializer(
+            data=request.data
+        )
+        # print(serializer.avatar)
+        # data = request.data.get('userprofile_md')
+        # avatar_file = request.FILES.get("avatar")
+        # print(avatar_file)
+        # print(data)
+        # 更新或创建用户资料
         if serializer.is_valid():
-            User_Profile.objects.update_or_create(user_Login=request.user.id,defaults=data)
-            return Response({"success": True,"message": "Profile updated successfully!"},status=status.HTTP_200_OK)
+            User_Profile.objects.update_or_create(
+                user_Login=request.user,
+                defaults={
+                    'userprofile_md': serializer.validated_data.get('userprofile_md', ''),
+                    'avatar': serializer.validated_data.get('avatar')
+                }
+            )
+            # serializer.save()
         else:
-            errors = ExtractError(serializer.errors).extract_error()
-            return Response({"success": False,"message": "Invalid data", "errors": errors}, status=status.HTTP_400_BAD_REQUEST)
+            print(serializer.errors)
+            return Response({'success ': False, 'message': 'Invalid data'},status=status.HTTP_400_BAD_REQUEST)
+        return Response({'success': True, 'message': 'User profile updated successfully!'}, status=status.HTTP_200_OK)
 
 # class Querr(APIView):
 #     def post(self, request):
