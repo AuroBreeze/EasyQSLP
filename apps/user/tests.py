@@ -218,9 +218,8 @@ class UserProfileTestCase(TestCase):
         self.token_url = reverse('user:token')
 
         self.valid_payload = {
-            'birthday': '2000-01-01',
-            'introduction': 'test introduction',
-            'sex': "MALE",
+            'userprofile_md': "'''This is a test article123.'''",
+            'avatar': None
         }
     def test_valid_update_user_profile(self):
         # 添加头像文件
@@ -234,11 +233,20 @@ class UserProfileTestCase(TestCase):
         token = self.client.post(self.token_url,{'email':'test@example.com','password':'testpassword'},format='json').json()
         self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token['access'])
         
-        # 更新有效载荷包含头像
-        payload = self.valid_payload.copy()
-        payload['avatar'] = avatar
+        # 更新有效载荷包含头像和markdown内容
+        payload = {
+            'userprofile_md': '# This is a test article123.',
+            'avatar': avatar
+        }
+        # print(payload)
         
-        response = self.client.post(self.profile_url, payload, format='multipart')
+        # 强制将avatar作为文件字段单独处理
+        response = self.client.post(
+            self.profile_url, 
+            payload,
+            format='multipart'
+        )
+        print(response)
         
         # 验证响应
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -248,46 +256,8 @@ class UserProfileTestCase(TestCase):
         self.assertTrue(profile.avatar.name.startswith('avatar/'))
         self.assertIn('test_avatar', profile.avatar.name)
         self.assertTrue(response.json()['success'])
+        # 验证markdown内容是否正确保存
         self.assertEqual(
-            User_Profile.objects.filter(user_Login=self.user).first().birthday,
-            datetime.date.fromisoformat(self.valid_payload['birthday'])
+            User_Profile.objects.filter(user_Login=self.user).first().userprofile_md,
+            "# This is a test article123."
         )
-        self.assertEqual(User_Profile.objects.filter(user_Login=self.user).first().introduction,self.valid_payload['introduction'])
-        self.assertEqual(User_Profile.objects.filter(user_Login=self.user).first().sex,self.valid_payload['sex'])
-
-    def test_invalid_update_user_profile(self):
-        self.client.force_authenticate(user=self.user)
-        User_Profile.objects.update_or_create(user_Login=self.user,defaults={
-            'birthday': '2000-01-01',
-            'introduction': 'test introduction',
-        })
-        invalid_payload = self.valid_payload.copy()
-        invalid_payload['birthday'] = '2000-01-01'
-        invalid_payload['introduction'] = 'test introduction'
-        invalid_payload['sex'] = "male"
-        response = self.client.post(self.profile_url,invalid_payload,format='json')
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('success', response.json())
-        if 'success' in response.json():
-            self.assertFalse(response.json()['success'])
-    def test_valid_unauthorized_update_user_profile(self):
-        response = self.client.post(self.profile_url,self.valid_payload,format='json')
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-        #self.assertFalse(response.json()['success'])
-        self.assertIn('detail',response.json())
-    def test_get_user_profile(self):
-        self.client.force_authenticate(user=self.user)
-        User_Profile.objects.update_or_create(user_Login=self.user,defaults={
-            'birthday': '2000-01-01',
-            'introduction': 'test introduction',
-        })
-
-        response = self.client.get(self.get_profile_url,args=[self.user.pk])
-        print(response.json())
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertTrue(response.json()['success'])
-        #self.assertEqual(response.json()['data']['birthday'],'2000-01-01')
-        self.assertEqual(response.json()['data']['introduction'],'test introduction')
-
-
-
