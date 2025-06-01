@@ -120,13 +120,9 @@ class UserProfileAPI(APIView):
         return Response({"success": True,"message": "User profile retrieved successfully!","data": data})
 
     def post(self, request):
-<<<<<<< HEAD
         serializer = UserProfileSerializer(
             data=request.data
         )
-=======
-        serializer = UserProfileSerializer(data=request.data)
->>>>>>> edca2af (refactor(user): 重构用户资料更新逻辑并支持 Markdown 内容)
         # print(serializer.avatar)
         # data = request.data.get('userprofile_md')
         # avatar_file = request.FILES.get("avatar")
@@ -135,7 +131,6 @@ class UserProfileAPI(APIView):
         # 更新或创建用户资料
         if serializer.is_valid():
             User_Profile.objects.update_or_create(
-<<<<<<< HEAD
                 user_Login=request.user,
                 defaults={
                     'userprofile_md': serializer.validated_data.get('userprofile_md', ''),
@@ -145,12 +140,6 @@ class UserProfileAPI(APIView):
             # serializer.save()
         else:
             print(serializer.errors)
-=======
-            user_Login=request.user,
-            defaults=serializer
-            )
-        else:
->>>>>>> edca2af (refactor(user): 重构用户资料更新逻辑并支持 Markdown 内容)
             return Response({'success ': False, 'message': 'Invalid data'},status=status.HTTP_400_BAD_REQUEST)
         return Response({'success': True, 'message': 'User profile updated successfully!'}, status=status.HTTP_200_OK)
 
