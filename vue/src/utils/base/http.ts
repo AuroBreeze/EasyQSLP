@@ -28,7 +28,7 @@ async function request(url: string, options: RequestInit = {}): Promise<any> {
     
     // 统一处理响应
     const data = await response.json();
-    if (response.status === 400) {
+    if (response.status === 400 || response.status === 401 || response.status === 403) {
       return data; // 返回400响应数据，不抛出错误
     }
     
