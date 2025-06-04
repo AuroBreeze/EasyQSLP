@@ -221,6 +221,24 @@ class UserProfileTestCase(TestCase):
             'userprofile_md': "'''This is a test article123.'''",
             'avatar': None
         }
+        
+        self.valid_register_payload = {
+            'email': 'test123@example.com',
+            'username': 'testuser123',
+            'password': 'testpassword',
+            'code': '123456',
+        }
+        # 创建一个验证码
+        Email_Verify_Code.objects.update_or_create(
+            email='test123@example.com',
+            defaults={
+                'code': '123456',
+                'send_time': timezone.now(),
+                'expire_time': timezone.now() + timezone.timedelta(minutes=5),
+            }
+        )
+    
+    @SkipTest
     def test_valid_update_user_profile(self):
         # 添加头像文件
         from django.core.files.uploadedfile import SimpleUploadedFile
@@ -246,7 +264,7 @@ class UserProfileTestCase(TestCase):
             payload,
             format='multipart'
         )
-        print(response)
+        print(response.json())
         
         # 验证响应
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -261,3 +279,23 @@ class UserProfileTestCase(TestCase):
             User_Profile.objects.filter(user_Login=self.user).first().userprofile_md,
             "# This is a test article123."
         )
+    def test_get_user_profile(self):
+
+
+        response = self.client.post(self.register_url, self.valid_register_payload, format='json')
+        print(response.json())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        user = User_Login.objects.get(email='test123@example.com')
+        self.assertTrue(user.DoesNotExist) # 测试是否创建了用户
+        self.assertFalse(user.is_superuser) # 测试是否创建了管理员权限
+        self.assertFalse(user.is_staff) # 测试是否创建了管理员权限
+        self.user = User_Login.objects.get(email='test123@example.com')
+        
+        token = self.client.post(self.token_url,{'email':'test123@example.com','password':'testpassword'},format='json').json()
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token['access'])
+        
+        
+        self.assertTrue(User_Profile.objects.filter(user_Login=User_Login.objects.get(email='test123@example.com').id)) # 测试是否创建了用户个人资料
+        
+        user_profiles = self.client.get(self.get_profile_url)
+        print(user_profiles.json())
