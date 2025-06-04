@@ -53,35 +53,53 @@ import WaveBackground from '@/components/background/WaveBackground.vue'
 }
 
 .error-code {
-  font-size: 8rem;
-  font-weight: 700;
+  font-size: 10rem;
+  font-weight: 800;
   margin: 0;
   line-height: 1;
   color: var(--color-primary);
+  text-shadow: 3px 3px 0 rgba(0,0,0,0.1);
+  animation: pulse 2s infinite;
 }
 
 .error-message {
-  font-size: 2rem;
-  margin: 1rem 0;
+  font-size: 2.5rem;
+  margin: 1.5rem 0;
+  color: #555;
+  font-weight: 500;
 }
 
 .error-description {
   max-width: 500px;
-  margin-bottom: 2rem;
-  line-height: 1.6;
+  margin-bottom: 3rem;
+  line-height: 1.8;
+  color: #666;
+  font-size: 1.1rem;
 }
 
 .home-button {
   display: inline-block;
-  padding: 0.75rem 1.5rem;
+  padding: 1rem 2rem;
   background-color: var(--color-primary);
   color: white;
-  border-radius: 4px;
+  border-radius: 50px;
   text-decoration: none;
-  transition: background-color 0.2s;
+  transition: all 0.3s;
+  font-size: 1.1rem;
+  font-weight: 600;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  transform: translateY(0);
 }
 
 .home-button:hover {
   background-color: var(--color-primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0,0,0,0.15);
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
 }
 </style>
