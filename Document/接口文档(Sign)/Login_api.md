@@ -519,11 +519,8 @@ tags: [Login, API]
 ### 请求参数说明
 | 字段名 | 类型 | 必填 | 描述 | 示例值                   |
 |--------|-------|-----|------|-----------------------|
-| avatar | string | 否 | 用户头像 | https://www.baidu.com/img/PCtm_d9c8750bed0b3c7d089fa7d55720d6cf.png |
-| birthday | string | 否 | 用户生日 | 2025-04-24            |
-| introduction | string | 否 | 用户简介 | AuroBree110           |
-| sex | string | 否 | 用户性别 | MALE 或 FEMALE 或 OTHER |
-| school | string | 否 | 用户学校 | 清华大学                 |
+| avatar | string | 否 | 用户头像 | |
+| userprofile_md | string | 否 | 用户简介 |  |
 ---
 
 ### 响应参数
@@ -532,20 +529,14 @@ tags: [Login, API]
 | success | bool | 状态码 | 总是    |
 | message | string | 状态信息 | 总是    |
 | errors | dict | 错误信息 | 存在错误时 |
-| sex | list | 用户性别 |  性别参数错误时   |
-| school | list | 用户学校 |  学校参数错误时   |
-| avatar | list | 用户头像 |  头像参数错误时   |
-| birthday | list | 用户生日 |  生日参数错误时   |
-| introduction | list | 用户简介 |  简介参数错误时   |
 
 ---
 
 ### 请求示例
 ```json
 {
-  'birthday': '2000-01-01',
-  'introduction': 'test introduction',
-  'sex': "MALE",
+  "avatar": "/avater/default.png",
+  "userprofile_md": "#test introduction"
 }
 ```
 
@@ -566,7 +557,7 @@ tags: [Login, API]
   'message': 'Invalid data', 
   'errors': 
     {
-      'sex': ['性别设置错误']
+      'avatar': ['Invalid image file'],
     }
 }
 ```
@@ -590,32 +581,41 @@ tags: [Login, API]
 | message | string | 状态信息 | 总是    |
 | data | dict | 用户信息 | 总是    |
 | avatar | string | 用户头像 | 总是    |
-| birthday | string | 用户生日 | 总是    |
-| introduction | string | 用户简介 | 总是    |
-| sex | string | 用户性别 | 总是    |
-| school | string | 用户学校 | 总是    |
-| username | string | 用户昵称 | 总是    |
-| email | string | 用户邮箱 | 总是    |
-| join_time | datetime | 用户注册时间 | 总是    |
+| userprofile_md | string | 用户简介 | 总是    |
+| userprofile_html | string | 用户简介html | 总是    |
+| content_hash | string | 内容hash | 总是    |
+| create_time | datetime | 创建时间 | 总是    |
+| update_time | datetime | 更新时间 | 总是    |
+| user_Login | int | 用户id | 总是    |
+| toc | string | 目录 | 总是    |
+| word_count | int | 字数 | 总是    |
+| username | string | 用户名 | 总是    |
+| email | string | 邮箱 | 总是    |
+| join_date | datetime | 注册时间 | 总是    |
+
+
 ---
 
 ### 响应示例
 
 成功响应示例：
 ```json
-{
-  'success': True, 
-  'message': 'User profile retrieved successfully!', 'data': 
-    {
-      'avater': '/avater/default.png', 
-      'birthday': '2000-01-01', 
-      'introduction': 'test introduction', 
-      'school': '', 
-      'sex': 'OTHER', 
-      'user_Login': 1, 
-      'username': 'testuser', 
-      'email': 'test@example.com', 
-      'join_date': '2025-04-26T10:39:01.287572'
+{ 'success': True, 
+  'message': 'User profile retrieved successfully!', 
+  'data': 
+  {
+    'avatar': '/avatar/default.png', 
+    'userprofile_md': '', 
+    'userprofile_html': '', 
+    'content_hash': 'd41d8cd98f00b204e9800998ecf8427e', 
+    'create_time': '2025-06-04T14:44:59.954074', 
+    'update_time': '2025-06-04T14:44:59.955074', 
+    'user_Login': 2, 
+    'toc': '', 
+    'word_count': 0, 
+    'username': 'testuser123', 
+    'email': 'test123@example.com', 
+    'join_date': '2025-06-04T14:44:59.939365'
     }
 }
 ```
