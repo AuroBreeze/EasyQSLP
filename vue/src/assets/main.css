@@ -7,6 +7,12 @@
   font-weight: normal;
 }
 
+#app.full-screen {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
 a,
 .green {
   text-decoration: none;
