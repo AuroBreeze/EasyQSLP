@@ -3,7 +3,7 @@ version: '3.8'
 services:
   redis:
     image: redis:latest
-    container_name: EasyQFLP-redis
+    container_name: EasyQFSP-redis
     ports:
       - "6379:6379"
     restart: always
