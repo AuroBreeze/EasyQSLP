@@ -7,6 +7,7 @@ from PIL import Image
 from django.utils import timezone
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 import markdown
+import markdown
 
 
 
@@ -142,6 +143,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
     avatar = serializers.ImageField(required=False)
     toc = serializers.SerializerMethodField()
     word_count = serializers.SerializerMethodField()
+    toc = serializers.SerializerMethodField()
+    word_count = serializers.SerializerMethodField()
     def validate_avatar(self, value):
         # 图片类型
         image_type = imghdr.what(value)
@@ -157,17 +160,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
         if width > 1024 or height > 1024:
             raise ValidationError({"ValidationError":"图片尺寸不能超过 1024x1024"})
         return value
-    def get_toc(self, obj):
-        """
-        生成目录
-        """
-        md = markdown.Markdown(extensions=['markdown.extensions.toc'])
-
-        md.convert(obj.userprofile_md)
-        return md.toc
-
-    def get_word_count(self, obj):
-        return len(obj.userprofile_md.split())
 
     class Meta:
         model = User_Profile
