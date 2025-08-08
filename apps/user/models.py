@@ -135,7 +135,15 @@ class Email_Verify_Code(models.Model):
     
 class User_Profile(models.Model):
 
+
     avatar = models.ImageField(upload_to='avatar/',null=True,default='avatar/default.png',verbose_name='头像')
+    
+    userprofile_md = models.TextField(verbose_name='个人资料markdown') #存储原始markdown
+    userprofile_html = models.TextField(verbose_name='个人资料html',editable=False)  # 自动生成的 HTML #存储渲染后的html
+    content_hash = models.CharField(max_length=32, editable=False)  # 用于缓存校验
+    create_time = models.DateTimeField(auto_now_add=True,verbose_name='创建时间')
+    update_time = models.DateTimeField(auto_now=True,verbose_name='更新时间')
+    
     
     userprofile_md = models.TextField(verbose_name='个人资料markdown') #存储原始markdown
     userprofile_html = models.TextField(verbose_name='个人资料html',editable=False)  # 自动生成的 HTML #存储渲染后的html
