@@ -264,7 +264,11 @@ class UserProfileTestCase(TestCase):
             payload,
             format='multipart'
         )
+<<<<<<< HEAD
         print(response.json())
+=======
+        print(response)
+>>>>>>> edca2af (refactor(user): 重构用户资料更新逻辑并支持 Markdown 内容)
         
         # 验证响应
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -278,6 +282,7 @@ class UserProfileTestCase(TestCase):
         self.assertEqual(
             User_Profile.objects.filter(user_Login=self.user).first().userprofile_md,
             "# This is a test article123."
+<<<<<<< HEAD
         )
     def test_get_user_profile(self):
 
@@ -299,3 +304,6 @@ class UserProfileTestCase(TestCase):
         
         user_profiles = self.client.get(self.get_profile_url)
         print(user_profiles.json())
+=======
+        )
+>>>>>>> edca2af (refactor(user): 重构用户资料更新逻辑并支持 Markdown 内容)
