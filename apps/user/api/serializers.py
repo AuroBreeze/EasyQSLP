@@ -160,20 +160,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
         if width > 1024 or height > 1024:
             raise ValidationError({"ValidationError":"图片尺寸不能超过 1024x1024"})
         return value
-    def get_toc(self, obj):
-        """
-        生成目录
-        """
-        md = markdown.Markdown(extensions=['markdown.extensions.toc'])
-        md.convert(obj.userprofile_md)
-        return md.toc
-
-    def get_word_count(self, obj):
-        return len(obj.userprofile_md.split())
 
     class Meta:
         model = User_Profile
         fields = ['avatar','userprofile_md','userprofile_html','content_hash','create_time','update_time','user_Login','toc','word_count']
-        extra_kwargs = {
-            'user_Login': {'read_only': True},
-        }
+
