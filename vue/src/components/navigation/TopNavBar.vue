@@ -81,7 +81,8 @@ const currentLocation = computed(() => {
     'profile': '个人中心',
     'settings': '设置',
     'search': '搜索结果',
-    'home': '首页'
+    'home': '首页',
+    '404view': '404页面'
   }
   return nameMap[route.name as string] || '未知位置'
 })
