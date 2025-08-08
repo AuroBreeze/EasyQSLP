@@ -93,6 +93,7 @@ class ResetPasswordAPI(APIView):
         serializer = ResetPasswordSerializer(instance=request.data["email"], data=request.data)
         if serializer.is_valid():
             serializer.save(user_Login=request.user)
+            serializer.save(user_Login=request.user)
             return Response({"success": True,"message": "Password reset successful!"},status=status.HTTP_200_OK)
         else:
             errors = ExtractError(serializer.errors).extract_error()
