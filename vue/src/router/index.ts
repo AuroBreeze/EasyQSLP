@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import StartView from '../views/StartView.vue'
 import Loginview from '../views/Loginview.vue'
 import ProfileView from '../views/ProfileView.vue'
+import NotFoundView from '../views/404view.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -22,7 +23,12 @@ const router = createRouter({
       component: ProfileView,
       meta: { requiresAuth: true },
       props: true
-    }
+    },
+    {
+      path: '/404view',
+      name: '404view',
+      component: NotFoundView
+    },
   ]
 })
 

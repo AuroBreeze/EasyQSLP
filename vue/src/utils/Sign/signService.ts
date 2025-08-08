@@ -1,4 +1,4 @@
-import request from './http'
+import request from '../base/http'
 
 interface BaseResponse {
     success: boolean
