@@ -9,7 +9,7 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Project
-        fields = ['title', 'cover_image', 'introduction', 'status', 'create_time', 'update_time', 'owner',
+        fields = ['id', 'title', 'cover_image', 'introduction', 'status', 'create_time', 'update_time', 'owner',
                   'collaborator', 'replications', 'likes', 'stars', 'short_term_score', 'long_term_score', 'views']
         extra_kwargs = {
             'collaborator': {
@@ -30,13 +30,25 @@ class ArticleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Article
-        fields = ['title', 'content_md', 'content_html', 'toc', 'word_count','create_time','update_time','adminer','project']
+        fields = ['id','title', 'content_md', 'content_html', 'toc', 'word_count','create_time','update_time','adminer','project']
 
         extra_kwargs = {
             'content_md': {
                 'write_only': True
             }
         }
+
+    def create(self, validated_data):
+        """
+        保底设置分类：若未传 category，则自动使用/创建一个名为“默认分类”的分类，避免外键约束失败。
+        """
+        if not validated_data.get('category'):
+            from ..models import Article_category
+            category, _ = Article_category.objects.get_or_create(
+                name='默认分类'
+            )
+            validated_data['category'] = category
+        return super().create(validated_data)
 
     def get_toc(self, obj):
         """

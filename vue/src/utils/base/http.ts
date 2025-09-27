@@ -26,24 +26,23 @@ async function request(url: string, options: RequestInit = {}): Promise<any> {
     
     clearTimeout(timeoutId);
     
-    // 统一处理响应
-    const data = await response.json();
+    // 统一处理响应（兼容非JSON错误响应）
+    const contentType = response.headers.get('content-type') || '';
+    const isJson = contentType.includes('application/json');
+    const body = isJson ? await response.json() : await response.text();
+
+    // 对于400，按原逻辑返回响应体（便于表单错误处理）
     if (response.status === 400) {
-      return data; // 返回400响应数据，不抛出错误
+      return body;
     }
-    
+
     if (!response.ok) {
-      let errorData;
-      try {
-        errorData = data;
-      } catch {
-        errorData = { message: `HTTP错误: ${response.status}` };
-      }
-      const error: ApiError = errorData;
+      // 抛出结构化错误，前端上层可统一显示
+      const error: any = isJson ? body : { message: `HTTP ${response.status}`, detail: String(body).slice(0, 500) };
       throw error;
     }
-    
-    return data;
+
+    return body;
   } catch (error) {
     clearTimeout(timeoutId);
     
