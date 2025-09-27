@@ -191,3 +191,130 @@ class RevisionApprovalWorkflowTestCase(TestCase):
         self.assertEqual(self.article.content_md, 'new content v2')
 
 
+class HistoryAndDiffTestCase(TestCase):
+    def setUp(self):
+        self.client: APIClient = APIClient()
+
+        self.owner = User_Login.objects.create_user(email='owner2@example.com', password='pwd', username='owner2')
+        self.m1 = User_Login.objects.create_user(email='m11@example.com', password='pwd', username='m11')
+        self.m2 = User_Login.objects.create_user(email='m22@example.com', password='pwd', username='m22')
+        self.m3 = User_Login.objects.create_user(email='m33@example.com', password='pwd', username='m33')
+
+        self.client.force_authenticate(user=self.owner)
+
+        self.project = Project.objects.create(title='History Project', owner=self.owner)
+        self.project.maintainers.add(self.m1, self.m2, self.m3)
+
+        self.category = Article_category.objects.create(name='HistCat')
+        self.article = Article.objects.create(
+            title='Hist Article',
+            content_md='v0',
+            adminer=self.owner,
+            category=self.category,
+            project=self.project,
+        )
+
+        # urls
+        self.rev_create_url = reverse('project:article-revision-create')
+        self.rev_list_url = reverse('project:article-revision-list', kwargs={'pk': self.article.id})
+
+    def _approve(self, rev_id, approver):
+        url = reverse('project:revision-approval')
+        self.client.force_authenticate(user=approver)
+        return self.client.post(url, {
+            'revision': rev_id,
+            'approver': approver.id,
+            'decision': 'approved'
+        }, format='json')
+
+    def test_revision_list_and_diff(self):
+        # 创建两个修订
+        r1 = self.client.post(self.rev_create_url, {
+            'article': self.article.id,
+            'content': 'v1',
+            'submitter': self.owner.id,
+            'comment': 'to v1',
+        }, format='json')
+        self.assertEqual(r1.status_code, status.HTTP_201_CREATED)
+        rev1_id = r1.data['id']
+
+        # 审批合入 r1
+        for u in [self.m1, self.m2, self.m3]:
+            a = self._approve(rev1_id, u)
+            self.assertEqual(a.status_code, status.HTTP_201_CREATED)
+
+        # 再创建 r2
+        r2 = self.client.post(self.rev_create_url, {
+            'article': self.article.id,
+            'content': 'v2',
+            'submitter': self.owner.id,
+            'comment': 'to v2',
+        }, format='json')
+        self.assertEqual(r2.status_code, status.HTTP_201_CREATED)
+        rev2_id = r2.data['id']
+
+        # 列表应至少包含 r1 和 r2
+        lst = self.client.get(self.rev_list_url)
+        self.assertEqual(lst.status_code, status.HTTP_200_OK)
+        ids = [item['id'] for item in lst.data]
+        self.assertIn(rev1_id, ids)
+        self.assertIn(rev2_id, ids)
+
+        # 查看 r2 与 prev 的 diff
+        diff_url_prev = reverse('project:revision-diff', kwargs={'pk': rev2_id}) + '?against=prev&mode=unified'
+        dprev = self.client.get(diff_url_prev)
+        self.assertEqual(dprev.status_code, status.HTTP_200_OK)
+        self.assertIn('diff', dprev.data)
+
+        # 查看 r2 与 current 的 diff（current 仍是 v1，因为 r2 未合入）
+        diff_url_cur = reverse('project:revision-diff', kwargs={'pk': rev2_id}) + '?against=current&mode=unified'
+        dcur = self.client.get(diff_url_cur)
+        self.assertEqual(dcur.status_code, status.HTTP_200_OK)
+        self.assertIn('diff', dcur.data)
+
+    def test_revert_flow(self):
+        # 创建并合入 r1(v1)
+        r1 = self.client.post(self.rev_create_url, {
+            'article': self.article.id,
+            'content': 'v1',
+            'submitter': self.owner.id,
+            'comment': 'to v1',
+        }, format='json')
+        rev1_id = r1.data['id']
+        for u in [self.m1, self.m2, self.m3]:
+            a = self._approve(rev1_id, u)
+            self.assertEqual(a.status_code, status.HTTP_201_CREATED)
+
+        # 创建并合入 r2(v2)
+        r2 = self.client.post(self.rev_create_url, {
+            'article': self.article.id,
+            'content': 'v2',
+            'submitter': self.owner.id,
+            'comment': 'to v2',
+        }, format='json')
+        rev2_id = r2.data['id']
+        for u in [self.m1, self.m2, self.m3]:
+            a = self._approve(rev2_id, u)
+            self.assertEqual(a.status_code, status.HTTP_201_CREATED)
+
+        # 现在文章应为 v2
+        self.article.refresh_from_db()
+        self.assertEqual(self.article.content_md, 'v2')
+
+        # 维护者发起回滚到 r1
+        self.client.force_authenticate(user=self.m1)
+        revert_url = reverse('project:revision-revert', kwargs={'pk': rev1_id})
+        rv = self.client.post(revert_url)
+        self.assertEqual(rv.status_code, status.HTTP_201_CREATED)
+        revert_id = rv.data['id']
+
+        # 审批回滚修订
+        for u in [self.m1, self.m2, self.m3]:
+            a = self._approve(revert_id, u)
+            self.assertEqual(a.status_code, status.HTTP_201_CREATED)
+
+        # 回滚合入后应变回 v1
+        self.article.refresh_from_db()
+        self.assertEqual(self.article.content_md, 'v1')
+
+

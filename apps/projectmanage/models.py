@@ -204,9 +204,28 @@ class Article_Revision(models.Model):
         article = self.article
         article.content_md = self.content
         article.save()
+        # 设置为已通过并记录合入信息与版本号
         self.status = self.Status.APPROVED
-        self.save(update_fields=['status'])
+        self.applied_time = timezone.now()
+        # applied_by 可在调用处（例如审批视图）补充设置；此处不强制
+        # 计算新版本：以当前文章已存在的最大版本+1
+        latest_version = Article_Revision.objects.filter(article=article, status=self.Status.APPROVED).aggregate(models.Max('version')).get('version__max') or 0
+        self.version = latest_version + 1
+        self.save(update_fields=['status', 'applied_time', 'version'])
         return True
+
+    # Git-like 历史增强字段
+    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='children', verbose_name='父修订')
+    base_content_hash = models.CharField(max_length=32, blank=True, verbose_name='基线内容MD5')
+    version = models.IntegerField(default=0, verbose_name='版本号')
+    # 缓存 diff 结果，便于前端快速展示（可选）
+    try:
+        from django.db.models import JSONField as DjangoJSONField
+    except Exception:
+        from django.contrib.postgres.fields import JSONField as DjangoJSONField
+    diff_json = DjangoJSONField(null=True, blank=True, verbose_name='内容差异')
+    applied_time = models.DateTimeField(null=True, blank=True, verbose_name='合入时间')
+    applied_by = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='applied_revisions', verbose_name='合入执行者')
 
 class Article_comment(models.Model):
     article = models.ForeignKey('Article',on_delete=models.CASCADE,related_name='comments',verbose_name='文章')
