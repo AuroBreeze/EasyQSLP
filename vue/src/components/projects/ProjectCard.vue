@@ -1,5 +1,5 @@
 <template>
-  <div class="card" @click="$emit('open')">
+  <div class="card" @click="$emit('open')" @mouseenter="onEnter" @mouseleave="onLeave">
     <div class="cover" v-if="project.cover_image">
       <img :src="project.cover_image" alt="cover" />
     </div>
@@ -26,7 +26,22 @@
 import type { ProjectLite } from '@/utils/home/homeService'
 
 const props = defineProps<{ project: ProjectLite }>()
-const emit = defineEmits<{ (e: 'like'): void; (e: 'star'): void; (e: 'open'): void }>()
+const emit = defineEmits<{
+  (e: 'like'): void;
+  (e: 'star'): void;
+  (e: 'open'): void;
+  (e: 'hover', payload: { project: ProjectLite | null; rect?: DOMRect }): void;
+}>()
+
+function onEnter(e: MouseEvent) {
+  const el = e.currentTarget as HTMLElement
+  const rect = el.getBoundingClientRect()
+  emit('hover', { project: props.project, rect })
+}
+
+function onLeave() {
+  emit('hover', { project: null })
+}
 </script>
 
 <style scoped>
