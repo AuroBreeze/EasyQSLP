@@ -21,10 +21,10 @@
       </div>
     </div>
     <div class="action-buttons">
-      <a href="index.html" class="action-btn quick-start-btn">
+      <RouterLink to="/main" class="action-btn quick-start-btn">
         <span class="btn-text">快速开始</span>
         <span class="btn-icon">→</span>
-      </a>
+      </RouterLink>
       <a href="#" class="action-btn explore-btn">
         <span class="btn-text">探索更多</span>
         <span class="btn-icon">→</span>

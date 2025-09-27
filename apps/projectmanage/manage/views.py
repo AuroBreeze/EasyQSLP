@@ -10,9 +10,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 
 class ProjectView(APIView):
     def get_permissions(self):
-        """GET 公开，POST 需登录。"""
-        if self.request.method == 'POST':
-            return [IsAuthenticated()]
+        """测试阶段：全部放开权限（GET/POST 均无需登录）。上线请恢复。"""
         return [AllowAny()]
 
     def get(self,request,*args,**kwargs):
@@ -30,9 +28,7 @@ class ProjectView(APIView):
 
 class ArticleView(APIView):
     def get_permissions(self):
-        """GET 公开，POST 需登录。"""
-        if self.request.method == 'POST':
-            return [IsAuthenticated()]
+        """测试阶段：全部放开权限（GET/POST 均无需登录）。上线请恢复。"""
         return [AllowAny()]
 
     def get(self,request,*args,**kwargs):
