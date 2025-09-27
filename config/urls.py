@@ -21,6 +21,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/', include("apps.api.urls")),
     path('user/',include("apps.user.api.urls")), #测试专用
-    # path('project/',include("apps.projectmanage.manage.urls")),
+    # 测试阶段启用项目管理接口
+    path('project/',include("apps.projectmanage.manage.urls")),
 
 ]
