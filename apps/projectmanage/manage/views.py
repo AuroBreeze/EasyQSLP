@@ -1,7 +1,12 @@
 from rest_framework.generics import get_object_or_404
 
-from .serializers import ArticleSerializer,ProjectSerializer
-from ..models import Article,Project
+from .serializers import (
+    ArticleSerializer,
+    ProjectSerializer,
+    ArticleRevisionSerializer,
+    RevisionApprovalSerializer,
+)
+from ..models import Article, Project, Article_Revision
 from django.core.cache import cache
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -10,7 +15,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 
 class ProjectView(APIView):
     def get_permissions(self):
-        """测试阶段：全部放开权限（GET/POST 均无需登录）。上线请恢复。"""
+        """TODO: 测试阶段：全部放开权限（GET/POST 均无需登录）。上线请恢复。"""
         return [AllowAny()]
 
     def get(self,request,*args,**kwargs):
@@ -46,5 +51,38 @@ class ArticleView(APIView):
             serializer.save()
             return Response(serializer.data,status=201)
         return Response(serializer.errors,status=400)
+
+
+class ArticleRevisionView(APIView):
+    def get_permissions(self):
+        return [AllowAny()]
+
+    def get(self, request, *args, **kwargs):
+        rev_id = kwargs.get('pk')
+        revision = get_object_or_404(Article_Revision, pk=rev_id)
+        serializer = ArticleRevisionSerializer(revision)
+        return Response(serializer.data)
+
+    def post(self, request, *args, **kwargs):
+        serializer = ArticleRevisionSerializer(data=request.data)
+        if serializer.is_valid():
+            revision = serializer.save()
+            return Response(ArticleRevisionSerializer(revision).data, status=201)
+        return Response(serializer.errors, status=400)
+
+
+class RevisionApprovalView(APIView):
+    def get_permissions(self):
+        return [AllowAny()]
+
+    def post(self, request, *args, **kwargs):
+        serializer = RevisionApprovalSerializer(data=request.data)
+        if serializer.is_valid():
+            approval = serializer.save()
+            # 审批后尝试自动合入
+            revision = approval.revision
+            revision.apply_if_ready()
+            return Response(RevisionApprovalSerializer(approval).data, status=201)
+        return Response(serializer.errors, status=400)
 
 
