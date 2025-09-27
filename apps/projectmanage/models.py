@@ -30,6 +30,9 @@ class Project(models.Model):
     views = models.IntegerField(default=0,verbose_name='浏览量')
     replications = models.ManyToManyField(User,related_name='replicated_projects',verbose_name='复现的用户')
 
+    # 新增：项目维护者（提交审批需要至少三位维护者同意）
+    maintainers = models.ManyToManyField(User, related_name='maintained_projects', blank=True, verbose_name='项目维护者')
+
     hot_score = models.FloatField(default=0.0,verbose_name='热度分数')
     short_term_score = models.FloatField(default=0.0,verbose_name='短期热度分数')
     long_term_score = models.FloatField(default=0.0,verbose_name='长期热度分数')
@@ -93,7 +96,8 @@ class Article_category(models.Model):
 class Article(models.Model):
 
     title = models.CharField(max_length=50,unique=True,verbose_name='文章标题')
-    project = models.ForeignKey('Project', on_delete=models.CASCADE, related_name='articles', null=True, blank=True,
+    # 修改：所有文章必须有归属项目（不允许为空）
+    project = models.ForeignKey('Project', on_delete=models.CASCADE, related_name='articles', null=False, blank=False,
                                 verbose_name='所属项目')
 
     adminer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='articles',
@@ -184,6 +188,26 @@ class Article_Revision(models.Model):
     def __str__(self):
         return f"文章{self.article.title}，提交者{self.submitter.username}，提交时间{self.create_time}"
 
+    def approvals_count(self):
+        return self.approvals.filter(decision=RevisionApproval.Decision.APPROVED).count()
+
+    def can_auto_apply(self):
+        # 审批通过数量达到 3 即可自动合入
+        return self.approvals_count() >= 3
+
+    def apply_if_ready(self):
+        if self.status != self.Status.PENDING:
+            return False
+        if not self.can_auto_apply():
+            return False
+        # 合并到文章
+        article = self.article
+        article.content_md = self.content
+        article.save()
+        self.status = self.Status.APPROVED
+        self.save(update_fields=['status'])
+        return True
+
 class Article_comment(models.Model):
     article = models.ForeignKey('Article',on_delete=models.CASCADE,related_name='comments',verbose_name='文章')
     user = models.ForeignKey(User,on_delete=models.SET_NULL,null=True,blank=True,related_name='comments',verbose_name='评论者')
@@ -197,3 +221,22 @@ class Article_comment(models.Model):
         db_table = "project_article_comment"
         verbose_name = '文章评论'
         verbose_name_plural = '文章评论'
+
+class RevisionApproval(models.Model):
+    class Decision(models.TextChoices):
+        APPROVED = 'approved', '同意'
+        REJECTED = 'rejected', '拒绝'
+
+    revision = models.ForeignKey('Article_Revision', on_delete=models.CASCADE, related_name='approvals', verbose_name='修改提交')
+    approver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='revision_approvals', verbose_name='审批人')
+    decision = models.CharField(max_length=10, choices=Decision.choices, default=Decision.APPROVED, verbose_name='审批结果')
+    create_time = models.DateTimeField(auto_now_add=True, verbose_name='审批时间')
+
+    class Meta:
+        db_table = "project_article_revision_approval"
+        verbose_name = '修改审批'
+        verbose_name_plural = '修改审批'
+        unique_together = ('revision', 'approver')
+
+    def __str__(self):
+        return f"修改{self.revision_id} 审批人{self.approver_id} 结果{self.decision}"
