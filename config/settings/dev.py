@@ -21,9 +21,9 @@ DATABASES = {
 INSTALLED_APPS_DEV = [
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
-    'apps.user.apps.UserConfig',
-    'apps.projectmanage.apps.ProjectmanageConfig',  # 确保应用路径正确
-    'apps.api.apps.ApiConfig'
+    'apps.user',
+    'apps.projectmanage',  # 使用模块路径，便于按包路径与 app label 测试
+    'apps.api'
 ]
 
 # 确保 INSTALLED_APPS_DEV 在 INSTALLED_APPS 之前
