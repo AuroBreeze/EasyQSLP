@@ -5,9 +5,16 @@ from ..models import Article,Project
 from django.core.cache import cache
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 
 class ProjectView(APIView):
+    def get_permissions(self):
+        """GET 公开，POST 需登录。"""
+        if self.request.method == 'POST':
+            return [IsAuthenticated()]
+        return [AllowAny()]
+
     def get(self,request,*args,**kwargs):
         project_id = kwargs.get('pk')
         project = get_object_or_404(Project,pk=project_id)
@@ -22,6 +29,12 @@ class ProjectView(APIView):
         return Response(serializer.errors,status=400)
 
 class ArticleView(APIView):
+    def get_permissions(self):
+        """GET 公开，POST 需登录。"""
+        if self.request.method == 'POST':
+            return [IsAuthenticated()]
+        return [AllowAny()]
+
     def get(self,request,*args,**kwargs):
         article_id = kwargs.get('pk')
         #print(article_id)
