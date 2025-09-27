@@ -1,80 +1,108 @@
 <template>
-  <div class="container">
-    <header class="header">
-      <h1 class="title">主界面</h1>
-      <p class="subtitle">请选择你要进行的操作</p>
-    </header>
+  <div class="layout">
+    <NavBar @search="onSearch" @createProject="goCreateProject" />
+    <Breadcrumbs :items="breadcrumbs" />
 
-    <section class="grid">
-      <router-link class="card upload" to="/article/upload">
-        <h2>发布文章</h2>
-        <p>上传 Markdown 内容，后端自动生成安全的 HTML。</p>
-      </router-link>
+    <div class="content">
+      <aside class="left">
+        <HotProjects :projects="hotProjects" @open="openProject" />
+        <Announcements :items="announcements" />
+        <Categories :trees="categories" @select="onSelectCategory" />
+        <RecentActivities :items="activities" />
+      </aside>
 
-      <router-link class="card create" to="/project/create">
-        <h2>创建项目</h2>
-        <p>最小实现：只需填写项目名称（可选简介）。</p>
-      </router-link>
+      <main class="main">
+        <div class="toolbar">
+          <router-link class="btn" to="/project/create">+ 创建项目</router-link>
+          <router-link class="btn outline" to="/article/upload">发布文章</router-link>
+        </div>
 
-      <div class="card view">
-        <h2>查看文章</h2>
-        <p>输入文章 ID 跳转到详情页</p>
-        <form class="inline" @submit.prevent="goView">
-          <input v-model.number="articleId" type="number" placeholder="文章ID" min="1" />
-          <button type="submit" :disabled="!articleId">前往</button>
-        </form>
-      </div>
-
-      <router-link class="card profile" to="/profile/1">
-        <h2>个人中心</h2>
-        <p>示例入口，实际请替换为真实用户 ID。</p>
-      </router-link>
-    </section>
+        <div class="grid">
+          <ProjectCard v-for="p in feed" :key="p.id" :project="p"
+                       @open="openProject(p.id)" @like="likeProject(p.id)" @star="starProject(p.id)" />
+        </div>
+      </main>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { onMounted, ref } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import NavBar from '@/components/navigation/NavBar.vue'
+import Breadcrumbs from '@/components/navigation/Breadcrumbs.vue'
+import HotProjects from '@/components/sidebar/HotProjects.vue'
+import Announcements from '@/components/sidebar/Announcements.vue'
+import Categories from '@/components/sidebar/Categories.vue'
+import RecentActivities from '@/components/sidebar/RecentActivities.vue'
+import ProjectCard from '@/components/projects/ProjectCard.vue'
+import { listProjects, listHotProjects, listAnnouncements, getCategoriesTree, listActivities, type ProjectLite, type Announcement as Ann, type CategoryNode, type ActivityItem } from '@/utils/home/homeService'
 
 const router = useRouter()
-const articleId = ref<number | null>(null)
+const route = useRoute()
 
-function goView() {
-  if (articleId.value) {
-    router.push(`/article/${articleId.value}`)
-  }
+const breadcrumbs = ref([{ label: '首页', link: '/main' }])
+const hotProjects = ref<ProjectLite[]>([])
+const announcements = ref<Ann[]>([])
+const categories = ref<CategoryNode[]>([])
+const activities = ref<ActivityItem[]>([])
+const feed = ref<ProjectLite[]>([])
+
+async function loadData() {
+  const kw = String(route.query.keyword || '')
+  const cat = Number(route.query.category || 0) || undefined
+  const [{ data: hot }, { data: anns }, { data: cats }, { data: acts }, { data: items }] = await Promise.all([
+    listHotProjects(),
+    listAnnouncements(),
+    getCategoriesTree(),
+    listActivities(),
+    listProjects({ keyword: kw, category: cat })
+  ])
+  hotProjects.value = hot
+  announcements.value = anns
+  categories.value = cats
+  activities.value = acts
+  feed.value = items
 }
+
+function onSearch(keyword: string) {
+  router.push({ path: '/main', query: { ...route.query, keyword } })
+}
+
+function onSelectCategory(id: number) {
+  router.push({ path: '/main', query: { ...route.query, category: id } })
+}
+
+function goCreateProject() {
+  router.push('/project/create')
+}
+
+function openProject(id: number) {
+  // TODO: 跳转到项目详情（待实现项目详情页），当前先跳到文章上传/列表占位
+  alert(`打开项目 #${id}`)
+}
+
+function likeProject(id: number) {
+  alert(`点赞项目 #${id}（占位）`)
+}
+
+function starProject(id: number) {
+  alert(`收藏项目 #${id}（占位）`)
+}
+
+onMounted(loadData)
 </script>
 
 <style scoped>
-.container {
-  max-width: 1100px;
-  margin: 24px auto;
-  padding: 0 16px;
+.layout { max-width: 1200px; margin: 0 auto; }
+.content { display: grid; grid-template-columns: 280px 1fr; gap: 16px; padding: 12px 16px; }
+.left { display: grid; gap: 12px; align-content: start; }
+.main { min-height: 60vh; }
+.toolbar { display: flex; gap: 8px; margin-bottom: 12px; }
+.btn { padding: 6px 12px; border: 1px solid #2563eb; color: #2563eb; background: transparent; text-decoration: none; border-radius: 6px; }
+.btn.outline { border-style: dashed; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+@media (max-width: 900px) {
+  .content { grid-template-columns: 1fr; }
 }
-.header { margin-bottom: 16px; }
-.title { margin: 0; font-size: 28px; }
-.subtitle { margin: 6px 0 0; color: #666; }
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 16px;
-}
-.card {
-  background: #fff;
-  border: 1px solid #eee;
-  border-radius: 12px;
-  padding: 16px;
-  text-decoration: none;
-  color: inherit;
-  transition: box-shadow .2s ease, transform .2s ease;
-}
-.card:hover { box-shadow: 0 8px 24px rgba(0,0,0,.08); transform: translateY(-2px); }
-.card h2 { margin: 0 0 8px; font-size: 20px; }
-.card p { margin: 0; color: #666; }
-.inline { display: flex; gap: 8px; margin-top: 12px; }
-input { flex: 1; padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; }
-button { padding: 8px 14px; border: none; border-radius: 8px; background: #1677ff; color: #fff; cursor: pointer; }
-button[disabled] { opacity: .6; cursor: not-allowed; }
 </style>
