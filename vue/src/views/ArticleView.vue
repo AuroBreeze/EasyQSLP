@@ -3,6 +3,7 @@
     <header class="header">
       <h1 class="title">{{ article?.title || '文章详情' }}</h1>
       <div class="header-actions">
+        <router-link v-if="articleId" :to="{ name: 'article-history', params: { id: articleId } }" class="link">查看历史</router-link>
         <router-link to="/article/upload" class="link">发布新文章</router-link>
       </div>
     </header>
@@ -26,6 +27,7 @@ const route = useRoute()
 const article = ref<ArticleResponse | null>(null)
 const loading = ref(true)
 const error = ref('')
+const articleId = ref<number | null>(null)
 
 onMounted(async () => {
   loading.value = true
@@ -37,6 +39,7 @@ onMounted(async () => {
     loading.value = false
     return
   }
+  articleId.value = id
   try {
     const res: ArticleResponse = await getArticle(id)
     article.value = res
