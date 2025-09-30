@@ -7,6 +7,8 @@ import ArticleUpload from '../views/ArticleUpload.vue'
 import ArticleView from '../views/ArticleView.vue'
 import MainView from '../views/MainView.vue'
 import ProjectCreate from '../views/ProjectCreate.vue'
+import ArticleHistory from '../views/ArticleHistory.vue'
+import RevisionDiff from '../views/RevisionDiff.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -46,6 +48,18 @@ const router = createRouter({
       path: '/article/:id',
       name: 'article-view',
       component: ArticleView,
+      props: true
+    },
+    {
+      path: '/article/:id/history',
+      name: 'article-history',
+      component: ArticleHistory,
+      props: true
+    },
+    {
+      path: '/revision/:id/diff',
+      name: 'revision-diff',
+      component: RevisionDiff,
       props: true
     },
     {
