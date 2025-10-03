@@ -9,7 +9,7 @@ from .serializers import *
 from django_ratelimit.decorators import ratelimit # 导入限流装饰器
 import random
 from django.utils import timezone
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from apps.utils.ErrorExtract import ExtractError
@@ -18,6 +18,60 @@ from apps.utils.ErrorExtract import ExtractError
 # 用户登录 JWT认证模块
 class UserTokenObtainPairAPI(TokenObtainPairView):
     serializer_class = UserTokenObtainPairSerializer
+    def post(self, request, *args, **kwargs):
+        # 允许同时兼容 query 参数与请求体
+        data = request.data.copy()
+        try:
+            data.update(request.query_params)
+        except Exception:
+            pass
+        serializer = self.get_serializer(data=data)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except Exception:
+            return Response({
+                "success": False,
+                "message": "Invalid credentials",
+                "errors": {"ValidationError": "邮箱或密码错误"}
+            }, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.validated_data, status=status.HTTP_200_OK)
+
+class UserTokenRefreshAPI(TokenRefreshView):
+    def post(self, request, *args, **kwargs):
+        data = request.data.copy()
+        try:
+            data.update(request.query_params)
+        except Exception:
+            pass
+        serializer = self.get_serializer(data=data)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except Exception:
+            return Response({
+                "success": False,
+                "message": "Invalid credentials",
+                "errors": {"ValidationError": "令牌错误"}
+            }, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.validated_data, status=status.HTTP_200_OK)
+
+class UserTokenVerifyAPI(TokenVerifyView):
+    def post(self, request, *args, **kwargs):
+        data = request.data.copy()
+        try:
+            data.update(request.query_params)
+        except Exception:
+            pass
+        serializer = self.get_serializer(data=data)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except Exception:
+            return Response({
+                "success": False,
+                "message": "Invalid credentials",
+                "errors": {"ValidationError": "邮箱或密码错误"}
+            }, status=status.HTTP_400_BAD_REQUEST)
+        # verify 成功通常返回 200 + 空体或校验信息
+        return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
 class RegisterAPI(APIView):
     @method_decorator(ratelimit(key='ip', rate='3/hour'))  # 同一 IP 每小时最多注册3次
