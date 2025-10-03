@@ -44,11 +44,19 @@ class LoginAPI(APIView):
             return Response({"success": True,"message": "Login successful","username": user.username,"user_id":user.id}, status=status.HTTP_200_OK)
         else:
             errors = ExtractError(serializer.errors).extract_error()
+            # 统一邮箱/密码为空或缺失等验证错误的响应格式
+            # 当字段级错误存在于 email 或 password，或非字段错误为“邮箱或密码不能为空”时，统一成“邮箱或密码错误”
+            email_err = errors.get('email')
+            pwd_err = errors.get('password')
+            non_field_err = errors.get('ValidationError')
+            if email_err is not None or pwd_err is not None or (non_field_err == "邮箱或密码不能为空"):
+                errors = {"ValidationError": "邮箱或密码错误"}
             return Response({
                 "success": False,
                 "message": "Invalid credentials",
                 "errors": errors  # 仅包含有错误的字段
             }, status=status.HTTP_400_BAD_REQUEST)
+
 class EmailCodeSendAPI(APIView):
     @method_decorator(ratelimit(key="ip", rate='3/minute'))
     def post(self,request):
@@ -63,34 +71,24 @@ class EmailCodeSendAPI(APIView):
         if User_Login.objects.filter(email=email).exists() == False and usage == 'ResetPassword':
             return Response({"success": False,"message": "邮箱未注册"}, status=status.HTTP_400_BAD_REQUEST)
 
-
         if Email_Verify_Code.objects.filter(email=email).exists():
             send_time = Email_Verify_Code.objects.get(email=email).send_time
-            if (timezone.now() - send_time).total_seconds() < 60:
+            if ((timezone.now() - send_time).total_seconds() < 60):
                 return Response({"success": False,"message": "发送频率过快，请稍后再试"}, status=status.HTTP_429_TOO_MANY_REQUESTS)
 
         code = ''.join(random.choices('0123456789', k=6))
         send_email_task.delay(email, code)
 
-        
         Email_Verify_Code.objects.update_or_create(email=email, defaults={"code": code,
                                                                    "expire_time": timezone.now() + timezone.timedelta(minutes=5),
                                                                    "send_time": timezone.now(),
                                                                     "usage": usage})
-        
-        """
-        
-        开发完成后，下面的返回值要修改，不能返回code
-
-        Returns:
-            _type_: _description_
-        """
         return Response({"success": True, "message": "Email code sent successfully!","code":code},status=status.HTTP_201_CREATED)
 
 class ResetPasswordAPI(APIView):
     @method_decorator(ratelimit(key="ip", rate='3/minute'))
     def post(self,request):
-        serializer = ResetPasswordSerializer(instance=request.data["email"], data=request.data)
+        serializer = ResetPasswordSerializer(instance=request.data.get("email"), data=request.data)
         if serializer.is_valid():
             serializer.save(user_Login=request.user)
             serializer.save(user_Login=request.user)
