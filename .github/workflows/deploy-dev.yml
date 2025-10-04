@@ -26,7 +26,6 @@ jobs:
           rsync -az --delete \
             --exclude ".git" \
             --exclude ".github" \
-            --exclude "venv/" \
             --exclude ".venv/" \
             -e "ssh -o StrictHostKeyChecking=yes" \
             ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.APP_DIR }}/
@@ -37,6 +36,15 @@ jobs:
           set -e
           cd ${{ secrets.APP_DIR }}
 
+          # write config from secrets
+          cat > config_env.toml << 'CFG'
+          [EMAIL]
+          HOST = "${{ secrets.EMAIL_HOST }}"
+          PORT = ${{ secrets.EMAIL_PORT }}
+          USER = "${{ secrets.EMAIL_USER }}"
+          PASSWORD = "${{ secrets.EMAIL_PASSWORD }}"
+          CFG
+
           # venv
           if [ ! -d "${{ secrets.VENV_DIR }}" ]; then
             ${{ secrets.PYTHON_BIN }} -m venv ${{ secrets.VENV_DIR }}
@@ -45,8 +53,6 @@ jobs:
 
           # env
           export DJANGO_SETTINGS_MODULE=${{ secrets.DJANGO_SETTINGS_MODULE }}
-
-          # deps
           pip install --upgrade pip
           if [ -f requirements.txt ]; then
             pip install -r requirements.txt
