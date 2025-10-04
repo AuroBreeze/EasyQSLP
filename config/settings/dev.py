@@ -137,22 +137,22 @@ cleaner = Cleaner(
 )
 
 
-# 邮箱配置
-import toml
+# # 邮箱配置
+# import toml
 
-# 读取配置文件
-try:
-    config_env = toml.load(BASE_DIR.parent / './config_env.toml')
+# # 读取配置文件
+# try:
+#     config_env = toml.load(BASE_DIR.parent / './config_env.toml')
 
-except FileNotFoundError:
-    raise FileNotFoundError('config.toml文件不存在')
+# except FileNotFoundError:
+#     raise FileNotFoundError('config.toml文件不存在')
 
-# 邮箱配置
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = config_env["EMAIL"]["HOST"]
-EMAIL_PORT = config_env["EMAIL"]["PORT"]
-EMAIL_USE_SSL = True
-#EMAIL_USE_TLS = True
-EMAIL_HOST_USER = config_env["EMAIL"]["USER"]
-EMAIL_HOST_PASSWORD = config_env["EMAIL"]["PASSWORD"]
+# # 邮箱配置
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = config_env["EMAIL"]["HOST"]
+# EMAIL_PORT = config_env["EMAIL"]["PORT"]
+# EMAIL_USE_SSL = True
+# #EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = config_env["EMAIL"]["USER"]
+# EMAIL_HOST_PASSWORD = config_env["EMAIL"]["PASSWORD"]
 
