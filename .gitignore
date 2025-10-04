@@ -170,3 +170,5 @@ config_env.toml
 *.dat
 *.bak
 *.dir
+
+env.ts
