@@ -1,7 +1,7 @@
 name: Deploy EasyQSLP (dev)
 on:
   push:
-    branches: [ "dev" ]
+    branches: [ "dev","feature/backend" ]
   workflow_dispatch:
 
 jobs:
