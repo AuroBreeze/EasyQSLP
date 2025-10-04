@@ -1,83 +1,62 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import StartView from '../views/StartView.vue'
-import Loginview from '../views/Loginview.vue'
-import ProfileView from '../views/ProfileView.vue'
-import NotFoundView from '../views/404view.vue'
-import ArticleUpload from '../views/ArticleUpload.vue'
-import ArticleView from '../views/ArticleView.vue'
-import MainView from '../views/MainView.vue'
-import ProjectCreate from '../views/ProjectCreate.vue'
-import ArticleHistory from '../views/ArticleHistory.vue'
-import RevisionDiff from '../views/RevisionDiff.vue'
+import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 
-const router = createRouter({
+// 页面按需加载
+const Home = () => import('@/pages/Home.vue')
+const HomeMain = () => import('@/pages/home/Main.vue')
+const HomeSearch = () => import('@/pages/home/Search.vue')
+const HomeSeries = () => import('@/pages/home/Series.vue')
+const HomeProject = () => import('@/pages/home/project.vue')
+const HomeList = () => import('@/pages/home/MyList.vue')
+const ArticleDetail = () => import('@/pages/ArticleDetail.vue')
+const TopicDetail = () => import('@/pages/TopicDetail.vue')
+const Workspace = () => import('@/pages/Workspace.vue')
+const Auth = () => import('@/pages/Auth.vue')
+const Profile = () => import('@/pages/Profile.vue')
+const ProfileBio = () => import('@/pages/profile/Bio.vue')
+const ProfileWork = () => import('@/pages/profile/Work.vue')
+const ProfileFavorites = () => import('@/pages/profile/Favorites.vue')
+const ProfileHistory = () => import('@/pages/profile/History.vue')
+const ProfileSettings = () => import('@/pages/profile/Settings.vue')
+
+const routes: RouteRecordRaw[] = [
+  {
+    path: '/',
+    name: 'home',
+    component: Home,
+    children: [
+      { path: '', redirect: { name: 'home-main' } },
+      { path: 'main', name: 'home-main', component: HomeMain },
+      { path: 'search', name: 'home-search', component: HomeSearch },
+      { path: 'series', name: 'home-series', component: HomeSeries },
+      { path: 'project', name: 'home-project', component: HomeProject },
+      { path: 'list', name: 'home-list', component: HomeList },
+    ],
+  },
+  { path: '/article/:id', name: 'article-detail', component: ArticleDetail },
+  { path: '/topic/:id', name: 'topic-detail', component: TopicDetail },
+  { path: '/workspace', name: 'workspace', component: Workspace },
+  { path: '/login', name: 'login', component: Auth },
+  { path: '/register', name: 'register', component: Auth, meta: { mode: 'register' } },
+  { path: '/auth', name: 'auth', component: Auth },
+  {
+    path: '/profile',
+    name: 'profile',
+    component: Profile,
+    children: [
+      { path: '', redirect: { name: 'profile-bio' } },
+      { path: 'bio', name: 'profile-bio', component: ProfileBio },
+      { path: 'work', name: 'profile-work', component: ProfileWork },
+      { path: 'favorites', name: 'profile-favorites', component: ProfileFavorites },
+      { path: 'history', name: 'profile-history', component: ProfileHistory },
+      { path: 'settings', name: 'profile-settings', component: ProfileSettings },
+    ],
+  },
+]
+
+export const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [
-    {
-      path: '/',
-      name: 'start',
-      component: StartView
-    },
-    {
-      path: '/main',
-      name: 'main',
-      component: MainView
-    },
-    {
-      path: '/project/create',
-      name: 'project-create',
-      component: ProjectCreate
-    },
-    {
-      path: '/login',
-      name: 'login',
-      component: Loginview
-    },
-    {
-      path: '/profile/:id',
-      name: 'profile',
-      component: ProfileView,
-      props: true
-    },
-    {
-      path: '/article/upload',
-      name: 'article-upload',
-      component: ArticleUpload,
-    },
-    {
-      path: '/article/:id',
-      name: 'article-view',
-      component: ArticleView,
-      props: true
-    },
-    {
-      path: '/article/:id/history',
-      name: 'article-history',
-      component: ArticleHistory,
-      props: true
-    },
-    {
-      path: '/revision/:id/diff',
-      name: 'revision-diff',
-      component: RevisionDiff,
-      props: true
-    },
-    {
-      path: '/404view',
-      name: '404view',
-      component: NotFoundView
-    },
-  ]
+  routes,
+  scrollBehavior() {
+    return { top: 0 }
+  },
 })
-
-// 测试阶段：临时关闭登录校验
-// router.beforeEach((to, from, next) => {
-//   const token = localStorage.getItem('access_token')
-//   if (to.meta.requiresAuth && !token) {
-//     next('/login')
-//   } else {
-//     next()
-//   }
-// })
-
-export default router
