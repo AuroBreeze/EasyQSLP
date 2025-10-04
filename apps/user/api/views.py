@@ -68,7 +68,7 @@ class UserTokenVerifyAPI(TokenVerifyView):
             return Response({
                 "success": False,
                 "message": "Invalid credentials",
-                "errors": {"ValidationError": "邮箱或密码错误"}
+                "errors": {"ValidationError": "令牌错误"}
             }, status=status.HTTP_400_BAD_REQUEST)
         # verify 成功通常返回 200 + 空体或校验信息
         return Response(serializer.validated_data, status=status.HTTP_200_OK)
@@ -117,7 +117,7 @@ class EmailCodeSendAPI(APIView):
         email = request.data.get('email')
         usage = request.data.get('usage')
         if usage is None or usage not in ['Register', 'ResetPassword']:
-            return Response({"success": False,"message": "注册异常"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"success": False,"message": "usage参数错误"}, status=status.HTTP_400_BAD_REQUEST)
         if email is None:
             return Response({"success": False,"message": "邮箱不能为空"}, status=status.HTTP_400_BAD_REQUEST)
         if User_Login.objects.filter(email=email).exists() and usage == 'Register':
