@@ -85,8 +85,12 @@ jobs:
           python manage.py init_demo_data || true
 
           python manage.py collectstatic --noinput || true
-          # restart
-          sudo systemctl restart ${{ secrets.GUNICORN_SERVICE }} || true
-          sudo systemctl restart ${{ secrets.CELERY_SERVICE }} || true
-          sudo systemctl restart ${{ secrets.CELERY_BEAT_SERVICE }} || true
+          # temporarily run Django dev server instead of systemd services
+          # stop gunicorn to free the port if running
+          sudo systemctl stop ${{ secrets.GUNICORN_SERVICE }} || true
+          # kill any previous runserver processes
+          pkill -f "manage.py runserver" || true
+          # start runserver in background and log output
+          nohup python manage.py runserver 0.0.0.0:8000 > /tmp/django_runserver.log 2>&1 &
+          echo "runserver started on 0.0.0.0:8000; logs: /tmp/django_runserver.log"
           EOF
