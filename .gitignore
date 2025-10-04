@@ -170,6 +170,3 @@ config_env.toml
 *.dat
 *.bak
 *.dir
-
-node_modules/
-env.ts
