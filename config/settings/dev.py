@@ -32,6 +32,8 @@ INSTALLED_APPS = INSTALLED_APPS + INSTALLED_APPS_DEV
 
 # 静态文件配置
 MEDIA_ROOT = BASE_DIR.parent / 'media'  # 媒体文件存储路径
+# 为 collectstatic 提供落盘目录（开发/部署环境都需要明确路径）
+STATIC_ROOT = BASE_DIR.parent / 'staticfiles'
 
 # 禁用安全警告（仅开发环境！）
 SECURE_HSTS_SECONDS = 0  # 禁用HSTS
