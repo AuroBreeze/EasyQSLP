@@ -74,7 +74,7 @@ class UserTokenVerifyAPI(TokenVerifyView):
         return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
 class RegisterAPI(APIView):
-    @method_decorator(ratelimit(key='ip', rate='3/hour', block=False))  # 同一 IP 每小时最多注册3次
+    # @method_decorator(ratelimit(key='ip', rate='3/hour', block=False))  # 同一 IP 每小时最多注册3次
     def post(self, request):
         # 自定义限流响应
         if getattr(request, 'limited', False):
@@ -91,7 +91,20 @@ class RegisterAPI(APIView):
         else:
             #print(serialize.errors)
             errors = ExtractError(serialize.errors).extract_error()
-            return Response({"success": False,"message": "Invalid data", "errors": errors}, status=status.HTTP_400_BAD_REQUEST)
+            # 将所有错误整合为单一 ValidationError 字段
+            msg_list = []
+            if isinstance(errors, dict):
+                for v in errors.values():
+                    if isinstance(v, (list, tuple)):
+                        msg_list.extend([str(x) for x in v if x is not None])
+                    elif v is not None:
+                        msg_list.append(str(v))
+            unified_msg = '；'.join(msg_list) if msg_list else '参数错误'
+            return Response({
+                "success": False,
+                "message": "Invalid data",
+                "errors": {"ValidationError": unified_msg}
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginAPI(APIView):
     # @method_decorator(ratelimit(key='ip', rate='3/hour', block=False))  # 同一 IP 每小时最多登录3次
