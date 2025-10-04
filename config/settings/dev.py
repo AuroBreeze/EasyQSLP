@@ -32,6 +32,8 @@ INSTALLED_APPS = INSTALLED_APPS + INSTALLED_APPS_DEV
 
 # 静态文件配置
 MEDIA_ROOT = BASE_DIR.parent / 'media'  # 媒体文件存储路径
+# 为 collectstatic 提供落盘目录（开发/部署环境都需要明确路径）
+STATIC_ROOT = BASE_DIR.parent / 'staticfiles'
 
 # 禁用安全警告（仅开发环境！）
 SECURE_HSTS_SECONDS = 0  # 禁用HSTS
@@ -48,11 +50,13 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # 跨域配置
-ALLOWED_HOSTS = ['localhost','localhost:7856', '127.0.0.1:7856','127.0.0.1:20000','127.0.0.1']  # 开发环境允许的域名
+ALLOWED_HOSTS = ['localhost','localhost:7856', '127.0.0.1:7856','127.0.0.1:20000','127.0.0.1','113.44.174.216']  # 开发环境允许的域名
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:7856',
     'http://127.0.0.1:7856',
-    'http://127.0.0.1:20000'
+    'http://127.0.0.1:20000',
+    'http://113.44.174.216',
+    'http://113.44.174.216:8000'
 )  # 允许跨域请求的域名
 
 # Markdown 扩展
