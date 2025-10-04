@@ -74,8 +74,15 @@ class UserTokenVerifyAPI(TokenVerifyView):
         return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
 class RegisterAPI(APIView):
-    @method_decorator(ratelimit(key='ip', rate='3/hour'))  # 同一 IP 每小时最多注册3次
+    # @method_decorator(ratelimit(key='ip', rate='3/hour', block=False))  # 同一 IP 每小时最多注册3次
     def post(self, request):
+        # 自定义限流响应
+        if getattr(request, 'limited', False):
+            return Response({
+                "success": False,
+                "message": "请求过于频繁，请稍后再试",
+                "errors": {"ValidationError": "请求频率限制"}
+            }, status=status.HTTP_429_TOO_MANY_REQUESTS)
         serialize = UserRegisterSerializer(data=request.data)
         #print(request.data)
         if serialize.is_valid():
@@ -84,12 +91,31 @@ class RegisterAPI(APIView):
         else:
             #print(serialize.errors)
             errors = ExtractError(serialize.errors).extract_error()
-            return Response({"success": False,"message": "Invalid data", "errors": errors}, status=status.HTTP_400_BAD_REQUEST)
-        #return Response({"message": "User registered successfully!"})
+            # 将所有错误整合为单一 ValidationError 字段
+            msg_list = []
+            if isinstance(errors, dict):
+                for v in errors.values():
+                    if isinstance(v, (list, tuple)):
+                        msg_list.extend([str(x) for x in v if x is not None])
+                    elif v is not None:
+                        msg_list.append(str(v))
+            unified_msg = '；'.join(msg_list) if msg_list else '参数错误'
+            return Response({
+                "success": False,
+                "message": "Invalid data",
+                "errors": {"ValidationError": unified_msg}
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginAPI(APIView):
-    #@method_decorator(ratelimit(key='ip', rate='3/hour'))  # 同一 IP 每小时最多登录5次
+    # @method_decorator(ratelimit(key='ip', rate='3/hour', block=False))  # 同一 IP 每小时最多登录3次
     def post(self, request):
+        # 自定义限流响应
+        if getattr(request, 'limited', False):
+            return Response({
+                "success": False,
+                "message": "请求过于频繁，请稍后再试",
+                "errors": {"ValidationError": "请求频率限制"}
+            }, status=status.HTTP_429_TOO_MANY_REQUESTS)
         serializer = UserLoginSerializer(data=request.data)
 
         if serializer.is_valid():
@@ -111,9 +137,37 @@ class LoginAPI(APIView):
                 "errors": errors  # 仅包含有错误的字段
             }, status=status.HTTP_400_BAD_REQUEST)
 
+class AccountExistAPI(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        email = request.data.get("email")
+        if not email:
+            return Response({
+                "success": False,
+                "message": "账户不存在",
+                "errors": {"ValidationError": "邮箱不能为空"}
+            }, status=status.HTTP_400_BAD_REQUEST)
+        exists = User_Login.objects.filter(email=email).exists()
+        return Response({
+            "success": True,
+            "message": "查询成功",
+            "data": {
+                "by": "email",
+                "value": email,
+                "exists": exists
+            }
+        }, status=status.HTTP_200_OK)
+
 class EmailCodeSendAPI(APIView):
-    @method_decorator(ratelimit(key="ip", rate='3/minute'))
+    # @method_decorator(ratelimit(key="ip", rate='3/minute', block=False))
     def post(self,request):
+        # 自定义限流响应
+        if getattr(request, 'limited', False):
+            return Response({
+                "success": False,
+                "message": "发送频率过快，请稍后再试",
+                "errors": {"ValidationError": "请求频率限制"}
+            }, status=status.HTTP_429_TOO_MANY_REQUESTS)
         email = request.data.get('email')
         usage = request.data.get('usage')
         if usage is None or usage not in ['Register', 'ResetPassword']:
@@ -140,8 +194,15 @@ class EmailCodeSendAPI(APIView):
         return Response({"success": True, "message": "Email code sent successfully!","code":code},status=status.HTTP_201_CREATED)
 
 class ResetPasswordAPI(APIView):
-    @method_decorator(ratelimit(key="ip", rate='3/minute'))
+    # @method_decorator(ratelimit(key="ip", rate='3/minute', block=False))
     def post(self,request):
+        # 自定义限流响应
+        if getattr(request, 'limited', False):
+            return Response({
+                "success": False,
+                "message": "请求过于频繁，请稍后再试",
+                "errors": {"ValidationError": "请求频率限制"}
+            }, status=status.HTTP_429_TOO_MANY_REQUESTS)
         serializer = ResetPasswordSerializer(instance=request.data.get("email"), data=request.data)
         if serializer.is_valid():
             serializer.save(user_Login=request.user)
@@ -149,7 +210,20 @@ class ResetPasswordAPI(APIView):
             return Response({"success": True,"message": "Password reset successful!"},status=status.HTTP_200_OK)
         else:
             errors = ExtractError(serializer.errors).extract_error()
-            return Response({"success": False,"message": "Invalid data", "errors": errors}, status=status.HTTP_400_BAD_REQUEST)
+            # 将所有错误整合为单一 ValidationError 字段
+            msg_list = []
+            if isinstance(errors, dict):
+                for v in errors.values():
+                    if isinstance(v, (list, tuple)):
+                        msg_list.extend([str(x) for x in v if x is not None])
+                    elif v is not None:
+                        msg_list.append(str(v))
+            unified_msg = '；'.join(msg_list) if msg_list else '参数错误'
+            return Response({
+                "success": False,
+                "message": "Invalid data",
+                "errors": {"ValidationError": unified_msg}
+            }, status=status.HTTP_400_BAD_REQUEST)
 
 class UserProfileAPI(APIView):
     permission_classes = [AllowAny]  # 默认 AllowAny，下面重写 get_permissions 更灵活
