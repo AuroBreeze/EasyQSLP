@@ -1,0 +1,96 @@
+name: Deploy EasyQSLP (dev)
+on:
+  push:
+    branches: [ "dev","feature/backend" ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Start ssh-agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: Add known hosts (optional)
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts || true
+
+      - name: Rsync code to server
+        run: |
+          rsync -az --delete \
+            --exclude ".git" \
+            --exclude ".github" \
+            --exclude ".venv/" \
+            --exclude "media/" \
+            -e "ssh -o StrictHostKeyChecking=yes" \
+            ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.APP_DIR }}/
+
+      - name: Install deps, migrate, collectstatic, restart services
+        run: |
+          ssh -o StrictHostKeyChecking=yes ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          set -e
+          cd ${{ secrets.APP_DIR }}
+
+          # write config from secrets
+          cat > config_env.toml << 'CFG'
+          [EMAIL]
+          HOST = "${{ secrets.EMAIL_HOST }}"
+          PORT = ${{ secrets.EMAIL_PORT }}
+          USER = "${{ secrets.EMAIL_USER }}"
+          PASSWORD = "${{ secrets.EMAIL_PASSWORD }}"
+          CFG
+
+          # venv
+          if [ ! -d "${{ secrets.VENV_DIR }}" ]; then
+            ${{ secrets.PYTHON_BIN }} -m venv ${{ secrets.VENV_DIR }}
+          fi
+          source ${{ secrets.VENV_DIR }}/bin/activate
+
+          # env
+          export DJANGO_SETTINGS_MODULE=${{ secrets.DJANGO_SETTINGS_MODULE }}
+          pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+
+          # django (generate migrations in dev, then migrate)
+          echo "== diagnostics: list user migrations =="
+          ls -la apps/user/migrations || true
+          echo "== makemigrations (dev only) =="
+          python manage.py makemigrations --noinput || true
+          echo "== diagnostics: showmigrations user =="
+          python manage.py showmigrations user || true
+
+          python manage.py migrate --noinput
+
+          # load test fixtures and set passwords (if fixture exists)
+          if [ -f "apps/user/fixtures/test_users.json" ]; then
+            echo "== loading fixtures: apps/user/fixtures/test_users.json =="
+            python manage.py loaddata apps/user/fixtures/test_users.json || true
+            python manage.py shell -c "from django.contrib.auth import get_user_model; U=get_user_model(); u,c=U.objects.get_or_create(email='test@test.com', defaults={'username':'tester','is_active':True}); u.set_password('12345678'); u.save(); print('Password set for test@test.com')" || true
+          fi
+
+          # seed initial data (modular, idempotent)
+          export ADMIN_EMAIL="${{ secrets.ADMIN_EMAIL }}"
+          export ADMIN_USERNAME="${{ secrets.ADMIN_USERNAME }}"
+          export ADMIN_PASSWORD="${{ secrets.ADMIN_PASSWORD }}"
+          # optional demo flag: set to 1 in secrets to enable
+          export CREATE_DEMO_USER="${{ secrets.CREATE_DEMO_USER }}"
+          python manage.py init_demo_data || true
+
+          python manage.py collectstatic --noinput || true
+          # temporarily run Django dev server instead of systemd services
+          # stop gunicorn to free the port if running
+          sudo systemctl stop ${{ secrets.GUNICORN_SERVICE }} || true
+          # kill any previous runserver processes
+          pkill -f "manage.py runserver" || true
+          # start runserver in background and log output
+          nohup python manage.py runserver 0.0.0.0:8000 > /tmp/django_runserver.log 2>&1 &
+          echo "runserver started on 0.0.0.0:8000; logs: /tmp/django_runserver.log"
+          EOF
