@@ -74,8 +74,15 @@ class UserTokenVerifyAPI(TokenVerifyView):
         return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
 class RegisterAPI(APIView):
-    @method_decorator(ratelimit(key='ip', rate='3/hour'))  # 同一 IP 每小时最多注册3次
+    @method_decorator(ratelimit(key='ip', rate='3/hour', block=False))  # 同一 IP 每小时最多注册3次
     def post(self, request):
+        # 自定义限流响应
+        if getattr(request, 'limited', False):
+            return Response({
+                "success": False,
+                "message": "请求过于频繁，请稍后再试",
+                "errors": {"ValidationError": "请求频率限制"}
+            }, status=status.HTTP_429_TOO_MANY_REQUESTS)
         serialize = UserRegisterSerializer(data=request.data)
         #print(request.data)
         if serialize.is_valid():
@@ -87,8 +94,15 @@ class RegisterAPI(APIView):
             return Response({"success": False,"message": "Invalid data", "errors": errors}, status=status.HTTP_400_BAD_REQUEST)
 
 class LoginAPI(APIView):
-    #@method_decorator(ratelimit(key='ip', rate='3/hour'))  # 同一 IP 每小时最多登录5次
+    # @method_decorator(ratelimit(key='ip', rate='3/hour', block=False))  # 同一 IP 每小时最多登录3次
     def post(self, request):
+        # 自定义限流响应
+        if getattr(request, 'limited', False):
+            return Response({
+                "success": False,
+                "message": "请求过于频繁，请稍后再试",
+                "errors": {"ValidationError": "请求频率限制"}
+            }, status=status.HTTP_429_TOO_MANY_REQUESTS)
         serializer = UserLoginSerializer(data=request.data)
 
         if serializer.is_valid():
@@ -132,8 +146,15 @@ class AccountExistAPI(APIView):
         }, status=status.HTTP_200_OK)
 
 class EmailCodeSendAPI(APIView):
-    @method_decorator(ratelimit(key="ip", rate='3/minute'))
+    # @method_decorator(ratelimit(key="ip", rate='3/minute', block=False))
     def post(self,request):
+        # 自定义限流响应
+        if getattr(request, 'limited', False):
+            return Response({
+                "success": False,
+                "message": "发送频率过快，请稍后再试",
+                "errors": {"ValidationError": "请求频率限制"}
+            }, status=status.HTTP_429_TOO_MANY_REQUESTS)
         email = request.data.get('email')
         usage = request.data.get('usage')
         if usage is None or usage not in ['Register', 'ResetPassword']:
