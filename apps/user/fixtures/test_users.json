@@ -1,0 +1,14 @@
+[
+  {
+    "model": "user.User_Login",
+    "pk": 1,
+    "fields": {
+      "email": "test@test.com",
+      "username": "tester",
+      "password": "!disabled",
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false
+    }
+  }
+]
