@@ -72,17 +72,9 @@ jobs:
           if [ -f "apps/user/fixtures/test_users.json" ]; then
             echo "== loading fixtures: apps/user/fixtures/test_users.json =="
             python manage.py loaddata apps/user/fixtures/test_users.json || true
-            python manage.py shell << 'PY'
-from django.contrib.auth import get_user_model
-User = get_user_model()
-try:
-    u = User.objects.get(email="test@test.com")
-    u.set_password("12345678")
-    u.save()
-    print("Password set for test@test.com")
-except User.DoesNotExist:
-    print("Seed user not found after loaddata")
-PY
+            python manage.py shell -c "from django.contrib.auth import get_user_model; U=get_user_model();\n\
+u,c=U.objects.get_or_create(email='test@test.com', defaults={'username':'tester','is_active':True});\n\
+u.set_password('12345678'); u.save(); print('Password set for test@test.com')" || true
           fi
 
           # seed initial data (modular, idempotent)
@@ -94,7 +86,6 @@ PY
           python manage.py init_demo_data || true
 
           python manage.py collectstatic --noinput || true
-
           # restart
           sudo systemctl restart ${{ secrets.GUNICORN_SERVICE }} || true
           sudo systemctl restart ${{ secrets.CELERY_SERVICE }} || true
