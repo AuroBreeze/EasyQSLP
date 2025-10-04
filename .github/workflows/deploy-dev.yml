@@ -58,8 +58,41 @@ jobs:
             pip install -r requirements.txt
           fi
 
-          # django
+          # django (generate migrations in dev, then migrate)
+          echo "== diagnostics: list user migrations =="
+          ls -la apps/user/migrations || true
+          echo "== makemigrations (dev only) =="
+          python manage.py makemigrations --noinput || true
+          echo "== diagnostics: showmigrations user =="
+          python manage.py showmigrations user || true
+
           python manage.py migrate --noinput
+
+          # load test fixtures and set passwords (if fixture exists)
+          if [ -f "apps/user/fixtures/test_users.json" ]; then
+            echo "== loading fixtures: apps/user/fixtures/test_users.json =="
+            python manage.py loaddata apps/user/fixtures/test_users.json || true
+            python manage.py shell << 'PY'
+from django.contrib.auth import get_user_model
+User = get_user_model()
+try:
+    u = User.objects.get(email="test@test.com")
+    u.set_password("12345678")
+    u.save()
+    print("Password set for test@test.com")
+except User.DoesNotExist:
+    print("Seed user not found after loaddata")
+PY
+          fi
+
+          # seed initial data (modular, idempotent)
+          export ADMIN_EMAIL="${{ secrets.ADMIN_EMAIL }}"
+          export ADMIN_USERNAME="${{ secrets.ADMIN_USERNAME }}"
+          export ADMIN_PASSWORD="${{ secrets.ADMIN_PASSWORD }}"
+          # optional demo flag: set to 1 in secrets to enable
+          export CREATE_DEMO_USER="${{ secrets.CREATE_DEMO_USER }}"
+          python manage.py init_demo_data || true
+
           python manage.py collectstatic --noinput || true
 
           # restart
