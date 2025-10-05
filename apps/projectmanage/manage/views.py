@@ -191,10 +191,8 @@ class TagListView(APIView):
 
     # 使用 JSON + POST 的方式获取/搜索标签
     def post(self, request, *args, **kwargs):
-        q = request.data.get('q')
+        # 返回全部标签（移除 q 模糊搜索）
         qs = Article_tag.objects.all().order_by('name')
-        if q:
-            qs = qs.filter(name__icontains=q)
         items = TagMiniSerializer(qs, many=True).data
         return Response({
             "success": True,
@@ -208,8 +206,25 @@ class TagProposalCreateView(APIView):
 
     def post(self, request, *args, **kwargs):
         from .serializers import TagProposalCreateSerializer, TagProposalSerializer
+        from ..models import TagProposal, Article_tag
         serializer = TagProposalCreateSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
+            name = serializer.validated_data.get('name')
+            # 幂等：若已存在同名待审申请，直接返回该申请
+            existed = TagProposal.objects.filter(name=name, status=TagProposal.Status.PENDING).order_by('-create_time').first()
+            if existed:
+                return Response({
+                    "success": True,
+                    "message": "已存在同名待审核申请",
+                    "data": TagProposalSerializer(existed).data
+                }, status=status.HTTP_200_OK)
+            # 若标签已存在（全站复用），不再创建申请
+            if Article_tag.objects.filter(name=name).exists():
+                return Response({
+                    "success": False,
+                    "message": "Invalid data",
+                    "errors": {"ValidationError": "标签已存在，无需申请"}
+                }, status=status.HTTP_400_BAD_REQUEST)
             proposal = serializer.save()
             return Response({
                 "success": True,
@@ -229,18 +244,60 @@ class TagProposalListView(APIView):
     def post(self, request, *args, **kwargs):
         from .serializers import TagProposalSerializer
         from ..models import TagProposal
-        q = request.data.get('q')
+        # status 为必填
         status_filter = request.data.get('status')
-        qs = TagProposal.objects.all().order_by('-create_time')
-        if q:
-            qs = qs.filter(name__icontains=q)
-        if status_filter:
-            qs = qs.filter(status=status_filter)
-        data = TagProposalSerializer(qs, many=True).data
+        if not status_filter:
+            return Response({
+                "success": False,
+                "message": "Invalid data",
+                "errors": {"ValidationError": "status 为必填"}
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # 校验合法取值
+        valid_status = {c[0] for c in TagProposal.Status.choices}
+        if status_filter not in valid_status:
+            return Response({
+                "success": False,
+                "message": "Invalid data",
+                "errors": {"ValidationError": "status 取值无效"}
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        qs = TagProposal.objects.filter(status=status_filter).order_by('-create_time')
+
+        # 分页参数：page, page_size
+        try:
+            page = int(request.data.get('page', 1))
+            page_size = int(request.data.get('page_size', 10))
+        except Exception:
+            return Response({
+                "success": False,
+                "message": "Invalid data",
+                "errors": {"ValidationError": "分页参数必须为数字"}
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        if page < 1:
+            page = 1
+        if page_size < 1:
+            page_size = 10
+        # 限制最大分页大小，避免一次性返回过多
+        if page_size > 100:
+            page_size = 100
+
+        total = qs.count()
+        start = (page - 1) * page_size
+        end = start + page_size
+        page_qs = qs[start:end]
+        items = TagProposalSerializer(page_qs, many=True).data
+
         return Response({
             "success": True,
             "message": "查询成功",
-            "data": data
+            "data": {
+                "total": total,
+                "page": page,
+                "page_size": page_size,
+                "item": items
+            }
         })
 
 
