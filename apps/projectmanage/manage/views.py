@@ -8,9 +8,14 @@ from .serializers import (
 )
 from ..models import Article, Project, Article_Revision, Article_tag
 from rest_framework.response import Response
+from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from apps.projectmanage.services.diff import DiffService
+from apps.utils.auth.permissions import IsOperatorOrSuperuser
+from django.db import transaction
+from django.utils import timezone
+from apps.utils.errors.ErrorExtract import ExtractError
 
 
 class ProjectView(APIView):
@@ -49,7 +54,26 @@ class ArticleView(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data,status=201)
-        return Response(serializer.errors,status=400)
+        # 统一错误响应格式，不暴露具体字段名（如 tags_ids）
+        errors = ExtractError(serializer.errors).extract_error()
+        # 若包含标签相关错误，汇总为统一提示
+        if 'tags_ids' in errors:
+            unified_msg = '所选标签不存在或未通过'
+        else:
+            # 合并所有错误到一个 ValidationError 提示
+            msg_list = []
+            if isinstance(errors, dict):
+                for v in errors.values():
+                    if isinstance(v, (list, tuple)):
+                        msg_list.extend([str(x) for x in v if x is not None])
+                    elif v is not None:
+                        msg_list.append(str(v))
+            unified_msg = '；'.join(msg_list) if msg_list else '参数错误'
+        return Response({
+            "success": False,
+            "message": "Invalid data",
+            "errors": {"ValidationError": unified_msg}
+        }, status=400)
 
 
 class ArticleRevisionView(APIView):
@@ -178,3 +202,104 @@ class TagListView(APIView):
             "data": items
         })
 
+
+class TagProposalCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        from .serializers import TagProposalCreateSerializer, TagProposalSerializer
+        serializer = TagProposalCreateSerializer(data=request.data, context={"request": request})
+        if serializer.is_valid():
+            proposal = serializer.save()
+            return Response({
+                "success": True,
+                "message": "提交成功，等待审核",
+                "data": TagProposalSerializer(proposal).data
+            }, status=status.HTTP_201_CREATED)
+        return Response({
+            "success": False,
+            "message": "Invalid data",
+            "errors": serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class TagProposalListView(APIView):
+    permission_classes = [IsAuthenticated, IsOperatorOrSuperuser]
+
+    def post(self, request, *args, **kwargs):
+        from .serializers import TagProposalSerializer
+        from ..models import TagProposal
+        q = request.data.get('q')
+        status_filter = request.data.get('status')
+        qs = TagProposal.objects.all().order_by('-create_time')
+        if q:
+            qs = qs.filter(name__icontains=q)
+        if status_filter:
+            qs = qs.filter(status=status_filter)
+        data = TagProposalSerializer(qs, many=True).data
+        return Response({
+            "success": True,
+            "message": "查询成功",
+            "data": data
+        })
+
+
+class TagProposalDecisionView(APIView):
+    permission_classes = [IsAuthenticated, IsOperatorOrSuperuser]
+
+    @transaction.atomic
+    def post(self, request, pk, *args, **kwargs):
+        from .serializers import TagProposalDecisionSerializer, TagProposalSerializer
+        from ..models import TagProposal, Article_tag
+        try:
+            proposal = TagProposal.objects.select_for_update().get(pk=pk)
+        except TagProposal.DoesNotExist:
+            return Response({
+                "success": False,
+                "message": "Not found",
+                "errors": {"ValidationError": "申请不存在"}
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        if proposal.status != TagProposal.Status.PENDING:
+            return Response({
+                "success": False,
+                "message": "Invalid data",
+                "errors": {"ValidationError": "该申请已处理"}
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = TagProposalDecisionSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response({
+                "success": False,
+                "message": "Invalid data",
+                "errors": serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        decision = serializer.validated_data['decision']
+        comment = serializer.validated_data.get('comment', '')
+
+        if decision == 'approved':
+            # 复用或创建全局唯一标签
+            tag, _ = Article_tag.objects.get_or_create(name=proposal.name)
+            proposal.final_tag = tag
+            proposal.status = TagProposal.Status.APPROVED
+            proposal.approved_by = request.user
+            proposal.approved_time = timezone.now()
+            proposal.comment = comment or proposal.comment
+            proposal.save(update_fields=['final_tag', 'status', 'approved_by', 'approved_time', 'comment', 'update_time'])
+            return Response({
+                "success": True,
+                "message": "已通过",
+                "data": TagProposalSerializer(proposal).data
+            })
+        else:
+            proposal.status = TagProposal.Status.REJECTED
+            proposal.approved_by = request.user
+            proposal.approved_time = timezone.now()
+            proposal.comment = comment or proposal.comment
+            proposal.save(update_fields=['status', 'approved_by', 'approved_time', 'comment', 'update_time'])
+            return Response({
+                "success": True,
+                "message": "已拒绝",
+                "data": TagProposalSerializer(proposal).data
+            })

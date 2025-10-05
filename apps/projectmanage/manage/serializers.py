@@ -2,7 +2,7 @@ from ..models import Article,Project
 from rest_framework import serializers
 import markdown
 from django.contrib.auth import get_user_model
-from ..models import Article_Revision, Article_tag
+from ..models import Article_Revision, Article_tag, TagProposal
 from apps.projectmanage.services.diff import DiffService
 
 User = get_user_model()
@@ -44,7 +44,15 @@ class ArticleSerializer(serializers.ModelSerializer):
     tags = TagMiniSerializer(many=True, read_only=True)
     # 写入使用：提交标签 ID 列表
     tags_ids = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=Article_tag.objects.all(), write_only=True, required=False
+        many=True,
+        queryset=Article_tag.objects.all(),
+        write_only=True,
+        required=False,
+        error_messages={
+            'does_not_exist': '所选标签不存在或未通过',
+            'incorrect_type': '标签ID格式错误',
+            'required': '请提供标签ID列表',
+        }
     )
 
     class Meta:
@@ -153,4 +161,38 @@ class RevisionApprovalSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({'approver': '只有项目维护者可以进行审批'})
         return attrs
 
+
+class TagProposalCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TagProposal
+        fields = ['id', 'name', 'comment']
+
+    def create(self, validated_data):
+        user = self.context.get('request').user if self.context.get('request') else None
+        return TagProposal.objects.create(submitter=user, **validated_data)
+
+
+class TagProposalSerializer(serializers.ModelSerializer):
+    submitter_name = serializers.SerializerMethodField()
+    approved_by_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TagProposal
+        fields = [
+            'id', 'name', 'status', 'submitter', 'submitter_name', 'comment',
+            'approved_by', 'approved_by_name', 'approved_time', 'final_tag',
+            'create_time', 'update_time'
+        ]
+        read_only_fields = ['status', 'submitter', 'approved_by', 'approved_time', 'final_tag', 'create_time', 'update_time']
+
+    def get_submitter_name(self, obj):
+        return getattr(obj.submitter, 'username', None)
+
+    def get_approved_by_name(self, obj):
+        return getattr(obj.approved_by, 'username', None)
+
+
+class TagProposalDecisionSerializer(serializers.Serializer):
+    decision = serializers.ChoiceField(choices=['approved', 'rejected'])
+    comment = serializers.CharField(max_length=200, required=False, allow_blank=True)
 

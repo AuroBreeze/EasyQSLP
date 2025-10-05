@@ -8,6 +8,9 @@ from .views import (
     RevisionDiffView,
     RevisionRevertView,
     TagListView,
+    TagProposalCreateView,
+    TagProposalListView,
+    TagProposalDecisionView,
 )
 
 app_name = 'project'
@@ -23,4 +26,7 @@ urlpatterns = [
     path("revision/<int:pk>/diff", RevisionDiffView.as_view(), name="revision-diff"),
     path("revision/<int:pk>/revert", RevisionRevertView.as_view(), name="revision-revert"),
     path("tags", TagListView.as_view(), name="tag-list"),
+    path("tag-proposals", TagProposalCreateView.as_view(), name="tag-proposal-create"),
+    path("tag-proposals/list", TagProposalListView.as_view(), name="tag-proposal-list"),
+    path("tag-proposals/<int:pk>/decision", TagProposalDecisionView.as_view(), name="tag-proposal-decision"),
 ]

@@ -104,6 +104,34 @@ class Article_tag(models.Model):
         verbose_name = '文章标签'
         verbose_name_plural = '文章标签'
 
+class TagProposal(models.Model):
+    class Status(models.TextChoices):
+        PENDING = 'pending', '待审核'
+        APPROVED = 'approved', '已通过'
+        REJECTED = 'rejected', '已拒绝'
+        CANCELED = 'canceled', '已取消'
+
+    name = models.CharField(max_length=50, verbose_name='申请标签名')
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING, verbose_name='审核状态')
+    submitter = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='tag_proposals', verbose_name='申请人')
+    comment = models.TextField(max_length=200, blank=True, verbose_name='申请说明')
+
+    # 审批结果
+    approved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='approved_tag_proposals', verbose_name='审核人')
+    approved_time = models.DateTimeField(null=True, blank=True, verbose_name='审核时间')
+    final_tag = models.ForeignKey('Article_tag', on_delete=models.SET_NULL, null=True, blank=True, related_name='from_proposals', verbose_name='最终标签')
+
+    create_time = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+    update_time = models.DateTimeField(auto_now=True, verbose_name='更新时间')
+
+    class Meta:
+        db_table = "project_tag_proposal"
+        verbose_name = '标签申请'
+        verbose_name_plural = '标签申请'
+
+    def __str__(self):
+        return f"标签申请:{self.name} 状态:{self.status} 提交人:{getattr(self.submitter, 'username', '匿名')}"
+
 # Create your models here.
 class Article(models.Model):
 
