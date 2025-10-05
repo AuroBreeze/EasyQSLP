@@ -4,8 +4,9 @@ from .serializers import (
     ProjectSerializer,
     ArticleRevisionSerializer,
     RevisionApprovalSerializer,
+    TagMiniSerializer,
 )
-from ..models import Article, Project, Article_Revision
+from ..models import Article, Project, Article_Revision, Article_tag
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
@@ -159,4 +160,21 @@ class RevisionRevertView(APIView):
 
         return Response(ArticleRevisionSerializer(revert_rev).data, status=201)
 
+
+class TagListView(APIView):
+    def get_permissions(self):
+        return [AllowAny()]
+
+    # 使用 JSON + POST 的方式获取/搜索标签
+    def post(self, request, *args, **kwargs):
+        q = request.data.get('q')
+        qs = Article_tag.objects.all().order_by('name')
+        if q:
+            qs = qs.filter(name__icontains=q)
+        items = TagMiniSerializer(qs, many=True).data
+        return Response({
+            "success": True,
+            "message": "查询成功",
+            "data": items
+        })
 

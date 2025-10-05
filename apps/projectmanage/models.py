@@ -1,3 +1,4 @@
+from enum import unique
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils import timezone
@@ -84,7 +85,7 @@ class Project(models.Model):
 #     pass
 #
 class Article_category(models.Model):
-    name = models.CharField(max_length=50,verbose_name='分类名称')
+    name = models.CharField(max_length=50,unique = True,verbose_name='分类名称')
     def __str__(self):
         return self.name
     class Meta:

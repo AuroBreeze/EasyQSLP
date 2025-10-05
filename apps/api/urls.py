@@ -6,5 +6,6 @@ app_name='api'
 
 
 urlpatterns=[
-    path('user/',include("apps.user.api.urls"),name="api_user")
+    path('user/',include("apps.user.api.urls"),name="api_user"),
+    path('project/',include("apps.projectmanage.manage.urls"),name="api_project"),
 ]
