@@ -94,7 +94,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',  # 启用 JWT 认证
     ),
-    'EXCEPTION_HANDLER': 'apps.utils.exception_handler.custom_exception_handler',
+    'EXCEPTION_HANDLER': 'apps.utils.exceptions.exception_handler.custom_exception_handler',
 }
 from django.utils import timezone
 
