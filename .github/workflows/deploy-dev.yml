@@ -93,4 +93,18 @@ jobs:
           # start runserver in background and log output
           nohup python manage.py runserver 0.0.0.0:8000 > /tmp/django_runserver.log 2>&1 &
           echo "runserver started on 0.0.0.0:8000; logs: /tmp/django_runserver.log"
+
+          # ensure redis is running (optional; comment out if not using systemd-managed redis)
+          sudo systemctl start redis || true
+
+          # stop any previous celery processes
+          pkill -f "celery.*config.celery.app" || true
+
+          # start celery worker (use solo for better compatibility)
+          nohup celery -A config.celery.app worker -l info -P solo > /tmp/celery_worker.log 2>&1 &
+
+          # start celery beat (scheduler)
+          nohup celery -A config.celery.app beat -l info > /tmp/celery_beat.log 2>&1 &
+
+          echo "celery worker/beat started; logs: /tmp/celery_worker.log /tmp/celery_beat.log"
           EOF
