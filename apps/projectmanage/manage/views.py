@@ -301,15 +301,24 @@ class TagProposalListView(APIView):
         })
 
 
-class TagProposalDecisionView(APIView):
+class TagProposalDecisionJsonView(APIView):
     permission_classes = [IsAuthenticated, IsOperatorOrSuperuser]
 
     @transaction.atomic
-    def post(self, request, pk, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         from .serializers import TagProposalDecisionSerializer, TagProposalSerializer
         from ..models import TagProposal, Article_tag
+
+        proposal_id = request.data.get('id')
+        if not proposal_id:
+            return Response({
+                "success": False,
+                "message": "Invalid data",
+                "errors": {"ValidationError": "id 为必填"}
+            }, status=status.HTTP_400_BAD_REQUEST)
+
         try:
-            proposal = TagProposal.objects.select_for_update().get(pk=pk)
+            proposal = TagProposal.objects.select_for_update().get(pk=proposal_id)
         except TagProposal.DoesNotExist:
             return Response({
                 "success": False,
@@ -360,3 +369,57 @@ class TagProposalDecisionView(APIView):
                 "message": "已拒绝",
                 "data": TagProposalSerializer(proposal).data
             })
+
+
+class TagProposalCancelJsonView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @transaction.atomic
+    def post(self, request, *args, **kwargs):
+        from .serializers import TagProposalSerializer
+        from ..models import TagProposal
+        proposal_id = request.data.get('id')
+        if not proposal_id:
+            return Response({
+                "success": False,
+                "message": "Invalid data",
+                "errors": {"ValidationError": "id 为必填"}
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            proposal = TagProposal.objects.select_for_update().get(pk=proposal_id)
+        except TagProposal.DoesNotExist:
+            return Response({
+                "success": False,
+                "message": "Not found",
+                "errors": {"ValidationError": "申请不存在"}
+            }, status=status.HTTP_404_NOT_FOUND)
+
+        # 权限：提交者本人或运营/超管
+        user = request.user
+        is_operator = getattr(user, 'is_superuser', False) or user.groups.filter(name='Operator').exists()
+        if not (proposal.submitter_id == getattr(user, 'id', None) or is_operator):
+            return Response({
+                "success": False,
+                "message": "Forbidden",
+                "errors": {"ValidationError": "无权限取消该申请"}
+            }, status=status.HTTP_403_FORBIDDEN)
+
+        if proposal.status != TagProposal.Status.PENDING:
+            return Response({
+                "success": False,
+                "message": "Invalid data",
+                "errors": {"ValidationError": "仅待审核申请可取消"}
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        comment = request.data.get('comment')
+        if comment:
+            proposal.comment = comment
+        proposal.status = TagProposal.Status.CANCELED
+        proposal.save(update_fields=['status', 'comment', 'update_time'])
+
+        return Response({
+            "success": True,
+            "message": "已取消",
+            "data": TagProposalSerializer(proposal).data
+        })
