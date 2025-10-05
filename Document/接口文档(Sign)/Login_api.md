@@ -80,22 +80,8 @@ tags: [Login, API]
 | success         | bool | 状态码 | 总是 |
 | message         | string | 状态信息 | 总是 |
 | errors          | dict | 错误信息 | 邮箱错误、密码错误、验证错误 |
-| email           | string | 邮箱错误 | 邮箱未填写或邮箱格式错误 |
-| password        | string | 密码错误 | 密码未填写 |
 | ValidationError | string | 验证错误 | 邮箱或密码错误 |
 
-
-失败响应示例(未触发验证错误)：
-```json
-{
-    "success": False,
-     "message": "Invalid credentials", 
-     "errors": {
-        "email": "邮箱不能为空", 
-        "password": "密码不能为空"
-        }
-}
-```
 
 失败响应示例(触发验证错误)：
 ```json
