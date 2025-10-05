@@ -92,6 +92,17 @@ class Article_category(models.Model):
         verbose_name = '文章分类'
         verbose_name_plural = '文章分类'
 
+class Article_tag(models.Model):
+    name = models.CharField(max_length=50, unique=True, verbose_name='标签名称')
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        db_table = "project_article_tag"
+        verbose_name = '文章标签'
+        verbose_name_plural = '文章标签'
+
 # Create your models here.
 class Article(models.Model):
 
@@ -104,6 +115,7 @@ class Article(models.Model):
                                 verbose_name='文章管理者')
     category = models.ForeignKey('Article_category', on_delete=models.SET_DEFAULT, default=1,
                                  related_name='articles', verbose_name='文章分类')
+    tags = models.ManyToManyField('Article_tag', blank=True, related_name='articles', verbose_name='文章标签')
 
     content_md = models.TextField(verbose_name='项目内容markdown') #存储原始markdown
     content_html = models.TextField(verbose_name='项目内容html',editable=False)  # 自动生成的 HTML #存储渲染后的html

@@ -2,7 +2,7 @@ from ..models import Article,Project
 from rest_framework import serializers
 import markdown
 from django.contrib.auth import get_user_model
-from ..models import Article_Revision
+from ..models import Article_Revision, Article_tag
 from apps.projectmanage.services.diff import DiffService
 
 User = get_user_model()
@@ -31,13 +31,25 @@ class ProjectSerializer(serializers.ModelSerializer):
         }
 
 
+class TagMiniSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Article_tag
+        fields = ['id', 'name']
+
+
 class ArticleSerializer(serializers.ModelSerializer):
     toc = serializers.SerializerMethodField()
     word_count = serializers.SerializerMethodField()
+    # 只读输出：返回 [{id, name}]
+    tags = TagMiniSerializer(many=True, read_only=True)
+    # 写入使用：提交标签 ID 列表
+    tags_ids = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Article_tag.objects.all(), write_only=True, required=False
+    )
 
     class Meta:
         model = Article
-        fields = ['id','title', 'content_md', 'content_html', 'toc', 'word_count','create_time','update_time','adminer','project','category']
+        fields = ['id','title', 'content_md', 'content_html', 'toc', 'word_count','create_time','update_time','adminer','project','category','tags','tags_ids']
 
         extra_kwargs = {
             'content_md': {
@@ -61,7 +73,23 @@ class ArticleSerializer(serializers.ModelSerializer):
                 name='默认分类'
             )
             validated_data['category'] = category
-        return super().create(validated_data)
+        # 处理多标签：从 validated_data 中取出 tags_ids，实例创建后再设置 M2M
+        tags = validated_data.pop('tags_ids', None)
+        instance = super().create(validated_data)
+        if not tags:
+            default_tag, _ = Article_tag.objects.get_or_create(name='默认标签')
+            instance.tags.set([default_tag])
+        else:
+            instance.tags.set(tags)
+        return instance
+
+    def update(self, instance, validated_data):
+        # 允许更新时覆盖标签集合（若传入）——从 tags_ids 读取
+        tags = validated_data.pop('tags_ids', None)
+        instance = super().update(instance, validated_data)
+        if tags is not None:
+            instance.tags.set(tags)
+        return instance
 
     def get_toc(self, obj):
         """
