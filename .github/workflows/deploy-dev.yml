@@ -1,4 +1,4 @@
-name: Deploy EasyQSLP (dev)
+name: Deploy Django backend (dev)
 on:
   push:
     branches: [ "dev","feature/backend" ]

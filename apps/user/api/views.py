@@ -170,13 +170,15 @@ class EmailCodeSendAPI(APIView):
             }, status=status.HTTP_429_TOO_MANY_REQUESTS)
         email = request.data.get('email')
         usage = request.data.get('usage')
-        if usage is None or usage not in ['Register', 'ResetPassword']:
+        if usage is None or usage not in ['Register', 'ResetPassword', 'DeleteAccount']:
             return Response({"success": False,"message": "usage参数错误"}, status=status.HTTP_400_BAD_REQUEST)
         if email is None:
             return Response({"success": False,"message": "邮箱不能为空"}, status=status.HTTP_400_BAD_REQUEST)
         if User_Login.objects.filter(email=email).exists() and usage == 'Register':
             return Response({"success": False,"message": "邮箱已被注册"}, status=status.HTTP_400_BAD_REQUEST)
         if User_Login.objects.filter(email=email).exists() == False and usage == 'ResetPassword':
+            return Response({"success": False,"message": "邮箱未注册"}, status=status.HTTP_400_BAD_REQUEST)
+        if User_Login.objects.filter(email=email).exists() == False and usage == 'DeleteAccount':
             return Response({"success": False,"message": "邮箱未注册"}, status=status.HTTP_400_BAD_REQUEST)
 
         if Email_Verify_Code.objects.filter(email=email).exists():
@@ -225,13 +227,37 @@ class ResetPasswordAPI(APIView):
                 "errors": {"ValidationError": unified_msg}
             }, status=status.HTTP_400_BAD_REQUEST)
 
+class DeleteAccountAPI(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = DeleteAccountSerializer(data=request.data, context={"request": request})
+        if serializer.is_valid():
+            user = serializer.validated_data['user']
+            user.delete()
+            return Response({"success": True, "message": "Account deleted successfully!"}, status=status.HTTP_200_OK)
+        else:
+            errors = ExtractError(serializer.errors).extract_error()
+            msg_list = []
+            if isinstance(errors, dict):
+                for v in errors.values():
+                    if isinstance(v, (list, tuple)):
+                        msg_list.extend([str(x) for x in v if x is not None])
+                    elif v is not None:
+                        msg_list.append(str(v))
+            unified_msg = '；'.join(msg_list) if msg_list else '参数错误'
+            return Response({
+                "success": False,
+                "message": "Invalid data",
+                "errors": {"ValidationError": unified_msg}
+            }, status=status.HTTP_400_BAD_REQUEST)
+
 class UserProfileAPI(APIView):
     permission_classes = [AllowAny]  # 默认 AllowAny，下面重写 get_permissions 更灵活
 
     def get_permissions(self):
         if self.request.method == 'GET':
             return [AllowAny()]
-        return [IsAuthenticated()]
     def get(self, request, pk):
         """
         所有人都能GET用户资料

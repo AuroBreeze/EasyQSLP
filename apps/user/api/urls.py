@@ -12,6 +12,7 @@ urlpatterns = [
     path("login/", LoginAPI.as_view(), name="login"), # 登录
     path("register/", RegisterAPI.as_view(), name="register"), # 注册
     path("account/exist/", AccountExistAPI.as_view(), name="account-exist"), # 账户是否存在
+    path("account/delete/", DeleteAccountAPI.as_view(), name="account-delete"), # 删除账号
 
     # path("querr/", Querr.as_view(), name="querr"),
     # path("article/", ArticleAPI.as_view(), name="article"),
