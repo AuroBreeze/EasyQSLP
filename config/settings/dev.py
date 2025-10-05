@@ -89,11 +89,12 @@ CELERY_ACCEPT_CONTENT = ['json']#指定接受的内容类型
 CELERY_TASK_SERIALIZER = 'json'#任务序列化和反序列化方案
 CELERY_TIMEZONE = 'Asia/Shanghai'#时区
 
-# JWT配置
+# JWT配置 & 自定义异常处理器
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',  # 启用 JWT 认证
     ),
+    'EXCEPTION_HANDLER': 'apps.utils.exception_handler.custom_exception_handler',
 }
 from django.utils import timezone
 

@@ -1,4 +1,4 @@
-name: Deploy GitHub Pages (vue)
+name: Deploy EasyQSLP Pages (vue)
 
 on:
   push:
