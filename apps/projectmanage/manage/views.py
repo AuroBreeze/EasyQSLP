@@ -225,6 +225,32 @@ class TagProposalCreateView(APIView):
                     "message": "Invalid data",
                     "errors": {"ValidationError": "标签已存在，无需申请"}
                 }, status=status.HTTP_400_BAD_REQUEST)
+
+            # 查看同名历史：是否存在已通过/已拒绝记录
+            last_approved = (
+                TagProposal.objects.filter(name=name, status=TagProposal.Status.APPROVED)
+                .order_by('-approved_time', '-update_time')
+                .first()
+            )
+            if last_approved:
+                return Response({
+                    "success": False,
+                    "message": "Invalid data",
+                    "errors": {"ValidationError": "已有同名申请已通过，可直接使用该标签"}
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            last_rejected = (
+                TagProposal.objects.filter(name=name, status=TagProposal.Status.REJECTED)
+                .order_by('-approved_time', '-update_time')
+                .first()
+            )
+            if last_rejected:
+                return Response({
+                    "success": False,
+                    "message": "Invalid data",
+                    "errors": {"ValidationError": "已有同名申请被拒绝，请修改名称或补充说明后再试"}
+                }, status=status.HTTP_400_BAD_REQUEST)
+
             proposal = serializer.save()
             return Response({
                 "success": True,
