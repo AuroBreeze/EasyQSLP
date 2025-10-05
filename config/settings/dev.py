@@ -21,9 +21,9 @@ DATABASES = {
 INSTALLED_APPS_DEV = [
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
-    'apps.user.apps.UserConfig',
-    'apps.projectmanage.apps.ProjectmanageConfig',  # 确保应用路径正确
-    'apps.api.apps.ApiConfig'
+    'apps.user',
+    'apps.projectmanage',  # 使用模块路径，便于按包路径与 app label 测试
+    'apps.api'
 ]
 
 # 确保 INSTALLED_APPS_DEV 在 INSTALLED_APPS 之前
@@ -32,6 +32,8 @@ INSTALLED_APPS = INSTALLED_APPS + INSTALLED_APPS_DEV
 
 # 静态文件配置
 MEDIA_ROOT = BASE_DIR.parent / 'media'  # 媒体文件存储路径
+# 为 collectstatic 提供落盘目录（开发/部署环境都需要明确路径）
+STATIC_ROOT = BASE_DIR.parent / 'staticfiles'
 
 # 禁用安全警告（仅开发环境！）
 SECURE_HSTS_SECONDS = 0  # 禁用HSTS
@@ -48,11 +50,13 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # 跨域配置
-ALLOWED_HOSTS = ['localhost','localhost:7856', '127.0.0.1:7856','127.0.0.1:20000','127.0.0.1']  # 开发环境允许的域名
+ALLOWED_HOSTS = ['localhost','localhost:7856', '127.0.0.1:7856','127.0.0.1:20000','127.0.0.1','113.44.174.216']  # 开发环境允许的域名
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:7856',
     'http://127.0.0.1:7856',
-    'http://127.0.0.1:20000'
+    'http://127.0.0.1:20000',
+    'http://113.44.174.216',
+    'http://113.44.174.216:8000'
 )  # 允许跨域请求的域名
 
 # Markdown 扩展
@@ -85,11 +89,12 @@ CELERY_ACCEPT_CONTENT = ['json']#指定接受的内容类型
 CELERY_TASK_SERIALIZER = 'json'#任务序列化和反序列化方案
 CELERY_TIMEZONE = 'Asia/Shanghai'#时区
 
-# JWT配置
+# JWT配置 & 自定义异常处理器
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',  # 启用 JWT 认证
     ),
+    'EXCEPTION_HANDLER': 'apps.utils.exception_handler.custom_exception_handler',
 }
 from django.utils import timezone
 

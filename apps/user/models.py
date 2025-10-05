@@ -17,7 +17,7 @@ class UserRegisterManager(BaseUserManager):
     """
     自定义用户注册管理器
     """
-    def create(self,email,username,password):
+    def create(self,email,username,password):#type:ignore
         if not email:
             raise ValueError({"email":"邮箱不能为空"})
         if not username:
@@ -61,12 +61,12 @@ class UserRegisterManager(BaseUserManager):
         return self.create_user(email, username, password, **extra_fields)
         
 class EmailCodeSendManager(models.Manager):
-    def create(self,email):
+    def create(self,email): #type:ignore
         if not email:
             raise ValueError({"email":"邮箱不能为空"})
         code = "".join(random.choices('0123456789', k=6))
         send_time = timezone.now()
-        expire_time = send_time + timezone.timedelta(minutes=5)
+        expire_time = send_time + timezone.timedelta(minutes=5) #type:ignore
         usage = "Register"
         
         return self.model(
@@ -134,22 +134,105 @@ class Email_Verify_Code(models.Model):
 
     
 class User_Profile(models.Model):
-    class SexChoices(models.TextChoices):
-        MALE = 'MALE', '男'
-        FEMALE = 'FEMALE', '女'
-        OTHER = 'OTHER', '其他'
-    #自我介绍
-    introduction = models.TextField(max_length=60,null=True,default='',verbose_name='自我介绍')
-    avatar = models.ImageField(upload_to='avatar/',null=True,default='avatar/default.png',verbose_name='头像')
-    #性别
-    sex = models.CharField(max_length=6,choices=SexChoices.choices,default=SexChoices.OTHER,verbose_name='性别')
-    #生日
-    birthday = models.DateField(null=True,blank=True,verbose_name='生日')
-    #学校
-    school = models.CharField(max_length=50,null=True,blank=True,default='',verbose_name='学校')
 
+
+    avatar = models.ImageField(upload_to='avatar/',null=True,default='avatar/default.png',verbose_name='头像')
+    
+    userprofile_md = models.TextField(verbose_name='个人资料markdown') #存储原始markdown
+    userprofile_html = models.TextField(verbose_name='个人资料html',editable=False)  # 自动生成的 HTML #存储渲染后的html
+    content_hash = models.CharField(max_length=32, editable=False)  # 用于缓存校验
+    create_time = models.DateTimeField(auto_now_add=True,verbose_name='创建时间')
+    update_time = models.DateTimeField(auto_now=True,verbose_name='更新时间')
+    
+    
+    userprofile_md = models.TextField(verbose_name='个人资料markdown') #存储原始markdown
+    userprofile_html = models.TextField(verbose_name='个人资料html',editable=False)  # 自动生成的 HTML #存储渲染后的html
+    content_hash = models.CharField(max_length=32, editable=False)  # 用于缓存校验
+    create_time = models.DateTimeField(auto_now_add=True,verbose_name='创建时间')
+    update_time = models.DateTimeField(auto_now=True,verbose_name='更新时间')
+    
     user_Login = models.ForeignKey('User_Login',on_delete=models.CASCADE,related_name='profile') #外键关联到User_Login表
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # 确保初始化时字段为字符串
+        
+        if not isinstance(self.userprofile_md, str) and self.userprofile_md is not None:
+            print(self.userprofile_md)
+            print(111)
+            self.userprofile_md = str(self.userprofile_md)
+
+    def save(self, *args, **kwargs):
+        # 确保内容为字符串
+        if not isinstance(self.userprofile_md, str):
+            self.userprofile_md = str(self.userprofile_md) if self.userprofile_md is not None else ''
+            
+        # 强制确保 avatar 是文件对象
+        if hasattr(self.avatar, '_file') and isinstance(self.avatar._file, list):
+            # 从 FILES 中获取原始文件对象
+            if hasattr(self, '_original_avatar'):
+                self.avatar = self._original_avatar
+            else:
+                self.avatar = None
+        
+        if not self.content_hash or self.has_content_changed():
+            self.content_html = self.generate_safe_html()
+            self.content_hash = self.calculate_hash()
+        super().save(*args, **kwargs)
+
+    def has_content_changed(self):
+        if not self.pk:
+            return True
+        old = User_Profile.objects.get(pk=self.pk)
+        # 确保比较前为字符串
+        current_content = str(self.userprofile_md) if not isinstance(self.userprofile_md, str) else self.userprofile_md
+        old_content = str(old.userprofile_md) if not isinstance(old.userprofile_md, str) else old.userprofile_md
+        return current_content != old_content
+
+    def generate_safe_html(self):
+        from markdown import markdown
+        from bleach.sanitizer import Cleaner
+
+        # 确保内容是字符串
+        content = self.userprofile_md or ''
+        if isinstance(content, list):
+            content = ' '.join(str(item) for item in content)
+
+        # 生成基础 HTML
+        html = markdown(
+            content,
+            extensions=[
+                'markdown.extensions.extra',
+                'markdown.extensions.codehilite',
+                'markdown.extensions.toc',
+                'mdx_math'  # 需要安装 python-markdown-math
+            ]
+        )
+
+        # 安全清理
+        cleaner = Cleaner(
+            tags=[
+                'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                'ul', 'ol', 'li', 'p', 'br',
+                'strong', 'em', 'code', 'pre', 'blockquote',
+                'table', 'thead', 'tbody', 'tr', 'th', 'td',
+                'a', 'img', 'span', 'div'
+            ],
+            attributes={
+                'a': ['href', 'title'],
+                'img': ['src', 'alt', 'title'],
+                'code': ['class'],
+                'span': ['class'],
+                'div': ['class']
+            },
+            protocols=['http', 'https', 'mailto', 'data']
+        )
+        html = cleaner.clean(html)
+        return html
+
+    def calculate_hash(self):
+        import hashlib
+        return hashlib.md5(self.userprofile_md.encode('utf-8')).hexdigest()
     class Meta:
         db_table = 'user_profile'
         verbose_name = '用户信息'

@@ -6,6 +6,8 @@ from ..models import *
 from PIL import Image
 from django.utils import timezone
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+import markdown
+import markdown
 
 
 
@@ -138,15 +140,11 @@ class ResetPasswordSerializer(serializers.ModelSerializer):
         return user
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    sex = serializers.CharField(max_length=6)
-    introduction = serializers.CharField(max_length=60,required=False)
     avatar = serializers.ImageField(required=False)
-    def validate_sex(self,data):
-        if data not in ['MALE','FEMALE','OTHER']:
-            raise ValidationError({"ValidationError":"性别设置错误"})
-        else:
-            return data
-
+    toc = serializers.SerializerMethodField()
+    word_count = serializers.SerializerMethodField()
+    toc = serializers.SerializerMethodField()
+    word_count = serializers.SerializerMethodField()
     def validate_avatar(self, value):
         # 图片类型
         image_type = imghdr.what(value)
@@ -165,4 +163,45 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User_Profile
-        fields = ['avatar','birthday','introduction','school','sex','user_Login']
+        fields = ['avatar','userprofile_md','userprofile_html','content_hash','create_time','update_time','user_Login','toc','word_count']
+
+
+class DeleteAccountSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True, error_messages={"required": "邮箱不能为空", "invalid": "邮箱格式不正确"})
+    password = serializers.CharField(required=True, write_only=True, error_messages={"required": "密码不能为空", "blank": "密码不能为空"})
+    code = serializers.CharField(min_length=6, max_length=6, required=True, write_only=True, error_messages={"required": "验证码不能为空", "min_length": "验证码长度为6位", "max_length": "验证码长度为6位"})
+
+    def validate(self, attrs):
+        request = self.context.get('request')
+        if request is None or not request.user.is_authenticated:
+            raise ValidationError({"ValidationError": "未认证用户"})
+
+        email = attrs.get('email')
+        password = attrs.get('password')
+        code = attrs.get('code')
+
+        # 1) 邮箱必须属于当前登录用户
+        if request.user.email != email:
+            raise ValidationError({"ValidationError": "邮箱与登录用户不一致"})
+
+        # 2) 账号存在性
+        if not User_Login.objects.filter(email=email).exists():
+            raise ValidationError({"ValidationError": "邮箱未注册"})
+
+        # 3) 密码认证
+        user = authenticate(email=email, password=password)
+        if user is None:
+            raise ValidationError({"ValidationError": "邮箱或密码错误"})
+
+        # 4) 验证码校验（DeleteAccount 用途）
+        evc = Email_Verify_Code.objects.filter(email=email).first()
+        if evc is None or evc.usage != 'DeleteAccount':
+            raise ValidationError({"ValidationError": "邮箱未发送验证码"})
+        if evc.is_expired():
+            raise ValidationError({"ValidationError": "验证码已过期"})
+        if evc.code != code:
+            raise ValidationError({"ValidationError": "验证码错误"})
+
+        attrs['user'] = user
+        return attrs
+
