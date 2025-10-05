@@ -2,7 +2,7 @@ name: Deploy EasyQSLP Pages (vue)
 
 on:
   push:
-    branches: ["dev"]
+    branches: [ main ]
   workflow_dispatch:
 
 permissions:
