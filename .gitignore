@@ -167,3 +167,8 @@ cython_debug/
 #.idea/
 
 config_env.toml
+*.dat
+*.bak
+*.dir
+
+env.ts

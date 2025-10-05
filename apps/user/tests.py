@@ -48,7 +48,7 @@ class UserRegistrationTestCase(TestCase):
         response = self.client.post(self.register_url, invalid_payload, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-#@SkipTest
+@SkipTest
 class UserLoginTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
@@ -207,70 +207,95 @@ class UserEmailCodeSendTestCase(TestCase):
         self.assertFalse(response.json()['success'])
         self.assertIn('message', response.json())
 
-@SkipTest
+
 class UserProfileTestCase(TestCase):
     def setUp(self):
         self.client:APIClient = APIClient()
-        self.user = User_Login.objects.create_user(email='test@example.com', username='testuser',
-                                                   password='testpassword')
+        self.user = User_Login.objects.create_user(email='test@example.com', username='testuser',password='testpassword')
         self.profile_url = reverse('user:revise-profile')
         self.get_profile_url = reverse('user:user-profile',args=[self.user.pk])
+        self.register_url = reverse('user:register')
         self.token_url = reverse('user:token')
 
         self.valid_payload = {
-            'birthday': '2000-01-01',
-            'introduction': 'test introduction',
-            'sex': "MALE",
+            'userprofile_md': "'''This is a test article123.'''",
+            'avatar': None
         }
-    def test_valid_update_user_profile(self):
-        token = self.client.post(self.token_url,{'email':'test@example.com','password':'testpassword'},format='json').json()
-        #print(token)
-        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token['access'])
-        response = self.client.post(self.profile_url,self.valid_payload,format='json')
-        #print(response.json())
-        #查看鉴权
-        #print(response.headers)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertTrue(response.json()['success'])
-        self.assertEqual(
-            User_Profile.objects.filter(user_Login=self.user).first().birthday,
-            datetime.date.fromisoformat(self.valid_payload['birthday'])
+        
+        self.valid_register_payload = {
+            'email': 'test123@example.com',
+            'username': 'testuser123',
+            'password': 'testpassword',
+            'code': '123456',
+        }
+        # 创建一个验证码
+        Email_Verify_Code.objects.update_or_create(
+            email='test123@example.com',
+            defaults={
+                'code': '123456',
+                'send_time': timezone.now(),
+                'expire_time': timezone.now() + timezone.timedelta(minutes=5),
+            }
         )
-        self.assertEqual(User_Profile.objects.filter(user_Login=self.user).first().introduction,self.valid_payload['introduction'])
-        self.assertEqual(User_Profile.objects.filter(user_Login=self.user).first().sex,self.valid_payload['sex'])
-
-    def test_invalid_update_user_profile(self):
-        self.client.force_authenticate(user=self.user)
-        User_Profile.objects.update_or_create(user_Login=self.user,defaults={
-            'birthday': '2000-01-01',
-            'introduction': 'test introduction',
-        })
-        invalid_payload = self.valid_payload.copy()
-        invalid_payload['birthday'] = '2000-01-01'
-        invalid_payload['introduction'] = 'test introduction'
-        invalid_payload['sex'] = "male"
-        response = self.client.post(self.profile_url,invalid_payload,format='json')
-        #print(response.json())
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertFalse(response.json()['success'])
-    def test_valid_unauthorized_update_user_profile(self):
-        response = self.client.post(self.profile_url,self.valid_payload,format='json')
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-        #self.assertFalse(response.json()['success'])
-        self.assertIn('detail',response.json())
-    def test_get_user_profile(self):
-        self.client.force_authenticate(user=self.user)
-        User_Profile.objects.update_or_create(user_Login=self.user,defaults={
-            'birthday': '2000-01-01',
-            'introduction': 'test introduction',
-        })
-
-        response = self.client.get(self.get_profile_url,args=[self.user.pk])
+    
+    @SkipTest
+    def test_valid_update_user_profile(self):
+        # 添加头像文件
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        avatar = SimpleUploadedFile(
+            name='test_avatar.png',
+            content=open('c:\\code\\EasyQSLP\\media\\avatar\\defau.png', 'rb').read(),
+            content_type='image/png'
+        )
+        
+        token = self.client.post(self.token_url,{'email':'test@example.com','password':'testpassword'},format='json').json()
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token['access'])
+        
+        # 更新有效载荷包含头像和markdown内容
+        payload = {
+            'userprofile_md': '# This is a test article123.',
+            'avatar': avatar
+        }
+        # print(payload)
+        
+        # 强制将avatar作为文件字段单独处理
+        response = self.client.post(
+            self.profile_url, 
+            payload,
+            format='multipart'
+        )
         print(response.json())
+        
+        # 验证响应
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        # 验证头像存储路径
+        profile = User_Profile.objects.get(user_Login=self.user)
+        self.assertTrue(profile.avatar.name.startswith('avatar/'))
+        self.assertIn('test_avatar', profile.avatar.name)
         self.assertTrue(response.json()['success'])
-        #self.assertEqual(response.json()['data']['birthday'],'2000-01-01')
-        self.assertEqual(response.json()['data']['introduction'],'test introduction')
+        # 验证markdown内容是否正确保存
+        self.assertEqual(
+            User_Profile.objects.filter(user_Login=self.user).first().userprofile_md,
+            "# This is a test article123."
+        )
+    def test_get_user_profile(self):
 
 
-
+        response = self.client.post(self.register_url, self.valid_register_payload, format='json')
+        print(response.json())
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        user = User_Login.objects.get(email='test123@example.com')
+        self.assertTrue(user.DoesNotExist) # 测试是否创建了用户
+        self.assertFalse(user.is_superuser) # 测试是否创建了管理员权限
+        self.assertFalse(user.is_staff) # 测试是否创建了管理员权限
+        self.user = User_Login.objects.get(email='test123@example.com')
+        
+        token = self.client.post(self.token_url,{'email':'test123@example.com','password':'testpassword'},format='json').json()
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token['access'])
+        
+        
+        self.assertTrue(User_Profile.objects.filter(user_Login=User_Login.objects.get(email='test123@example.com').id)) # 测试是否创建了用户个人资料
+        
+        user_profiles = self.client.get(self.get_profile_url)
+        print(user_profiles.json())

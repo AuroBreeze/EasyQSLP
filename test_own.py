@@ -25,7 +25,7 @@ register_data = {
 }
 
 email_data = {
-    "email": "test@example.com",
+    "email": "test@test.com",
 
     "usage": "Register"#Register or ResetPassword
 }
@@ -39,18 +39,18 @@ email_data = {
 
 # print(res)
 
-class RegisterTest:
-    
+class RegisterTest: 
     def test_register(self):
         code_data = requests.post(url_codesend, json=email_data).json()
-        #print(code_data)
+        print(code_data)
         code = code_data["code"]
         #print(code)
         register_data["code"]=code
-        register_data["email"] = "test@example.com"
-        register_data["password"] = "123456789"
+        register_data["email"] = "test@test.com"
+        register_data["password"] = "12345678"
         print(register_data)
         res = requests.post(url_register, json=register_data).json()
+        print(res)
 
 if __name__ == '__main__':
     test = RegisterTest()
