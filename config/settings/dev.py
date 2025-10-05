@@ -94,7 +94,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',  # 启用 JWT 认证
     ),
-    'EXCEPTION_HANDLER': 'apps.utils.exception_handler.custom_exception_handler',
+    'EXCEPTION_HANDLER': 'apps.utils.exceptions.exception_handler.custom_exception_handler',
 }
 from django.utils import timezone
 
@@ -113,6 +113,11 @@ CELERY_BEAT_SCHEDULE = {
     'clear_expired_codes': {
         'task': 'apps.user.task.clear_expired_codes_task',
         'schedule': crontab(minute='*/30'),
+    },
+    'purge_old_tag_proposals_daily': {
+        'task': 'apps.projectmanage.tasks.purge_old_tag_proposals',
+        'schedule': crontab(minute=30, hour=3),  # 每日 03:30 执行
+        # 可按需传参：'args': (30, 180),  # (days_rejected_canceled, days_approved)
     },
 }
 

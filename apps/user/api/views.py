@@ -12,7 +12,7 @@ from django.utils import timezone
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from apps.utils.ErrorExtract import ExtractError
+from apps.utils.errors.ErrorExtract import ExtractError
 # Create your views here.
 
 # 用户登录 JWT认证模块

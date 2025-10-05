@@ -18,17 +18,17 @@ class Project(models.Model):
 
     title = models.CharField(max_length=50,unique=True,verbose_name='项目名称')
     owner = models.ForeignKey(User,on_delete=models.SET_NULL,null=True,blank=True,related_name='projects',verbose_name='项目管理者')
-    collaborator = models.ManyToManyField(User,related_name='collaborated_projects',verbose_name='项目协作者')
+    collaborator = models.ManyToManyField(User, related_name='collaborated_projects', blank=True, verbose_name='项目协作者')
     # version = models.OneToOneField("ProjectVersion",on_delete=models.SET_NULL,null=True,blank=True,related_name='project_versions',verbose_name='项目版本')
     introduction = models.TextField(max_length=50,default="暂无介绍",verbose_name='项目简介')
     create_time = models.DateTimeField(auto_now_add=True,verbose_name='创建时间')
     update_time = models.DateTimeField(auto_now=True,verbose_name='更新时间')
-    cover_image = models.ImageField(upload_to='project_cover_image',verbose_name='项目封面图')
+    cover_image = models.ImageField(upload_to='project_cover_image', blank=True, null=True, verbose_name='项目封面图')
     
-    likes = models.ManyToManyField(User,related_name='liked_projects',verbose_name='喜欢的用户')
-    stars = models.ManyToManyField(User,related_name='collected_projects',verbose_name='收藏的用户')
-    views = models.IntegerField(default=0,verbose_name='浏览量')
-    replications = models.ManyToManyField(User,related_name='replicated_projects',verbose_name='复现的用户')
+    likes = models.ManyToManyField(User, related_name='liked_projects', blank=True, verbose_name='喜欢的用户')
+    stars = models.ManyToManyField(User, related_name='collected_projects', blank=True, verbose_name='收藏的用户')
+    views = models.IntegerField(default=0, verbose_name='浏览量')
+    replications = models.ManyToManyField(User, related_name='replicated_projects', blank=True, verbose_name='复现的用户')
 
     # 新增：项目维护者（提交审批需要至少三位维护者同意）
     maintainers = models.ManyToManyField(User, related_name='maintained_projects', blank=True, verbose_name='项目维护者')
@@ -45,7 +45,8 @@ class Project(models.Model):
         verbose_name_plural = '项目'
         
     def __str__(self):
-        return f"项目管理者{self.owner.username}，项目名称{self.title}，"
+        owner_name = self.owner.username if self.owner else '无'
+        return f"项目管理者{owner_name}，项目名称{self.title}，"
 
     def calculate_hot_score(self):
         time_diff = timezone.now() - self.create_time
@@ -84,13 +85,55 @@ class Project(models.Model):
 #     pass
 #
 class Article_category(models.Model):
-    name = models.CharField(max_length=50,verbose_name='分类名称')
+    name = models.CharField(max_length=50,unique = True,verbose_name='分类名称')
     def __str__(self):
         return self.name
     class Meta:
         db_table = "project_article_category"
         verbose_name = '文章分类'
         verbose_name_plural = '文章分类'
+
+class Article_tag(models.Model):
+    name = models.CharField(max_length=50, unique=True, verbose_name='标签名称')
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        db_table = "project_article_tag"
+        verbose_name = '文章标签'
+        verbose_name_plural = '文章标签'
+
+class TagProposal(models.Model):
+    class Status(models.TextChoices):
+        PENDING = 'pending', '待审核'
+        APPROVED = 'approved', '已通过'
+        REJECTED = 'rejected', '已拒绝'
+        CANCELED = 'canceled', '已取消'
+
+    name = models.CharField(max_length=50, db_index=True, verbose_name='申请标签名')
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING, db_index=True, verbose_name='审核状态')
+    submitter = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='tag_proposals', verbose_name='申请人')
+    comment = models.TextField(max_length=200, blank=True, verbose_name='申请说明')
+
+    # 审批结果
+    approved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='approved_tag_proposals', verbose_name='审核人')
+    approved_time = models.DateTimeField(null=True, blank=True, verbose_name='审核时间')
+    final_tag = models.ForeignKey('Article_tag', on_delete=models.SET_NULL, null=True, blank=True, related_name='from_proposals', verbose_name='最终标签')
+
+    create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
+    update_time = models.DateTimeField(auto_now=True, verbose_name='更新时间')
+
+    class Meta:
+        db_table = "project_tag_proposal"
+        verbose_name = '标签申请'
+        verbose_name_plural = '标签申请'
+        indexes = [
+            models.Index(fields=["status", "create_time"]),
+        ]
+
+    def __str__(self):
+        return f"标签申请:{self.name} 状态:{self.status} 提交人:{getattr(self.submitter, 'username', '匿名')}"
 
 # Create your models here.
 class Article(models.Model):
@@ -102,8 +145,9 @@ class Article(models.Model):
 
     adminer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='articles',
                                 verbose_name='文章管理者')
-    category = models.ForeignKey('Article_category', on_delete=models.SET_DEFAULT, default=1,
+    category = models.ForeignKey('Article_category', on_delete=models.SET_NULL, null=True, blank=True,
                                  related_name='articles', verbose_name='文章分类')
+    tags = models.ManyToManyField('Article_tag', blank=True, related_name='articles', verbose_name='文章标签')
 
     content_md = models.TextField(verbose_name='项目内容markdown') #存储原始markdown
     content_html = models.TextField(verbose_name='项目内容html',editable=False)  # 自动生成的 HTML #存储渲染后的html

@@ -2,7 +2,7 @@ from ..models import Article,Project
 from rest_framework import serializers
 import markdown
 from django.contrib.auth import get_user_model
-from ..models import Article_Revision
+from ..models import Article_Revision, Article_tag, TagProposal
 from apps.projectmanage.services.diff import DiffService
 
 User = get_user_model()
@@ -31,13 +31,33 @@ class ProjectSerializer(serializers.ModelSerializer):
         }
 
 
+class TagMiniSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Article_tag
+        fields = ['id', 'name']
+
+
 class ArticleSerializer(serializers.ModelSerializer):
     toc = serializers.SerializerMethodField()
     word_count = serializers.SerializerMethodField()
+    # 只读输出：返回 [{id, name}]
+    tags = TagMiniSerializer(many=True, read_only=True)
+    # 写入使用：提交标签 ID 列表
+    tags_ids = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Article_tag.objects.all(),
+        write_only=True,
+        required=False,
+        error_messages={
+            'does_not_exist': '所选标签不存在或未通过',
+            'incorrect_type': '标签ID格式错误',
+            'required': '请提供标签ID列表',
+        }
+    )
 
     class Meta:
         model = Article
-        fields = ['id','title', 'content_md', 'content_html', 'toc', 'word_count','create_time','update_time','adminer','project','category']
+        fields = ['id','title', 'content_md', 'content_html', 'toc', 'word_count','create_time','update_time','adminer','project','category','tags','tags_ids']
 
         extra_kwargs = {
             'content_md': {
@@ -61,7 +81,23 @@ class ArticleSerializer(serializers.ModelSerializer):
                 name='默认分类'
             )
             validated_data['category'] = category
-        return super().create(validated_data)
+        # 处理多标签：从 validated_data 中取出 tags_ids，实例创建后再设置 M2M
+        tags = validated_data.pop('tags_ids', None)
+        instance = super().create(validated_data)
+        if not tags:
+            default_tag, _ = Article_tag.objects.get_or_create(name='默认标签')
+            instance.tags.set([default_tag])
+        else:
+            instance.tags.set(tags)
+        return instance
+
+    def update(self, instance, validated_data):
+        # 允许更新时覆盖标签集合（若传入）——从 tags_ids 读取
+        tags = validated_data.pop('tags_ids', None)
+        instance = super().update(instance, validated_data)
+        if tags is not None:
+            instance.tags.set(tags)
+        return instance
 
     def get_toc(self, obj):
         """
@@ -125,4 +161,38 @@ class RevisionApprovalSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({'approver': '只有项目维护者可以进行审批'})
         return attrs
 
+
+class TagProposalCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TagProposal
+        fields = ['id', 'name', 'comment']
+
+    def create(self, validated_data):
+        user = self.context.get('request').user if self.context.get('request') else None
+        return TagProposal.objects.create(submitter=user, **validated_data)
+
+
+class TagProposalSerializer(serializers.ModelSerializer):
+    submitter_name = serializers.SerializerMethodField()
+    approved_by_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TagProposal
+        fields = [
+            'id', 'name', 'status', 'submitter', 'submitter_name', 'comment',
+            'approved_by', 'approved_by_name', 'approved_time', 'final_tag',
+            'create_time', 'update_time'
+        ]
+        read_only_fields = ['status', 'submitter', 'approved_by', 'approved_time', 'final_tag', 'create_time', 'update_time']
+
+    def get_submitter_name(self, obj):
+        return getattr(obj.submitter, 'username', None)
+
+    def get_approved_by_name(self, obj):
+        return getattr(obj.approved_by, 'username', None)
+
+
+class TagProposalDecisionSerializer(serializers.Serializer):
+    decision = serializers.ChoiceField(choices=['approved', 'rejected'])
+    comment = serializers.CharField(max_length=200, required=False, allow_blank=True)
 

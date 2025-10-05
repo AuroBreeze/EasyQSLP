@@ -7,6 +7,11 @@ from .views import (
     ArticleRevisionListView,
     RevisionDiffView,
     RevisionRevertView,
+    TagListView,
+    TagProposalCreateView,
+    TagProposalListView,
+    TagProposalDecisionJsonView,
+    TagProposalCancelJsonView,
 )
 
 app_name = 'project'
@@ -19,6 +24,9 @@ urlpatterns = [
     path("revision/<int:pk>/", ArticleRevisionView.as_view(), name="article-revision-detail"),
     path("revision", ArticleRevisionView.as_view(), name="article-revision-create"),
     path("revision/approval", RevisionApprovalView.as_view(), name="revision-approval"),
-    path("revision/<int:pk>/diff", RevisionDiffView.as_view(), name="revision-diff"),
-    path("revision/<int:pk>/revert", RevisionRevertView.as_view(), name="revision-revert"),
+    path("tags", TagListView.as_view(), name="tag-list"),  # 
+    path("tag-proposals", TagProposalCreateView.as_view(), name="tag-proposal-create"),  # 
+    path("tag-proposals/list", TagProposalListView.as_view(), name="tag-proposal-list"),  # 
+    path("tag-proposals/decision", TagProposalDecisionJsonView.as_view(), name="tag-proposal-decision-json"),  # JSON 决策
+    path("tag-proposals/cancel", TagProposalCancelJsonView.as_view(), name="tag-proposal-cancel-json"),  # JSON 
 ]
