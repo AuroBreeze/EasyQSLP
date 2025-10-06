@@ -191,6 +191,12 @@ class TagListView(APIView):
 
     # 使用 JSON + POST 的方式获取/搜索标签
     def post(self, request, *args, **kwargs):
+        """
+        返回全站可用标签列表（不支持搜索）。
+        - 权限：匿名可访问
+        - 请求体：{}
+        - 响应：[{id, name}, ...]
+        """
         # 返回全部标签（移除 q 模糊搜索）
         qs = Article_tag.objects.all().order_by('name')
         items = TagMiniSerializer(qs, many=True).data
@@ -205,6 +211,13 @@ class TagProposalCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
+        """
+        提交标签申请。
+        - 幂等：若存在同名待审申请，直接返回该申请（200）
+        - 若标签已存在（Article_tag），直接拒绝（400）
+        - 若历史存在同名已通过/已拒绝申请，提示并拒绝（400）
+        - 否则创建 pending 申请（201）
+        """
         from .serializers import TagProposalCreateSerializer, TagProposalSerializer
         from ..models import TagProposal, Article_tag
         serializer = TagProposalCreateSerializer(data=request.data, context={"request": request})
@@ -268,6 +281,12 @@ class TagProposalListView(APIView):
     permission_classes = [IsAuthenticated, IsOperatorOrSuperuser]
 
     def post(self, request, *args, **kwargs):
+        """
+        分页查询标签申请列表（仅运营/超管）。
+        - 必填：status（pending|approved|rejected|canceled）
+        - 可选分页：page(>=1, 默认1)，page_size(1~100, 默认10)
+        - 响应：{"total", "page", "page_size", "item": [申请条目...]}
+        """
         from .serializers import TagProposalSerializer
         from ..models import TagProposal
         # status 为必填
@@ -290,7 +309,7 @@ class TagProposalListView(APIView):
 
         qs = TagProposal.objects.filter(status=status_filter).order_by('-create_time')
 
-        # 分页参数：page, page_size
+        # 分页参数：page, page_size（容错：非数字时报 400）
         try:
             page = int(request.data.get('page', 1))
             page_size = int(request.data.get('page_size', 10))
@@ -301,6 +320,7 @@ class TagProposalListView(APIView):
                 "errors": {"ValidationError": "分页参数必须为数字"}
             }, status=status.HTTP_400_BAD_REQUEST)
 
+        # 兜底：小于 1 时回退到默认
         if page < 1:
             page = 1
         if page_size < 1:
@@ -332,6 +352,12 @@ class TagProposalDecisionJsonView(APIView):
 
     @transaction.atomic
     def post(self, request, *args, **kwargs):
+        """
+        运营/超管审批标签申请（JSON 方式）。
+        - 请求体：{id, decision: approved|rejected, comment?}
+        - 通过：复用或创建 Article_tag，并回写 final_tag；拒绝：仅更新状态/备注
+        - 仅允许对 pending 进行审批
+        """
         from .serializers import TagProposalDecisionSerializer, TagProposalSerializer
         from ..models import TagProposal, Article_tag
 
@@ -402,6 +428,11 @@ class TagProposalCancelJsonView(APIView):
 
     @transaction.atomic
     def post(self, request, *args, **kwargs):
+        """
+        取消标签申请（提交者本人或运营/超管）。
+        - 仅对 pending 可取消
+        - 请求体：{id, comment?}
+        """
         from .serializers import TagProposalSerializer
         from ..models import TagProposal
         proposal_id = request.data.get('id')
@@ -448,4 +479,66 @@ class TagProposalCancelJsonView(APIView):
             "success": True,
             "message": "已取消",
             "data": TagProposalSerializer(proposal).data
+        })
+
+
+class TagProposalStatusView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        """
+        查询当前用户指定标签名称的申请状态。
+        - 优先返回该用户的申请记录（最新一条）
+        - 若无申请，则检查标签库（Article_tag）是否已有
+        - 请求体：{name}
+        - 响应：{"source": "proposal"|"tag"|null, "proposal": ..., "tag": ...}
+        """
+        from .serializers import TagProposalSerializer, TagMiniSerializer
+        from ..models import TagProposal, Article_tag
+        name = (request.data.get('name') or '').strip()
+        if not name:
+            return Response({
+                "success": False,
+                "message": "Invalid data",
+                "errors": {"ValidationError": "name 为必填"}
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        # 先查当前用户的申请记录（按最新时间）
+        prop = (TagProposal.objects
+                .filter(submitter=request.user, name=name)
+                .order_by('-create_time')
+                .first())
+        if prop:
+            return Response({
+                "success": True,
+                "message": "命中申请记录",
+                "data": {
+                    "source": "proposal",
+                    "proposal": TagProposalSerializer(prop).data,
+                    "tag": None
+                }
+            })
+
+        # 若无申请记录，则查是否已有可用标签
+        tag = Article_tag.objects.filter(name=name).order_by('id').first()
+        if tag:
+            return Response({
+                "success": True,
+                "message": "标签已存在，可直接使用",
+                "data": {
+                    "source": "tag",
+                    "proposal": None,
+                    "tag": TagMiniSerializer(tag).data
+                }
+            })
+
+        # 两者都不存在
+        return Response({
+            "success": True,
+            "message": "未找到申请或现有标签",
+            "data": {
+                "source": None,
+                "proposal": None,
+                "tag": None
+            }
         })
