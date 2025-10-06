@@ -84,47 +84,8 @@ jobs:
           export CREATE_DEMO_USER="${{ secrets.CREATE_DEMO_USER }}"
           python manage.py init_demo_data || true
 
-          # ensure superuser (idempotent) using ADMIN_* secrets
-          python manage.py shell <<'PY'
-from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group
-import os
-U = get_user_model()
-email = os.environ.get("ADMIN_EMAIL")
-username = os.environ.get("ADMIN_USERNAME")
-password = os.environ.get("ADMIN_PASSWORD")
-if not email or not username or not password:
-    print("ADMIN_* envs not set; skip superuser creation")
-else:
-    user = U.objects.filter(email=email).first() or U.objects.filter(username=username).first()
-    if not user:
-        user = U.objects.create(
-            email=email,
-            username=username,
-            is_active=True,
-            is_staff=True,
-            is_superuser=True,
-        )
-        user.set_password(password)
-        user.save()
-        print(f"Created superuser: {username} <{email}>")
-    else:
-        changed = False
-        if not user.is_staff:
-            user.is_staff = True; changed = True
-        if not user.is_superuser:
-            user.is_superuser = True; changed = True
-        user.set_password(password); changed = True
-        if changed:
-            user.save()
-            print(f"Updated superuser flags/password for: {username} <{email}>")
-        else:
-            print(f"Superuser already present: {username} <{email}>")
-    # ensure Operator group and add the admin (useful for tag review)
-    op, _ = Group.objects.get_or_create(name="Operator")
-    user.groups.add(op)
-    print("Ensured Operator group and added admin to it")
-PY
+          # ensure superuser (idempotent) using ADMIN_* secrets via management command
+          python manage.py ensure_superuser || true
 
           python manage.py collectstatic --noinput || true
           # temporarily run Django dev server instead of systemd services
