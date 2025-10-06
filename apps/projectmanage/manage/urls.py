@@ -13,6 +13,7 @@ from .views import (
     TagProposalDecisionJsonView,
     TagProposalCancelJsonView,
     TagProposalStatusView,
+    TagProposalMyHistoryView,
 )
 
 app_name = 'project'
@@ -31,4 +32,5 @@ urlpatterns = [
     path("tag-proposals/decision", TagProposalDecisionJsonView.as_view(), name="tag-proposal-decision-json"),  # 审批标签
     path("tag-proposals/cancel", TagProposalCancelJsonView.as_view(), name="tag-proposal-cancel-json"),  # 取消申请标签
     path("tag-proposals/status", TagProposalStatusView.as_view(), name="tag-proposal-status"),  # 获取标签提案状态
+    path("tag-proposals/my-history", TagProposalMyHistoryView.as_view(), name="tag-proposal-my-history"),  # 我的标签申请历史
 ]

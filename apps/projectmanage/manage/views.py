@@ -475,6 +475,20 @@ class TagProposalCancelJsonView(APIView):
         proposal.status = TagProposal.Status.CANCELED
         proposal.save(update_fields=['status', 'comment', 'update_time'])
 
+        # 审计：记录取消事件
+        try:
+            from ..models import TagProposalEvent
+            TagProposalEvent.objects.create(
+                proposal=proposal,
+                action=TagProposalEvent.Action.CANCELED,
+                by_user=request.user,
+                comment=comment or '',
+                snapshot_name=proposal.name,
+                snapshot_final_tag=proposal.final_tag,
+            )
+        except Exception:
+            pass
+
         return Response({
             "success": True,
             "message": "已取消",
@@ -540,5 +554,86 @@ class TagProposalStatusView(APIView):
                 "source": None,
                 "proposal": None,
                 "tag": None
+            }
+        })
+
+
+class TagProposalMyHistoryView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        """
+        获取当前用户的标签申请历史（含归档，可选是否附带事件时间线）。
+        - 可选参数：status(可多选数组或单值)、date_from、date_to、include_archived(bool, 默认true)、include_events(bool, 默认false)、page/page_size
+        - 返回：分页 proposals；若 include_events=true，则为每条附带 events 列表
+        """
+        from ..models import TagProposal, TagProposalEvent
+        from .serializers import TagProposalSerializer, TagProposalEventSerializer
+
+        data = request.data or {}
+        include_archived = bool(data.get('include_archived', True))
+        include_events = bool(data.get('include_events', False))
+        status_filter = data.get('status')
+        date_from = data.get('date_from')
+        date_to = data.get('date_to')
+
+        qs = TagProposal.objects.filter(submitter=request.user).order_by('-create_time')
+        if not include_archived:
+            qs = qs.filter(archived_at__isnull=True)
+
+        # status 可为单值或列表
+        if status_filter:
+            if isinstance(status_filter, list):
+                qs = qs.filter(status__in=status_filter)
+            else:
+                qs = qs.filter(status=status_filter)
+
+        # 简单的日期过滤（ISO 字符串）
+        from django.utils.dateparse import parse_datetime
+        if date_from:
+            df = parse_datetime(date_from)
+            if df:
+                qs = qs.filter(create_time__gte=df)
+        if date_to:
+            dt = parse_datetime(date_to)
+            if dt:
+                qs = qs.filter(create_time__lte=dt)
+
+        # 分页
+        try:
+            page = int(data.get('page', 1))
+            page_size = int(data.get('page_size', 10))
+        except Exception:
+            return Response({
+                "success": False,
+                "message": "Invalid data",
+                "errors": {"ValidationError": "分页参数必须为数字"}
+            }, status=status.HTTP_400_BAD_REQUEST)
+        if page < 1:
+            page = 1
+        if page_size < 1:
+            page_size = 10
+        if page_size > 100:
+            page_size = 100
+
+        total = qs.count()
+        start = (page - 1) * page_size
+        end = start + page_size
+        items = []
+        for p in qs[start:end]:
+            row = TagProposalSerializer(p).data
+            if include_events:
+                ev = TagProposalEvent.objects.filter(proposal=p).order_by('at')
+                row['events'] = TagProposalEventSerializer(ev, many=True).data
+            items.append(row)
+
+        return Response({
+            "success": True,
+            "message": "查询成功",
+            "data": {
+                "total": total,
+                "page": page,
+                "page_size": page_size,
+                "item": items
             }
         })

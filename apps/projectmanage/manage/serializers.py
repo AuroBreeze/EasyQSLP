@@ -192,6 +192,23 @@ class TagProposalSerializer(serializers.ModelSerializer):
         return getattr(obj.approved_by, 'username', None)
 
 
+class TagProposalEventSerializer(serializers.ModelSerializer):
+    by_user_name = serializers.SerializerMethodField()
+    snapshot_final_tag = TagMiniSerializer(read_only=True)
+
+    class Meta:
+        from ..models import TagProposalEvent
+        model = TagProposalEvent
+        fields = [
+            'id', 'proposal', 'action', 'by_user', 'by_user_name', 'at', 'comment',
+            'snapshot_name', 'snapshot_final_tag'
+        ]
+        read_only_fields = fields
+
+    def get_by_user_name(self, obj):
+        return getattr(obj.by_user, 'username', None)
+
+
 class TagProposalDecisionSerializer(serializers.Serializer):
     decision = serializers.ChoiceField(choices=['approved', 'rejected'])
     comment = serializers.CharField(max_length=200, required=False, allow_blank=True)

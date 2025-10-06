@@ -124,6 +124,10 @@ class TagProposal(models.Model):
     create_time = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='创建时间')
     update_time = models.DateTimeField(auto_now=True, verbose_name='更新时间')
 
+    # 审计与归档：采用软归档，保留完整历史
+    archived_at = models.DateTimeField(null=True, blank=True, verbose_name='归档时间')
+    archived_reason = models.CharField(max_length=100, null=True, blank=True, verbose_name='归档原因')
+
     class Meta:
         db_table = "project_tag_proposal"
         verbose_name = '标签申请'
@@ -134,6 +138,37 @@ class TagProposal(models.Model):
 
     def __str__(self):
         return f"标签申请:{self.name} 状态:{self.status} 提交人:{getattr(self.submitter, 'username', '匿名')}"
+
+
+class TagProposalEvent(models.Model):
+    class Action(models.TextChoices):
+        SUBMITTED = 'submitted', '提交申请'
+        APPROVED = 'approved', '审批通过'
+        REJECTED = 'rejected', '审批拒绝'
+        CANCELED = 'canceled', '已取消'
+        AUTO_ARCHIVED = 'auto_archived', '系统归档'
+
+    proposal = models.ForeignKey('TagProposal', on_delete=models.CASCADE, related_name='events', verbose_name='关联申请')
+    action = models.CharField(max_length=20, choices=Action.choices, verbose_name='动作')
+    by_user = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='tag_proposal_events', verbose_name='操作者')
+    at = models.DateTimeField(auto_now_add=True, verbose_name='发生时间')
+    comment = models.CharField(max_length=200, blank=True, verbose_name='备注')
+
+    # 快照（避免后续重命名导致历史混乱）
+    snapshot_name = models.CharField(max_length=50, verbose_name='当时标签名')
+    snapshot_final_tag = models.ForeignKey('Article_tag', null=True, blank=True, on_delete=models.SET_NULL, related_name='event_snapshots', verbose_name='当时最终标签')
+
+    class Meta:
+        db_table = 'project_tag_proposal_event'
+        verbose_name = '标签申请事件'
+        verbose_name_plural = '标签申请事件'
+        indexes = [
+            models.Index(fields=['proposal', 'at']),
+            models.Index(fields=['action', 'at']),
+        ]
+
+    def __str__(self):
+        return f"Proposal#{self.proposal_id} {self.action} at {self.at}"
 
 # Create your models here.
 class Article(models.Model):
